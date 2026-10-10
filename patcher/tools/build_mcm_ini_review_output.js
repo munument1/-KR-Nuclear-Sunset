@@ -27,7 +27,9 @@ for(const seed of seeds){
  const full=path.join(repo,".local",seed);
  const data=JSON.parse(fs.readFileSync(full,"utf8"));
  check(data.release_ready!==true&&data.translation_ready!==true,"Unsafe seed state");
- for(const row of data.entries){
+ for(const seedRow of data.entries){
+   const row={...seedRow,file:seedRow.file||data.source_file};
+   check(typeof row.file==="string"&&row.file.length>0,"Missing MCM file in seed");
    const k=skey(row);
    if(dict.has(k)&&dict.get(k).dest!==row.dest)throw Error("Conflicting translation "+k);
    check(typeof row.source==="string"&&typeof row.dest==="string"&&row.source!==row.dest,
