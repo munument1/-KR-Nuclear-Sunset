@@ -1,0 +1,227 @@
+---
+title: STARS 설치 안내
+hide_title: true
+sidebar_label: STARS 설치 안내
+---
+
+# ![STARS](../assets/stars.png)
+
+:::danger 반드시 읽으세요
+STARS는 TTW 전체 방어구 구성을 광범위하게 개편하는 모드입니다. **게임 내 모든 방어구의 능력치, 외형, 효과**를 전면 조정하고, 파워 아머 작동 방식을 크게 바꾸며 Nexus의 뛰어난 방어구 교체·추가 모드를 다수 통합합니다. 진행하기 전에 모드 페이지의 **설명을 반드시 주의 깊게 읽으세요.**
+
+설치 과정이 **매우 복잡하고 길기** 때문에 게임 내 텍스처 누락이 발생하지 않도록 지침을 정확히 따라야 합니다.
+
+설치 중 여러 플러그인과 폴더를 **숨김 처리(HIDE)** 해야 합니다. 해당 모드를 지침대로 설치한 후 MO2에서 모드를 마우스 오른쪽 버튼으로 클릭해 정보(Information)를 열고 파일 트리(File Tree) 탭으로 이동하세요. 숨길 플러그인이나 폴더를 마우스 오른쪽 버튼으로 클릭한 뒤 Hide(숨기기)를 선택하면 됩니다. 자산이 누락되거나 잘못 관리되면 STARS에서 게임 내 경고를 표시합니다.
+:::
+
+# [STARS Nexus Mod Page](https://www.nexusmods.com/newvegas/mods/76016)
+
+#### 설치 방법:
+
+- 메인 파일 - [JIP LN NVSE Plugin](https://www.nexusmods.com/newvegas/mods/58277)
+  - 메인 파일 - [JIP LN - INI](https://www.nexusmods.com/newvegas/mods/58277?tab=files&file_id=1000114298&nmm=1)
+    - **다음 INI 설정이 활성화되어 있는지 확인하세요:**
+      - `bLocalizedDTDR=1`
+      - `uNPCPerks=1`
+- 메인 파일 - [lStewieAl's Tweaks and Engine Fixes](https://www.nexusmods.com/newvegas/mods/66347)
+  - 메인 파일 - [Stewie Tweaks - INI](https://www.nexusmods.com/newvegas/mods/66347?tab=files&file_id=1000054871&nmm=1)
+    - **다음 INI 설정이 활성화되어 있는지 확인하세요:**
+      - `bDisableStealthEffectInPipboy = 0`
+      - `bWeightlessWornArmor = 1`
+      - `bWeightlessWornPowerArmor = 1`
+      - `bEquipBrokenItems = 0`
+- 메인 파일 - [JohnnyGuitar NVSE](https://www.nexusmods.com/newvegas/mods/66927)
+- 메인 파일 - [Pipboy Holo Panel ESPless](https://www.nexusmods.com/newvegas/mods/86483)
+- 메인 파일 - [Tranquility Lane Fix](https://www.nexusmods.com/newvegas/mods/77018?tab=files&file_id=1000094179&nmm=1)
+- 메인 파일 - [Wasteland Soldier - NV Edition Main File](https://www.nexusmods.com/newvegas/mods/46278?tab=files&file_id=105348&nmm=1)
+  - `Wasteland Soldier - NV Edition.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Wasteland Soldier Redux](https://www.nexusmods.com/newvegas/mods/74025?tab=files&file_id=1000082462&nmm=1)
+- 메인 파일 - [nov 2011 book of steel](https://www.nexusmods.com/newvegas/mods/39873?tab=files&file_id=100462&nmm=1)
+  - `Boacombat2glove.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `boa ncrpahelmet.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Book of Steel - Compatibility Edition](https://www.nexusmods.com/newvegas/mods/60666?tab=files&file_id=1000044227&nmm=1)
+  - `Book of Steel.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Tammer's NIF-Bashed Armor Mega-Pack v4.2.rar](https://drive.google.com/file/d/1m3LUeY-z_Fm_S9MayG41ZUw-jgvrJkVu/view?usp=drive_link)
+  - `Tammer's NIF-Bashed Armor Mega-Pack.esm` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [NivSpiceofLife-V 1_2](https://www.nexusmods.com/newvegas/mods/44476?tab=files&file_id=1000000585&nmm=1)
+  - `1nivVSLArmors.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - Fallout 4 Nexus에서 [Bethesda Archive Extractor](https://www.nexusmods.com/fallout4/mods/78?tab=files&file_id=145001)를 다운로드해 **`1nivVSLArmors.bsa` 파일을 압축 해제**합니다.
+    - Bethesda Archive Extractor의 압축을 풉니다.
+    - MO2에서 Spice of Life 모드를 마우스 오른쪽 버튼으로 클릭하고 탐색기에서 열기(Open in Explorer)를 선택합니다.
+    - `1nivVSLArmors.bsa`를 마우스 오른쪽 버튼으로 클릭하고 연결 프로그램(Open with) → 다른 앱 선택 → PC에서 앱 찾기를 진행합니다. Bethesda Archive Extractor를 압축 해제한 위치에서 `bae.exe`를 선택합니다.
+    - Extract 버튼을 누르고 폴더 경로 선택 창이 나타나면 잠시 그대로 둡니다. **임의의 폴더를 선택하지 마세요.** 다음 단계에서 올바른 경로를 지정합니다.
+    - Spice of Life 모드 폴더로 돌아가 탐색기 위쪽의 폴더 경로를 클릭하고 복사합니다.
+      - 예시: `C:\Games\Mod.Organizer-2.4.5alpha3\mods\Spice of Life`.
+    - Bethesda Archive Extractor의 폴더 선택 창으로 돌아가 앞에서 복사한 경로를 붙여넣고 폴더를 선택합니다.
+    - 올바르게 진행했다면 1~2초 정도의 짧은 압축 해제 과정이 표시됩니다.
+    - Spice of Life 모드 폴더에 `Meshes`와 `Textures` 폴더가 생성되었는지 확인하면 압축 해제 성공 여부를 알 수 있습니다.
+- 메인 파일 - [Deus Specs](https://www.nexusmods.com/newvegas/mods/76125?tab=files&file_id=1000090887&nmm=1)
+  - `DeusSpecs.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [REAL main File](https://www.nexusmods.com/newvegas/mods/63745?tab=files&file_id=1000043981&nmm=1)
+  - `BlackjackPackULTIMATEv2.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Power Armor Visual Enhancement 2K](https://www.nexusmods.com/newvegas/mods/74786?tab=files&file_id=1000151453&nmm=1)
+- 메인 파일 - [Dogtooths EnclaveOfficer](https://www.nexusmods.com/newvegas/mods/70483?tab=files&file_id=1000068030&nmm=1)
+  - `DogToothsEnclaveOfficer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Nightstalker Armour Set](https://www.nexusmods.com/newvegas/mods/66399?tab=files&file_id=1000051772&nmm=1)
+  - `Nightstalker Outfit.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Fallout Metal Armor - NVSE Replacer](https://www.nexusmods.com/newvegas/mods/80930?tab=files&file_id=1000110156&nmm=1)
+  - `NVSE` 폴더를 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Fallout 2 Metal Armor MKII](https://www.nexusmods.com/newvegas/mods/79493?tab=files&file_id=1000108502&nmm=1)
+  - `MCMetalArmor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `NVSE` 폴더를 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fallout 2 combat armor mark II (green textures) v1.0.0.3](https://www.nexusmods.com/newvegas/mods/78947?tab=files&file_id=1000102214&nmm=1)
+  - `Fallout 2 combat armor MK2 (remastered) replacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Combat Armor Replacer Redux FNV](https://www.nexusmods.com/newvegas/mods/77658?tab=files&file_id=1000096873&nmm=1)
+  - `Classic Combat Armor Replacer Redux FNV.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Combat Armor Replacer Redux TTW](https://www.nexusmods.com/newvegas/mods/77858?tab=files&file_id=1000097245&nmm=1)
+  - `Classic Combat Armor Replacer Redux TTW.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Combat Armor Replacer Combined (TTW) 1.2.1](https://www.nexusmods.com/newvegas/mods/78343?tab=files&file_id=1000105042&nmm=1)
+  - `MMM-CCARC-TTW.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Tribal Power Helmet No-DLC-Version](https://www.nexusmods.com/newvegas/mods/65594?tab=files&file_id=1000049071&nmm=1)
+  - `Tribal Power Helmet.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Ballistic Skull Mask](https://www.nexusmods.com/newvegas/mods/69388?tab=files&file_id=1000078780&nmm=1)
+  - `Ballistic Skull Mask.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Courier Duster Replacer](https://www.nexusmods.com/newvegas/mods/75004?tab=files&file_id=1000096304&nmm=1)
+  - `CourierDusterReplacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [GP-5 Gasmask](https://www.nexusmods.com/newvegas/mods/72282?tab=files&file_id=1000076038&nmm=1)
+  - `GP-5 Gasmask.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [NCR Commando](https://www.nexusmods.com/newvegas/mods/75821?tab=files&file_id=1000099356&nmm=1)
+  - `NCR Commando.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [The Lone Wanderer - TTW](https://www.nexusmods.com/newvegas/mods/77281?tab=files&file_id=1000095504&nmm=1)
+  - `The Lone Wanderer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Waster Gear TTW](https://www.nexusmods.com/newvegas/mods/78845?tab=files&file_id=1000100597&nmm=1)
+  - `QwibWasterBackpack.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Canvas Backpacks - FNV](https://www.nexusmods.com/newvegas/mods/71510?tab=files&file_id=1000101108&nmm=1)
+  - `QwibNewBackpacks.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Petal Gasmask](https://www.nexusmods.com/newvegas/mods/73963?tab=files&file_id=1000122538&nmm=1)
+  - `PetalGasmask.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [DVA - Distributed Variety Armors](https://www.nexusmods.com/newvegas/mods/79331?tab=files&file_id=1000118549&nmm=1)
+  - `DVA - Distributed Variety Armors.esm` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Fallout Tesla Armor](https://www.nexusmods.com/newvegas/mods/80372?tab=files&file_id=1000106489&nmm=1)
+  - `MCMetalTesla.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Arsthetiu's Armoire](https://www.nexusmods.com/newvegas/mods/79001?tab=files&file_id=1000118461&nmm=1)
+  - `Arsthetiu's Armoire.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fallout The Odyssey Mega Armor Pack](https://www.nexusmods.com/newvegas/mods/79313?tab=files&file_id=1000102384&nmm=1)
+  - `Fallout The Odyssey Mega Armor Pack.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `NVSE` 폴더를 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fallout Revelation Blues Mega Armor Pack](https://www.nexusmods.com/newvegas/mods/79310?tab=files&file_id=1000102376&nmm=1)
+  - `Fallout Revelation Blues Mega Armor Pack.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Firefighter Outfit](https://www.nexusmods.com/newvegas/mods/80915?tab=files&file_id=1000108242&nmm=1)
+  - `firefighter-uniform.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Mercenary Wanderer](https://www.nexusmods.com/newvegas/mods/47855?tab=files&file_id=109223&nmm=1)
+  - `MercWanderer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [TeslaArmor_v1.2](https://www.nexusmods.com/newvegas/mods/74702?tab=files&file_id=1000097484&nmm=1)
+  - `ClassicTeslaArmor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fallout Tactics Brotherhood Metal Armor Integration](https://www.nexusmods.com/newvegas/mods/70112?tab=files&file_id=1000066456&nmm=1)
+  - `Fallout Tactics Brotherhood Armor Integration.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Main](https://www.nexusmods.com/newvegas/mods/42333?tab=files&file_id=92513&nmm=1)
+  - `KORs Pistol Harness JG.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `KORs Pistol Harness.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Geonox_Riot_Armor_v1_1](https://www.nexusmods.com/newvegas/mods/38887?tab=files&file_id=81472&nmm=1)
+  - `Geonox_Riot_Armor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Geonox Riot Armor -Female-](https://www.nexusmods.com/newvegas/mods/43844?tab=files&file_id=97667&nmm=1)
+  - `Geonox_Riot_Armor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Wasteland Seeker Armor v1_1](https://www.nexusmods.com/newvegas/mods/43760?tab=files&file_id=98009&nmm=1)
+  - `Seeker Armor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Altyn Helmet](https://www.nexusmods.com/newvegas/mods/75714?tab=files&file_id=1000089602&nmm=1)
+  - `AltynHelmet.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [AkiraMoriTacticalGloves](https://www.nexusmods.com/newvegas/mods/67981?tab=files&file_id=1000058612&nmm=1)
+  - `Asurah_LeatherGloves.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [M1 Helmets v209](https://www.nexusmods.com/newvegas/mods/40091?tab=files&file_id=85388&nmm=1)
+  - `Blck_Fx NV-- Add Casque M1.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 업데이트 파일 - [v2dot1](https://www.nexusmods.com/newvegas/mods/40091?tab=files&file_id=85557&nmm=1)
+  - `Blck_Fx NV-- Add Casque M1.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 선택 파일 - [Patch normal map](https://www.nexusmods.com/newvegas/mods/40091?tab=files&file_id=85699&nmm=1)
+- 메인 파일 - [ClassicMetalArmorMkI](https://www.nexusmods.com/newvegas/mods/67315?tab=files&file_id=1000065891&nmm=1)
+  - `ClassicMetalArmorMkI.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Psycho Gear V2](https://www.nexusmods.com/newvegas/mods/58258?tab=files&file_id=1000026226&nmm=1)
+  - `Psycho Gear.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Road Warrior Armor](https://www.nexusmods.com/newvegas/mods/38738?tab=files&file_id=80851&nmm=1)
+  - `Road Warrior's Armor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Wasteland Stealth Armor NV](https://www.nexusmods.com/newvegas/mods/59659?tab=files&file_id=1000030252&nmm=1)
+  - `Wasteland Stealth Armor NV.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Bone Harvester](https://www.nexusmods.com/newvegas/mods/69728?tab=files&file_id=1000068588&nmm=1)
+  - `ArMOAR BH Armor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [For Vanilla Male Bodies](https://www.nexusmods.com/newvegas/mods/48848?tab=files&file_id=1000000074&nmm=1)
+  - `DragsModernGunslinger.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [SalvagedArmors1.1](https://www.nexusmods.com/newvegas/mods/64296?tab=files&file_id=1000044955&nmm=1)
+  - `SalvageArmor.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Leather Armor Replacer](https://www.nexusmods.com/newvegas/mods/69594?tab=files&file_id=1000097174&nmm=1)
+  - `Classic Leather Armor Replacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Lightweight Leather Armor Replacer](https://www.nexusmods.com/newvegas/mods/69594?tab=files&file_id=1000097176&nmm=1)
+  - `Classic Lightweight Leather Armor Replacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Strangers and Freaks Outfit Pack](https://www.nexusmods.com/newvegas/mods/71522?tab=files&file_id=1000073091&nmm=1)
+  - `StrangersAndFreakersPack.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Tailor Maid - NV](https://www.nexusmods.com/newvegas/mods/36660?tab=files&file_id=76090&nmm=1)
+  - `Tailor Maid - NV.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Suave Adventurer's Outfit - Indiana Jones Style](https://www.nexusmods.com/newvegas/mods/83103?tab=files&file_id=1000119928&nmm=1)
+  - `AC_SuaveAdventurersOutfit.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Gala Tuxedo Outfit](https://www.nexusmods.com/newvegas/mods/82081?tab=files&file_id=1000112877&nmm=1)
+  - `Gala Tuxedo Outfit.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Puddlepond's Prison Posse - A Powder Ganger Overhaul](https://www.nexusmods.com/newvegas/mods/85210?tab=files&file_id=1000125188&nmm=1)
+- 메인 파일 - [Mojave Manhunter Courier Duster](https://www.nexusmods.com/newvegas/mods/85377?tab=files&file_id=1000125266&nmm=1)
+- 메인 파일 - [Courier Head Bandage](https://www.nexusmods.com/newvegas/mods/80476?tab=files&file_id=1000106610&nmm=1)
+  - `QwibHeadBandage.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [CROSS - Chosen of Atom (Mojave Edition)](https://www.nexusmods.com/newvegas/mods/85634?tab=files&file_id=1000127022&nmm=1)
+  - `CROSS_COA.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Classic Brotherhood Combat Armor](https://www.nexusmods.com/newvegas/mods/84261?tab=files&file_id=1000121609&nmm=1)
+  - `zMCArmorCombatBOS_JS.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [TTW - Environment Suit Replacer](https://www.nexusmods.com/newvegas/mods/85241?tab=files&file_id=1000124680&nmm=1)
+  - `EnvironmentSuitReplacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Motorized Power Armor MK-I](https://www.nexusmods.com/newvegas/mods/88402?tab=files&file_id=1000136850&nmm=1)
+  - `Motorized Power Armor MK-I Standalone version.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `Motorized Power Armor MK-I.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [4th of July Power Armors](https://www.nexusmods.com/newvegas/mods/88083?tab=files&file_id=1000135605&nmm=1)
+  - `4th of July Power Armors.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fiend Helmet](https://www.nexusmods.com/newvegas/mods/89644?tab=files&file_id=1000142072&nmm=1)
+  - `fiendmasks.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [AOTD - Army of the Dead Mini Pack](https://www.nexusmods.com/newvegas/mods/89657?tab=files&file_id=1000142103&nmm=1)
+  - `AOTD.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Sea Captain Hat - FO4 Recreation TTW](https://www.nexusmods.com/newvegas/mods/91531?tab=files&file_id=1000148848&nmm=1)
+  - `SeaCaptainHat.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+    - Bethesda Archive Extractor의 압축을 풉니다.
+    - MO2에서 Sea Captain Hat 모드를 마우스 오른쪽 버튼으로 클릭하고 탐색기에서 열기(Open in Explorer)를 선택합니다.
+    - `SeaCaptainHat.bsa`를 마우스 오른쪽 버튼으로 클릭하고 연결 프로그램(Open with) → 다른 앱 선택 → PC에서 앱 찾기를 진행합니다. Bethesda Archive Extractor의 `bae.exe`를 선택합니다.
+    - Extract 버튼을 누르고 폴더 경로 선택 창이 나타나면 잠시 그대로 둡니다. **임의의 폴더를 선택하지 마세요.** 다음 단계에서 올바른 경로를 지정합니다.
+    - Sea Captain Hat 모드 폴더로 돌아가 탐색기 위쪽의 폴더 경로를 클릭하고 복사합니다.
+      - 예시: `C:\Games\Mod.Organizer-2.4.5alpha3\mods\Sea Captain Hat`.
+    - Bethesda Archive Extractor의 폴더 선택 창으로 돌아가 앞에서 복사한 경로를 붙여넣고 폴더를 선택합니다.
+    - 올바르게 진행했다면 1~2초 정도의 짧은 압축 해제 과정이 표시됩니다.
+    - Sea Captain Hat 모드 폴더에 `Meshes`와 `Textures` 폴더가 생성되었는지 확인하면 압축 해제 성공 여부를 알 수 있습니다.
+- 메인 파일 - [Veronica Outfit Replacer](https://www.nexusmods.com/newvegas/mods/91605?tab=files&file_id=1000149180&nmm=1)
+  - `Veronica Outfit Replacer.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Courier's 3](https://www.nexusmods.com/newvegas/mods/90759?tab=files&file_id=1000146100&nmm=1)
+  - `Courier's 3.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Caesar's Legion - Helmet of the 87th Tribe](https://www.nexusmods.com/newvegas/mods/90172?tab=files&file_id=1000145320&nmm=1)
+  - `Caesar's Legion - Helmet of the 87th Tribe.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `NVSE` 폴더를 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fear and Loathing - Raoul Shades](https://www.nexusmods.com/newvegas/mods/88861?tab=files&file_id=1000139438&nmm=1)
+  - `Raoul_Shades.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+  - `NVSE` 폴더를 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Fear and Loathing Hawaiian Shirt and Panama Hat](https://www.nexusmods.com/newvegas/mods/87723?tab=files&file_id=1000134220&nmm=1)
+  - `FnL.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [Zion National Park Ranger Outfit](https://www.nexusmods.com/newvegas/mods/88624?tab=files&file_id=1000140110&nmm=1)
+  - `ZionParkRanger.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [KORs Knight Hunter](https://www.nexusmods.com/newvegas/mods/44422?tab=files&file_id=99597&nmm=1)
+  - `KORs Knight Hunter.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [BEWARE OF GIRL Man Trap Armor EX New Vegas RELAUNCH](https://www.nexusmods.com/newvegas/mods/44557?tab=files&file_id=100375&nmm=1)
+  - `ManTrap.esp` 플러그인을 **숨김 처리(HIDE)** 합니다.
+- 메인 파일 - [STARS TTW](https://www.nexusmods.com/newvegas/mods/76016?tab=files)
+- 자산 파일 - [STARS TTW](https://www.nexusmods.com/newvegas/mods/76016?tab=files).
+- 메인 파일 - [STARS TTW and ySI Patch](https://www.nexusmods.com/newvegas/mods/76509)
+- 선택 파일 - [Classic Fallout Tesla Consistent Icons v0.1](https://www.nexusmods.com/newvegas/mods/80347?tab=description)
+- 메인 파일 - [AVCCA - Animated Visor for Classic Combat Armor](https://www.nexusmods.com/newvegas/mods/81974)
+  - 설치된 모드에서 다음 항목을 선택합니다.
+    - [x] Classic Fallout combat armor
+    - [x] Classic Fallout combat armor Mark 2
+    - [ ] Classic Combat Armor Replacer (Riley, US Army, Desert)
+    - [ ] Brotherhood of Steel and Enclave Classic Combat Armors
+    - [x] Classic Combat Armor Replacer Redux
+    - [x] Classic Replacers for TTW
+    - [x] Classic Brotherhood Combat Armor
+- 메인 파일 - [PipBoyOn Node Fixes TTW](https://www.nexusmods.com/newvegas/mods/81775)
+- 선택 파일 - [PipBoyOn Node Fixes PAVE](https://www.nexusmods.com/newvegas/mods/81775)
+- 선택 파일 - [BHYSYS Starting Gear Patch](https://www.nexusmods.com/newvegas/mods/76016?tab=files)
+  - [(Benny Humbles You) and Steals Your Stuff](https://www.nexusmods.com/newvegas/mods/71112)를 다운로드한 경우
+- 선택 파일 - [Wasteland Starting Gear DC Patch](https://www.nexusmods.com/newvegas/mods/76016?tab=files)
+  - [Wasteland Starting Gear DC](https://www.nexusmods.com/newvegas/mods/75789)를 다운로드한 경우
