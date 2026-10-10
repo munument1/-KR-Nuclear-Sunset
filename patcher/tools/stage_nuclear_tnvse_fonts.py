@@ -1,6 +1,7 @@
 """Prepare a portable optional Nuclear Sunset tNVSE Korean font mod locally.
 
-Do not install to MO2 or game. No tNVSE binary included.
+Do not install to MO2 or game. Includes the VNV Korean UI-fixed tNVSE DLL as an overlay;
+the user's separately installed original tNVSE must remain unchanged.
 """
 from pathlib import Path
 import hashlib,json,shutil,re,xml.etree.ElementTree as ET
