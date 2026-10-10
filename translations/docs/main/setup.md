@@ -19,14 +19,14 @@ sidebar_label: 설치 안내
 
 - **게임 준비:** 원본 가이드의 [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에서 지원하는 Fallout: New Vegas, Fallout 3 및 **두 게임의 DLC** 보유 여부를 먼저 확인하세요.
 - **계정 준비:** Wabbajack에서 다운로드할 때 로그인할 Nexus Mods 계정을 준비하세요. Premium 여부에 따라 다운로드 방식이 달라집니다.
-- **기존 데이터 보존:** 이미 모드를 설치했거나 저장 파일을 보관하고 있다면 게임 설치 폴더와 \`Documents\My Games\`의 관련 폴더를 **별도 위치에 백업**하세요.
-- **경로 예시:** 본문에 나오는 \`C:\Modding\`은 예시입니다. 실제 설치 드라이브가 D라면 같은 위치를 \`D:\Modding\`으로 일관되게 바꾸세요.
+- **기존 데이터 보존:** 이미 모드를 설치했거나 저장 파일을 보관하고 있다면 게임 설치 폴더와 `Documents\My Games`의 관련 폴더를 **별도 위치에 백업**하세요.
+- **경로 예시:** 본문에 나오는 `C:\Modding`은 예시입니다. 실제 설치 드라이브가 D라면 같은 위치를 `D:\Modding`으로 일관되게 바꾸세요.
 - **필수와 선택 구분:** 게임을 실행하기 위해 필요한 작업과 특정 GPU 사용자·모드 제작자·컨트롤러 사용자에게만 필요한 작업을 구분했습니다. 자신의 환경에 해당하는 절차를 따르세요.
 
 :::tip 한국어판 안내 — 설치 폴더 구조 미리 보기
 Nuclear Sunset은 **게임 런처가 관리하는 원본 게임 폴더**와 **모드팩이 사용하는 독립적인 게임 복사본**을 구분합니다.
 
-\`\`\`text
+```text
 C:\Modding\
 ├── Wabbajack\
 │   └── Wabbajack Launcher.exe
@@ -36,7 +36,7 @@ C:\Modding\
     └── MODS\
         ├── [NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)\
         └── [NoDelete] [INF] [DB] - YUPTTW Update\
-\`\`\`
+```
 
 위 구조는 **작업이 완료되었을 때 주요 폴더의 위치를 설명하는 예시**입니다. Wabbajack이 만들어 주는 폴더를 미리 전부 만들거나, TTW 폴더를 임의로 새로 만들라는 뜻이 아닙니다. 현재 단계에서는 아래의 '필요한 폴더 만들기'만 수행하세요.
 :::
@@ -60,14 +60,14 @@ Linux 설치 지침은 Discord의 queenglizzyandthelizzywizzy가 친절하게 �
 <br></br>
 
 ### <p align="center"> ![Creating Necessary File Paths](https://github.com/user-attachments/assets/7f0a2b00-9990-434d-b7e6-bc8ed273f78c) </p>
-- 드라이브의 `루트 디렉터리`(예: `C:\`, `D:\`)로 이동합니다.
+- 드라이브의 `루트 디렉터리`(예: `C:`, `D:`)로 이동합니다.
 - `Modding`이라는 폴더를 만들고 엽니다.
 - 그 안에 `Wabbajack` 폴더를 만듭니다. (**아직 열지 마세요.**)
 - `Nuclear Sunset` 폴더도 만들고 엽니다.
 - `Nuclear Sunset` 안에 `downloads` 폴더를 만듭니다.
 
 :::tip 한국어판 확인 — 드라이브와 폴더 이름
-예를 들어 D 드라이브를 사용한다면 \`D:\Modding\Wabbajack\`과 \`D:\Modding\Nuclear Sunset\downloads\`가 되어야 합니다. \`Modding\Modding\`처럼 폴더가 중복되거나 \`Nuclear Sunset\Nuclear Sunset\`처럼 이름이 중첩되지 않았는지 주소 표시줄에서 확인하세요. \`downloads\`는 Nuclear Sunset 폴더 **안**에 있어야 합니다.
+예를 들어 D 드라이브를 사용한다면 `D:\Modding\Wabbajack`과 `D:\Modding\Nuclear Sunset\downloads`가 되어야 합니다. `Modding\Modding`처럼 폴더가 중복되거나 `Nuclear Sunset\Nuclear Sunset`처럼 이름이 중첩되지 않았는지 주소 표시줄에서 확인하세요. `downloads`는 Nuclear Sunset 폴더 **안**에 있어야 합니다.
 :::
 
 :::important 다시 확인하세요
@@ -111,7 +111,7 @@ Linux 설치 지침은 Discord의 queenglizzyandthelizzywizzy가 친절하게 �
 - Wabbajack을 닫습니다.
 
 :::tip 한국어판 확인 — 파일 확장자
-Windows 탐색기에서 확장명을 숨기고 있다면 이름을 바꿀 때 \`.exe.exe\`가 되지 않도록 주의하세요. 파일 탐색기의 '파일 확장명' 표시를 켜고, 최종 파일 이름이 **\`Wabbajack Launcher.exe\`**인지 확인하는 것이 안전합니다. 기존 바로 가기는 새 위치의 실행 파일을 가리키지 않을 수 있습니다.
+Windows 탐색기에서 확장명을 숨기고 있다면 이름을 바꿀 때 `.exe.exe`가 되지 않도록 주의하세요. 파일 탐색기의 '파일 확장명' 표시를 켜고, 최종 파일 이름이 **`Wabbajack Launcher.exe`**인지 확인하는 것이 안전합니다. 기존 바로 가기는 새 위치의 실행 파일을 가리키지 않을 수 있습니다.
 :::
 
 :::warning 버전 확인
@@ -148,7 +148,7 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 이 단계는 **이미 설치된 모드가 섞여 있지 않은 깨끗한 원본 게임 두 개**를 다시 얻기 위한 절차입니다.
 
 1. 게임 설치 위치에 있던 Fallout New Vegas 폴더는 바탕 화면 등 안전한 위치에 보관하거나, 백업이 필요 없을 때만 삭제합니다. Fallout 3 역시 기존 설치 파일이 남아 있지 않아야 합니다.
-2. \`Documents\My Games\FalloutNV\`에는 설정과 저장 데이터가 있을 수 있으므로 **게임 설치 폴더와 별개로** 백업 여부를 결정하세요. \`Fallout3\`도 기존 개인 설정 파일이 남는 위치입니다.
+2. `Documents\My Games\FalloutNV`에는 설정과 저장 데이터가 있을 수 있으므로 **게임 설치 폴더와 별개로** 백업 여부를 결정하세요. `Fallout3`도 기존 개인 설정 파일이 남는 위치입니다.
 3. 그다음 게임 런처에서 두 게임을 다시 설치합니다. **새로 설치된 원본 게임 폴더에 기존 모드 파일을 다시 넣지 마세요.** 기존 설치본 복구는 '깨끗한 Stock New Vegas 폴더 만들기' 단계에서 처리합니다.
 
 이후 단계에서 '이동'은 원래 위치에서 파일이 사라지는 작업이고, '복사'는 원본을 유지한 채 사본을 만드는 작업입니다. 둘을 혼동하면 설치 또는 기존 게임 환경 복구에 문제가 생길 수 있습니다.
@@ -207,11 +207,11 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 - Nexus Mods Premium 구독자가 아니라면 모드마다 다운로드 버튼을 수동으로 눌러야 합니다.
 
 :::tip 한국어판 확인 — 설치 화면의 두 경로
-- \`Installation Location\`은 **모드팩이 설치될 폴더**입니다. \`C:\Modding\Nuclear Sunset\` 자체를 지정하며, 그 안의 \`downloads\` 폴더를 선택하지 않습니다.
-- \`Download Location\`은 **받아 둔 설치 파일을 보관할 폴더**입니다. \`C:\Modding\Nuclear Sunset\downloads\`를 확인하세요.
+- `Installation Location`은 **모드팩이 설치될 폴더**입니다. `C:\Modding\Nuclear Sunset` 자체를 지정하며, 그 안의 `downloads` 폴더를 선택하지 않습니다.
+- `Download Location`은 **받아 둔 설치 파일을 보관할 폴더**입니다. `C:\Modding\Nuclear Sunset\downloads`를 확인하세요.
 - Nexus Premium이 없다면 다운로드 페이지로 이동해 수동 다운로드를 반복해야 합니다. **모든 다운로드와 설치가 끝날 때까지** Wabbajack을 닫거나 MO2를 먼저 실행하지 마세요.
 
-설치가 끝났는지는 진행 막대가 멈춘 것만으로 판단하지 말고 아래에 안내된 **\`Finished Installing Nuclear Sunset\`** 메시지로 확인하세요.
+설치가 끝났는지는 진행 막대가 멈춘 것만으로 판단하지 말고 아래에 안내된 **`Finished Installing Nuclear Sunset`** 메시지로 확인하세요.
 :::
 - 설치가 완료되면 Wabbajack 상단에 `Finished Installing Nuclear Sunset` 메시지가 표시됩니다.
 - Wabbajack을 닫습니다. `Create Desktop Shortcut` 옵션은 **선택하지 마세요.**
@@ -238,9 +238,9 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 - **새로 설치한** `C:\[STEAM, GOG, or EPIC FILEPATH]\Fallout New Vegas` 폴더로 이동합니다. 폴더 안의 **모든 파일**을 **복사**(폴더 안에서 `Ctrl+A`, `Ctrl+C`)하여 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas` 폴더에 **붙여넣습니다**(`Ctrl+V`).
 
 :::important 한국어판 확인 — 폴더째 옮기는 것이 아닙니다
-\`FalloutNV.exe\` 등 **새로 설치한 Fallout New Vegas 폴더 안의 파일과 하위 폴더 전체**를 복사합니다. \`[NoDelete] Stock New Vegas\Fallout New Vegas\FalloutNV.exe\`처럼 게임 폴더가 한 단계 더 들어간 구조가 되지 않게 하세요.
+`FalloutNV.exe` 등 **새로 설치한 Fallout New Vegas 폴더 안의 파일과 하위 폴더 전체**를 복사합니다. `[NoDelete] Stock New Vegas\Fallout New Vegas\FalloutNV.exe`처럼 게임 폴더가 한 단계 더 들어간 구조가 되지 않게 하세요.
 
-복사가 끝났다면 \`C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas\FalloutNV.exe\`가 실제로 있는지 확인합니다. 이곳의 파일은 이후 **TTW 설치, 4GB 패치, 게임 실행에 사용될 복사본**입니다. 원본 게임 설치 위치와 혼동하지 마세요.
+복사가 끝났다면 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas\FalloutNV.exe`가 실제로 있는지 확인합니다. 이곳의 파일은 이후 **TTW 설치, 4GB 패치, 게임 실행에 사용될 복사본**입니다. 원본 게임 설치 위치와 혼동하지 마세요.
 :::
 
 #### 2단계: 기존 설치본과 모드 설치본의 백업 복구
@@ -254,7 +254,7 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
   - 바탕 화면의 `FalloutNV` 폴더를 원래 `C:\Users\[USERNAME]\Documents\My Games` 위치로 되돌리고, 메시지가 나타나면 `Replace`(바꾸기)를 선택합니다.
 
 :::tip 한국어판 확인 — 백업 복구 시점
-이전 설치본을 되돌리는 작업은 **Stock New Vegas 복사를 끝낸 다음** 진행합니다. 이전에 저장한 \`Fallout New Vegas\` 폴더와 \`FalloutNV\` 폴더는 서로 다른 위치에 복구하며, 기존 폴더를 덮어쓸 때는 필요한 파일을 미리 백업했는지 다시 확인하세요. 복구한 구버전 모드 파일은 **독립적인 Stock New Vegas 폴더로 복사하지 않습니다.**
+이전 설치본을 되돌리는 작업은 **Stock New Vegas 복사를 끝낸 다음** 진행합니다. 이전에 저장한 `Fallout New Vegas` 폴더와 `FalloutNV` 폴더는 서로 다른 위치에 복구하며, 기존 폴더를 덮어쓸 때는 필요한 파일을 미리 백업했는지 다시 확인하세요. 복구한 구버전 모드 파일은 **독립적인 Stock New Vegas 폴더로 복사하지 않습니다.**
 :::
 
 :::danger
@@ -270,7 +270,7 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 - `register to handle nxm links`(nxm 링크 처리 등록) 메시지가 나오면 `Yes`를 선택합니다.
 
 :::tip 한국어판 확인 — MO2를 처음 실행할 때
-반드시 \`C:\Modding\Nuclear Sunset\ModOrganizer.exe\`를 실행합니다. Steam/GOG/Epic의 원본 게임 실행 파일이나 전에 설치해 둔 다른 MO2를 여는 단계가 아닙니다. 두 확인 창에 \`Yes\`를 누른 뒤 자신의 게임 구매처에 맞는 추가 설정만 진행하세요.
+반드시 `C:\Modding\Nuclear Sunset\ModOrganizer.exe`를 실행합니다. Steam/GOG/Epic의 원본 게임 실행 파일이나 전에 설치해 둔 다른 MO2를 여는 단계가 아닙니다. 두 확인 창에 `Yes`를 누른 뒤 자신의 게임 구매처에 맞는 추가 설정만 진행하세요.
 :::
 
 :::tip Epic Games 사용자
@@ -307,9 +307,9 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 :::
 
 :::tip 한국어판 확인 — 설정 순서
-\`Configuring Game Settings\`은 **MO2에서 선택해 실행하는 설정 프로그램**입니다. 뒤에서 고르는 A~L 그래픽·모드 프로필과는 다른 기능입니다. 우선 런처의 \`Options\`에서 품질을 설정한 다음 창 모드와 해상도를 확인하세요.
+`Configuring Game Settings`은 **MO2에서 선택해 실행하는 설정 프로그램**입니다. 뒤에서 고르는 A~L 그래픽·모드 프로필과는 다른 기능입니다. 우선 런처의 `Options`에서 품질을 설정한 다음 창 모드와 해상도를 확인하세요.
 
-\`Falloutprefs.ini\`의 \`iSize W\`는 가로 픽셀, \`iSize H\`는 세로 픽셀을 뜻합니다. 목록에 원하는 해상도가 없을 때만 모니터의 실제 너비와 높이에 맞게 변경하세요. \`Low\` 프리셋이 필수 렌더링을 비활성화한다는 원본 경고를 지켜 주세요.
+`Falloutprefs.ini`의 `iSize W`는 가로 픽셀, `iSize H`는 세로 픽셀을 뜻합니다. 목록에 원하는 해상도가 없을 때만 모니터의 실제 너비와 높이에 맞게 변경하세요. `Low` 프리셋이 필수 렌더링을 비활성화한다는 원본 경고를 지켜 주세요.
 :::
 
 - `Windowed` 항목이 체크되어 있다면 해제하고 모니터 해상도를 선택합니다.
@@ -334,11 +334,11 @@ TTW 설치 프로그램 화면에는 서로 다른 역할의 경로 세 개를 �
 
 | 설치 프로그램 입력 항목 | 가리켜야 하는 위치 |
 | --- | --- |
-| \`Fallout 3\` | Steam/GOG/Epic에서 **새로 설치한 Fallout 3**의 실제 게임 폴더 |
-| \`Fallout New Vegas\` | \`C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas\` |
-| \`Tale of Two Wastelands Installation Path\` | \`C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)\` |
+| `Fallout 3` | Steam/GOG/Epic에서 **새로 설치한 Fallout 3**의 실제 게임 폴더 |
+| `Fallout New Vegas` | `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas` |
+| `Tale of Two Wastelands Installation Path` | `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)` |
 
-이 표에서 \`C:\`는 본인이 설치한 드라이브 문자로 변경하세요. **첫째는 Fallout 3 원본 폴더, 둘째는 FNV의 독립 복사본, 셋째는 TTW 결과가 기록될 모드 폴더**라는 차이가 중요합니다. 이미 존재하는 TTW 모드 폴더를 사용하며 별도의 새 폴더를 만들지 않습니다.
+이 표에서 `C:`는 본인이 설치한 드라이브 문자로 변경하세요. **첫째는 Fallout 3 원본 폴더, 둘째는 FNV의 독립 복사본, 셋째는 TTW 결과가 기록될 모드 폴더**라는 차이가 중요합니다. 이미 존재하는 TTW 모드 폴더를 사용하며 별도의 새 폴더를 만들지 않습니다.
 :::
 
 - [Tale of Two Wastelands](https://mod.pub/ttw/133/files)를 **수동 다운로드**하여 압축을 풉니다.
@@ -362,7 +362,7 @@ TTW 설치 프로그램 화면에는 서로 다른 역할의 경로 세 개를 �
 - [YUPTTW](https://mod.pub/ttw/133/files)를 **수동 다운로드**하고 압축 내용을 `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - YUPTTW Update`에 풉니다.
 
 :::tip 한국어판 확인 — TTW와 YUPTTW는 서로 다른 폴더
-TTW의 출력 폴더는 \`[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)\`이고, YUPTTW의 압축을 푸는 곳은 \`[NoDelete] [INF] [DB] - YUPTTW Update\`입니다. YUPTTW를 TTW의 설치 폴더에 섞어 넣지 말고, 원문에 지정된 각각의 폴더를 확인하세요. 압축을 풀면서 같은 이름의 최상위 폴더가 한 번 더 생기지 않았는지도 확인하세요.
+TTW의 출력 폴더는 `[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)`이고, YUPTTW의 압축을 푸는 곳은 `[NoDelete] [INF] [DB] - YUPTTW Update`입니다. YUPTTW를 TTW의 설치 폴더에 섞어 넣지 말고, 원문에 지정된 각각의 폴더를 확인하세요. 압축을 풀면서 같은 이름의 최상위 폴더가 한 번 더 생기지 않았는지도 확인하세요.
 :::
 
 :::tip 다시 확인하세요
@@ -383,9 +383,9 @@ TTW 설치 프로그램은 **반드시** `[NoDelete] Stock New Vegas` 폴더에 
 - CMD 창이 나타나며 버전에 따라 `FalloutNV.exe patched!` 또는 `Press any key to continue...`라는 메시지가 표시됩니다. `[NoDelete] Stock New Vegas` 폴더에는 `FalloutNV_backup.exe`도 생성됩니다.
 
 :::tip 한국어판 확인 — 어떤 파일에 패치하나요?
-패처를 실행하는 위치는 **\`[NoDelete] Stock New Vegas\` 폴더**입니다. Steam/GOG/Epic의 게임 원본 폴더에 있는 \`FalloutNV.exe\`나 다른 모드팩의 실행 파일을 패치하는 단계가 아닙니다.
+패처를 실행하는 위치는 **`[NoDelete] Stock New Vegas` 폴더**입니다. Steam/GOG/Epic의 게임 원본 폴더에 있는 `FalloutNV.exe`나 다른 모드팩의 실행 파일을 패치하는 단계가 아닙니다.
 
-화면에 완료 메시지가 표시되고 \`FalloutNV_backup.exe\`가 만들어졌는지 확인한 뒤 다음 단계로 진행하세요. 오류가 나타났다면 성공했다고 간주하지 말고 원본의 문제 해결 안내를 확인하세요.
+화면에 완료 메시지가 표시되고 `FalloutNV_backup.exe`가 만들어졌는지 확인한 뒤 다음 단계로 진행하세요. 오류가 나타났다면 성공했다고 간주하지 말고 원본의 문제 해결 안내를 확인하세요.
 :::
 
 :::danger
@@ -430,7 +430,7 @@ DXVK 캐시 파일 생성을 중단하면 메모리 관련 충돌을 방지할 �
 ![Cache](https://github.com/user-attachments/assets/6bb4cd54-1c6f-4e91-b3ff-006cd95576f7)
 
 :::tip 한국어판 확인 — 사용자 환경 변수
-\`DXVK_STATE_CACHE\`는 **변수 이름**, \`disable\`은 **변수 값**입니다. 위 지침은 \`User variables for USER NAME\`(현재 사용자 환경 변수) 아래에 만드는 절차입니다. 다른 변수와 혼동하거나 공백을 넣지 않았는지 확인하세요.
+`DXVK_STATE_CACHE`는 **변수 이름**, `disable`은 **변수 값**입니다. 위 지침은 `User variables for USER NAME`(현재 사용자 환경 변수) 아래에 만드는 절차입니다. 다른 변수와 혼동하거나 공백을 넣지 않았는지 확인하세요.
 :::
 
 - 기존 DXVK 캐시가 있다면 삭제합니다.
@@ -473,7 +473,7 @@ FPS 제한 프로그램은 프레임 속도가 급격하게 변하는 현상을 
 - `OK`를 클릭한 뒤 RTSS를 **종료하지 말고 최소화**하여 시스템 트레이로 돌려놓습니다.
 
 :::tip 한국어판 확인 — RTSS 대상 파일
-\`Add\`로 등록하는 것은 Stock New Vegas 폴더 안의 **\`FalloutNV.exe\`**입니다. MO2의 \`ModOrganizer.exe\`나 원본 게임 폴더의 실행 파일이 아닙니다. 프레임 제한 설정을 마치고 창을 최소화하면 트레이에서 RTSS가 실행 중인 상태를 유지합니다.
+`Add`로 등록하는 것은 Stock New Vegas 폴더 안의 **`FalloutNV.exe`**입니다. MO2의 `ModOrganizer.exe`나 원본 게임 폴더의 실행 파일이 아닙니다. 프레임 제한 설정을 마치고 창을 최소화하면 트레이에서 RTSS가 실행 중인 상태를 유지합니다.
 :::
 
 ![RTSS Setup](https://github.com/user-attachments/assets/eb43544d-2143-446d-a86e-777da81d27f0)
@@ -551,7 +551,7 @@ AMD GPU에서는 Ultra-Low Power State(ULPS)가 기본적으로 활성화되어 
 
 ### <p align="center"> ![Selecting a Nuclear Sunset Profile](https://github.com/user-attachments/assets/16974159-4dfb-46c5-ae36-77c33b1703a2) </p>
 :::tip 한국어판 확인 — 두 종류의 선택 메뉴
-MO2에서 **프로필(A~L)**을 고르는 작업과 **실행 항목(\`Nuclear Sunset\`, \`Configuring Game Settings\`)**을 고르는 작업은 다릅니다. 여기서는 화질·활성 모드 구성을 정하는 프로필을 선택하고, 게임을 시작할 때는 마지막 단계에서 \`Nuclear Sunset\` 실행 항목을 선택해야 합니다.
+MO2에서 **프로필(A~L)**을 고르는 작업과 **실행 항목(`Nuclear Sunset`, `Configuring Game Settings`)**을 고르는 작업은 다릅니다. 여기서는 화질·활성 모드 구성을 정하는 프로필을 선택하고, 게임을 시작할 때는 마지막 단계에서 `Nuclear Sunset` 실행 항목을 선택해야 합니다.
 :::
 
 - MO2의 드롭다운 메뉴에서 `A - Uranium Haze NVR High`를 선택한 뒤 원하는 프로필을 고릅니다.
@@ -600,7 +600,7 @@ MO2에서 **프로필(A~L)**을 고르는 작업과 **실행 항목(\`Nuclear Su
 ![OptionalSeparators](https://github.com/user-attachments/assets/976d0ff7-c70e-435f-83b7-fe3939ac1cfc)
 
 :::warning 한국어판 확인 — 선택 모드만 변경
-이 구간에 표시된 **Optional 구분선의 모드**만 켜거나 끄세요. 모드 이름의 공통 앞부분을 공유하는 관련 항목이 있다면 함께 변경해야 합니다. 아래 목록의 \`Hardercore\`와 \`Softercore\`는 게임 난이도를 크게 바꾸므로 처음 실행하기 전에 무엇을 활성화했는지 확인하세요. 일반 모드의 활성화를 임의로 바꾸면 원본 가이드의 지원 대상에서 제외될 수 있습니다.
+이 구간에 표시된 **Optional 구분선의 모드**만 켜거나 끄세요. 모드 이름의 공통 앞부분을 공유하는 관련 항목이 있다면 함께 변경해야 합니다. 아래 목록의 `Hardercore`와 `Softercore`는 게임 난이도를 크게 바꾸므로 처음 실행하기 전에 무엇을 활성화했는지 확인하세요. 일반 모드의 활성화를 임의로 바꾸면 원본 가이드의 지원 대상에서 제외될 수 있습니다.
 :::
 
 <details><summary>
@@ -673,10 +673,10 @@ MO2에서 **프로필(A~L)**을 고르는 작업과 **실행 항목(\`Nuclear Su
 
 :::tip 한국어판 확인 — 처음 실행할 때 점검
 1. MO2에서 설치 안내대로 선택한 **A~L 프로필**을 확인합니다.
-2. MO2 실행 항목을 **\`Nuclear Sunset\`**으로 선택했는지 확인합니다.
+2. MO2 실행 항목을 **`Nuclear Sunset`**으로 선택했는지 확인합니다.
 3. RTSS를 사용하는 Windows 환경이라면 시스템 트레이에서 RTSS가 실행 중인지 확인합니다.
-4. \`Run\`으로 게임을 시작합니다. 게임 런처가 열리면 거기서 \`Play\`를 누르지 말고 아래 문제 해결 안내를 따르세요.
-5. 게임이 시작되었다면 일시 정지 메뉴에서 \`K\`를 눌러 단축키를 확인합니다.
+4. `Run`으로 게임을 시작합니다. 게임 런처가 열리면 거기서 `Play`를 누르지 말고 아래 문제 해결 안내를 따르세요.
+5. 게임이 시작되었다면 일시 정지 메뉴에서 `K`를 눌러 단축키를 확인합니다.
 
 프로필, 실행 항목, 게임 설치 폴더가 서로 혼동되지 않았는지를 먼저 확인하면 실행 오류를 추적하기 쉽습니다.
 :::
