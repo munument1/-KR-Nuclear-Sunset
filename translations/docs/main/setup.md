@@ -252,180 +252,187 @@ Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합�
 <br></br>
 
 ### <p align="center"> ![Installing Tale of Two Wastelands (TTW)](https://github.com/user-attachments/assets/883d2bfc-80b7-4dcd-afbc-bc0611aff0b9) </p>
-
-:::danger Required Mod
+:::danger 필수 모드
 :::
 
-- Manual Download [Tale of Two Wastelands](https://mod.pub/ttw/133/files) and extract the archive.
-- Open the extracted `Tale of Two Wastelands Installer` folder. Right-click `TTW Install.exe` and select `Run as Administrator`.
-- Verify that the `Fallout 3` file path matches your Steam/GOG/Epic Games Fallout 3 installation path (this should already be auto-populated).
-- Copy (`Ctrl+C`) `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`, changing the Root Directory path if necessary, and paste (`Ctrl+V`) it into the `Fallout New Vegas` file path.
-- Copy (`Ctrl+C`) `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)`, changing the Root Directory path if necessary, and paste (`Ctrl+V`) it into the `Tale of Two Wastelands Installation Path`.
+- [Tale of Two Wastelands](https://mod.pub/ttw/133/files)를 **수동 다운로드**하여 압축을 풉니다.
+- 압축을 푼 `Tale of Two Wastelands Installer` 폴더를 엽니다. `TTW Install.exe`를 마우스 오른쪽 버튼으로 클릭하고 `Run as Administrator`(관리자 권한으로 실행)를 선택합니다.
+- `Fallout 3` 경로가 Steam/GOG/Epic Games에 설치된 실제 Fallout 3 경로와 일치하는지 확인합니다. 보통 자동으로 입력되어 있습니다.
+- 필요한 경우 루트 드라이브 문자를 변경한 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`를 **복사**(`Ctrl+C`)해 `Fallout New Vegas` 경로에 **붙여넣습니다**(`Ctrl+V`).
+- 필요한 경우 루트 드라이브 문자를 변경한 `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)`를 **복사**(`Ctrl+C`)해 `Tale of Two Wastelands Installation Path`에 **붙여넣습니다**(`Ctrl+V`).
 
-:::danger CRITICAL - Confirm the File Path
-- Ensure the installation file path is `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)`. Installing outside of the `MODS` folder will prevent the game from launching.
-- Do not create a new TTW folder if you cannot find the existing one. You are likely in the wrong filepath.
+:::danger 매우 중요 — 설치 경로를 반드시 확인하세요
+- 설치 경로가 `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)`인지 확인하세요. `MODS` 폴더 바깥에 설치하면 게임이 실행되지 않습니다.
+- 기존 TTW 폴더를 찾지 못하더라도 새 TTW 폴더를 만들지 마세요. 다른 경로를 살펴보고 있을 가능성이 큽니다.
 
-	![TTW Confirm](https://github.com/user-attachments/assets/69486d67-af7e-4357-afdf-5c2f09204bfd)
+![TTW Confirm](https://github.com/user-attachments/assets/69486d67-af7e-4357-afdf-5c2f09204bfd)
 :::
 
-- Click `Install`.
-- Once the installation is complete and the confirmation screen appears, close the installer.
+- `Install`을 클릭합니다.
+- 설치가 끝나 확인 화면이 나타나면 설치 프로그램을 종료합니다.
 
-	![TTWComplete](https://github.com/user-attachments/assets/c99bd84b-0b28-4d45-a631-8b302cba49fb)
+![TTWComplete](https://github.com/user-attachments/assets/c99bd84b-0b28-4d45-a631-8b302cba49fb)
 
-- Manual Download [YUPTTW](https://mod.pub/ttw/133/files) and extract the archive contents into `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - YUPTTW Update`
+- [YUPTTW](https://mod.pub/ttw/133/files)를 **수동 다운로드**하고 압축 내용을 `C:\Modding\Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - YUPTTW Update`에 풉니다.
 
-:::tip Double Check
-Navigate to `C:\Modding\Nuclear Sunset\mods`, right-click the `[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)` folder, select `Properties`, and verify that the folder size is exactly 17GB.
+:::tip 다시 확인하세요
+`C:\Modding\Nuclear Sunset\mods`로 이동하여 `[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)` 폴더를 마우스 오른쪽 버튼으로 클릭하고 `Properties`(속성)를 선택합니다. 폴더의 크기가 정확히 **17GB**인지 확인합니다.
 
-If not, delete the `[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)` and `[NoDelete] Stock New Vegas` folders, then repeat the steps starting from [Creating Clean Installs and Backups](https://nuclearsunset.com/docs/main/setup#-creating-clean-installs-and-backups-).
+크기가 다르면 `[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)` 및 `[NoDelete] Stock New Vegas` 폴더를 삭제하고 [깨끗한 게임 설치 및 백업](https://nuclearsunset.com/docs/main/setup#-creating-clean-installs-and-backups-) 단계부터 다시 진행합니다.
 :::
 
 :::warning
-The TTW Installer **MUST** run on the copy of Fallout: New Vegas inside the `[NoDelete] Stock New Vegas` folder. A prior TTW installation **CANNOT** be moved into the Nuclear Sunset TTW mod folder. The TTW installation process performs BSA decompression, binary patching, and sound file extension alterations, which are critical for a functional installation.
+TTW 설치 프로그램은 **반드시** `[NoDelete] Stock New Vegas` 폴더에 들어 있는 Fallout: New Vegas 복사본을 대상으로 실행해야 합니다. 기존에 설치해 둔 TTW를 Nuclear Sunset의 TTW 모드 폴더로 옮기는 방식은 **사용할 수 없습니다.** TTW 설치 과정에서 정상 동작에 필요한 BSA 압축 해제, 바이너리 패치, 사운드 파일 확장자 변경이 수행되기 때문입니다.
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Running 4GB Patcher](https://github.com/user-attachments/assets/940d8473-617e-4d26-8c12-8ec3b4814f77) </p>
-- Navigate to `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas` and run `Patcher - GOG & Steam.exe` or `Patcher - Epic.exe` depending on your game version.
-- A CMD prompt popup will appear, confirming `FalloutNV.exe patched!` or `Press any key to continue...` depending on your game version. `FalloutNV_backup.exe` will also appear in the `[NoDelete] Stock New Vegas` folder.
+- `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`로 이동하여 사용 중인 게임 버전에 따라 `Patcher - GOG & Steam.exe` 또는 `Patcher - Epic.exe`를 실행합니다.
+- CMD 창이 나타나며 버전에 따라 `FalloutNV.exe patched!` 또는 `Press any key to continue...`라는 메시지가 표시됩니다. `[NoDelete] Stock New Vegas` 폴더에는 `FalloutNV_backup.exe`도 생성됩니다.
 
 :::danger
-Failure to run the 4GB Patch will result in a pink screen or crash when launching the game.
+4GB 패치를 실행하지 않으면 게임을 시작할 때 화면이 분홍색으로 변하거나 게임이 종료됩니다.
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Disabling Base Address Randomization](https://github.com/user-attachments/assets/1231e641-2ddb-4a40-b814-7b3d470559fe) </p>
-:::tip Why?
-This step can prevent unforeseen crashes.
+:::tip 이 작업을 하는 이유
+예기치 못한 충돌을 방지하는 데 도움이 될 수 있습니다.
 :::
 
-- Open `Windows Security` from the `Start Menu`.
-- Open `App & Browser Control` from the left sidebar.
-- Open `Exploit Protection Settings` under `Exploit Protection`.
-- Set `Force Randomization for Images (Mandatory ASLR)` to `Use Default (Off)`.
+- 시작 메뉴에서 `Windows Security`(Windows 보안)를 엽니다.
+- 왼쪽 메뉴의 `App & Browser Control`(앱 및 브라우저 컨트롤)을 엽니다.
+- `Exploit Protection`(Exploit Protection) 아래의 `Exploit Protection Settings`(설정)를 엽니다.
+- `Force Randomization for Images (Mandatory ASLR)`(이미지 강제 임의 지정)를 `Use Default (Off)`(기본값 사용 — 끔)으로 지정합니다.
 
-  ![Base Address](https://github.com/user-attachments/assets/3a1fcb3d-8bee-4aa6-a394-ece70234160a)
+![Base Address](https://github.com/user-attachments/assets/3a1fcb3d-8bee-4aa6-a394-ece70234160a)
+
+:::caution 한국어판 보안 참고
+Mandatory ASLR은 보안 완화 기능입니다. 이를 변경하면 시스템 보안에 영향을 줄 수 있습니다. 이 단계는 원본 지침을 충실히 옮긴 것이며, 조직의 보안 정책과 설정 적용 범위를 확인한 뒤 진행하세요.
+:::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Disabling DXVK Cache Storage](https://github.com/user-attachments/assets/2c315792-eea9-4ac5-b483-1ea8a504fa47) </p>
-:::tip Why?
-Disabling DXVK Cache Storage prevents memory-related crashes by halting the creation of the DXVK cache.
+:::tip 이 작업을 하는 이유
+DXVK 캐시 파일 생성을 중단하면 메모리 관련 충돌을 방지할 수 있습니다.
 :::
 
-- Press the `Windows` button.
-- Search for `Env`, then select `Edit the system environmental variables`.
-- In the dialog box, click `Environmental Variables`.
-- Under `User variables for USER NAME`, click `New`.
-- Enter `DXVK_STATE_CACHE` in the `Variable name` field.
-- Enter `disable` in the `Variable value` field.
-- Click `OK` and exit the `Environmental Variables` window.
+- `Windows` 키를 누릅니다.
+- `Env`를 검색하고 `Edit the system environmental variables`(시스템 환경 변수 편집)를 선택합니다.
+- 대화 상자에서 `Environmental Variables`(환경 변수)를 클릭합니다.
+- `User variables for USER NAME`(사용자 변수) 아래에서 `New`(새로 만들기)를 클릭합니다.
+- `Variable name`(변수 이름)에 `DXVK_STATE_CACHE`를 입력합니다.
+- `Variable value`(변수 값)에 `disable`을 입력합니다.
+- `OK`를 누르고 환경 변수 창을 닫습니다.
 
-  ![Cache](https://github.com/user-attachments/assets/6bb4cd54-1c6f-4e91-b3ff-006cd95576f7)
+![Cache](https://github.com/user-attachments/assets/6bb4cd54-1c6f-4e91-b3ff-006cd95576f7)
 
-- Delete any existing DXVK Cache:
-  - **Steam Users**:
-    - Navigate to `Steam > steamapps > shadercache > 2490` and delete `DXVK_STATE_CACHE` if it exists.
-  - **GOG Users**:
-    - Navigate to `Nuclear Sunset > [NoDelete] Stock New Vegas > FalloutNV.dxvk-cache` and delete `DXVK_STATE_CACHE` if it exists.
+- 기존 DXVK 캐시가 있다면 삭제합니다.
+  - **Steam 사용자**
+    - `Steam > steamapps > shadercache > 2490`로 이동하여 `DXVK_STATE_CACHE`가 존재하면 삭제합니다.
+  - **GOG 사용자**
+    - `Nuclear Sunset > [NoDelete] Stock New Vegas > FalloutNV.dxvk-cache`로 이동하여 `DXVK_STATE_CACHE`가 존재하면 삭제합니다.
 
-- Restart your computer for changes to take effect.
+- 변경 사항이 적용되도록 컴퓨터를 다시 시작합니다.
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Installing RivaTuner Statistics Server (RTSS)](https://github.com/user-attachments/assets/587122a3-6b03-4fe7-b342-6e844df0161e) </p>
-:::tip Why?
-FPS limiters make the game smoother by reducing rapid FPS fluctuations and preventing timescale desync bugs.
+:::tip 이 작업을 하는 이유
+FPS 제한 프로그램은 프레임 속도가 급격하게 변하는 현상을 줄여 게임을 부드럽게 하고, 시간 동기화가 어긋나는 오류를 방지합니다.
 :::
 
-- Download and install [RTSS](https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download).
-- Open the `System Tray` and click the `RTSS icon`.
+- [RTSS](https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download)를 다운로드하여 설치합니다.
+- `System Tray`(시스템 트레이)를 열고 `RTSS` 아이콘을 클릭합니다.
 
 ![RTSS Icon](https://github.com/user-attachments/assets/f6542135-e257-4053-b6c7-b7c171024a7c)
 
-- Press the green `Add` button and select `FalloutNV.exe` from `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`. Click `OK`.
+- 녹색 `Add` 버튼을 누르고 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`에 있는 `FalloutNV.exe`를 선택한 다음 `OK`를 클릭합니다.
 
 ![RTSS FNV](https://github.com/user-attachments/assets/306eecdd-482b-4011-a81b-51f0a95a8b3c)
 
-- Select `FalloutNV.exe`.
-- Set `Application Detection Level` to `Low`.
-- Set `Framerate Limit` to `59.95`.
+- `FalloutNV.exe`를 선택합니다.
+- `Application Detection Level`은 `Low`로 설정합니다.
+- `Framerate Limit`은 `59.95`로 설정합니다.
 
 ![RTSS Frame](https://github.com/user-attachments/assets/ab24c6ef-f166-4518-b2da-802d89d91c0a)
 
-:::warning 
-Exceeding this value, even on powerful machines, can result in significantly increased stuttering. Exceeding 120 can result in timesync abnormalities.
+:::warning
+강력한 컴퓨터라도 이 값을 초과하면 화면 끊김이 크게 늘어날 수 있습니다. 특히 120을 초과하면 시간 동기화에 이상이 생길 수 있습니다.
 :::
 
-- Open the settings using the `Setup` button.
-- Enable `Passive Waiting` and set `Framerate Limiter` to `Front Edge Sync`.
-- Click `OK`, then **MINIMIZE** (not close) RTSS back to the System Tray.
+- `Setup` 버튼으로 설정을 엽니다.
+- `Passive Waiting`을 활성화하고 `Framerate Limiter`를 `Front Edge Sync`로 설정합니다.
+- `OK`를 클릭한 뒤 RTSS를 **종료하지 말고 최소화**하여 시스템 트레이로 돌려놓습니다.
 
 ![RTSS Setup](https://github.com/user-attachments/assets/eb43544d-2143-446d-a86e-777da81d27f0)
-
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Nvidia Users - Applying Nvidia Profile](https://github.com/user-attachments/assets/cfc3598f-9681-4a44-a96d-2246d0168b34) </p>
-:::tip Why?
-Enabling Flip Model (DXVK with DXGI) reduces latency and supports HDR and VRR.
+:::tip 이 작업을 하는 이유
+Flip Model(DXGI와 함께 사용하는 DXVK)을 활성화하면 지연 시간이 줄어들고 HDR 및 VRR을 지원할 수 있습니다.
 :::
 
-- Navigate to `Nuclear Sunset > xNVIDIA Utilities`.
-- Run `nvidiaProfileInspector.exe`, click `Import user defined profiles`, then select `Import Profiles`.
+- `Nuclear Sunset > xNVIDIA Utilities`로 이동합니다.
+- `nvidiaProfileInspector.exe`를 실행하고 `Import user defined profiles`를 클릭한 다음 `Import Profiles`를 선택합니다.
 
-  ![Import Nvidia Profile](https://github.com/user-attachments/assets/976cfd96-b6ff-4c95-ac87-2b888c2dbaa2)
+![Import Nvidia Profile](https://github.com/user-attachments/assets/976cfd96-b6ff-4c95-ac87-2b888c2dbaa2)
 
-- In `Nuclear Sunset > xNVIDIA Utilities`, select `[#] [INF] - FNV-NvidiaProfile.nip`, then click `Open`.
+- `Nuclear Sunset > xNVIDIA Utilities`에서 `[#] [INF] - FNV-NvidiaProfile.nip` 파일을 선택하고 `Open`을 클릭합니다.
 
-  ![NVIDIA Profile Select](https://github.com/user-attachments/assets/f516b1b3-d332-4b16-82d4-61360aace48e)
+![NVIDIA Profile Select](https://github.com/user-attachments/assets/f516b1b3-d332-4b16-82d4-61360aace48e)
 
-- Click `OK` on the `Profile Successfully Imported!` prompt.
+- `Profile Successfully Imported!` 메시지가 나타나면 `OK`를 클릭합니다.
 
-  ![Nvidia Successfully Imported](https://github.com/user-attachments/assets/178cdbc0-cdf1-499c-bd7d-77aecc973e41)
+![Nvidia Successfully Imported](https://github.com/user-attachments/assets/178cdbc0-cdf1-499c-bd7d-77aecc973e41)
 
-- Click `Apply Changes`, then close the program.
+- `Apply Changes`를 클릭한 뒤 프로그램을 닫습니다.
 
-  ![Apply Nvidia Profile](https://github.com/user-attachments/assets/3cf964e6-fb5d-4407-a0dc-16d0f45b90b7)
+![Apply Nvidia Profile](https://github.com/user-attachments/assets/3cf964e6-fb5d-4407-a0dc-16d0f45b90b7)
 
-:::warning Driver Updates
-Repeat this process after every Nvidia driver update.
+:::warning 드라이버 업데이트
+Nvidia 드라이버를 업데이트할 때마다 이 작업을 다시 해야 합니다.
 :::
 
-- Disable the `NVIDIA overlay` in the NVIDIA app settings, as it can reduce performance.
+- NVIDIA 앱의 설정에서 `NVIDIA overlay`를 비활성화합니다. 오버레이는 성능을 낮출 수 있습니다.
 
-  ![NVIDIA Overlay](https://github.com/user-attachments/assets/284d36b6-6f22-4346-b93f-7e1b2edce48b)
+![NVIDIA Overlay](https://github.com/user-attachments/assets/284d36b6-6f22-4346-b93f-7e1b2edce48b)
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![AMD Users - Disabling Ultra-Low Power State (ULPS)](https://github.com/user-attachments/assets/5c4bb051-58fe-465b-865d-9c3e63456f6e) </p>
-:::tip Why?
-The Ultra-Low Power State (ULPS) setting is enabled by default on AMD GPUs and has been associated with significant performance impact.
+:::tip 이 작업을 하는 이유
+AMD GPU에서는 Ultra-Low Power State(ULPS)가 기본적으로 활성화되어 있으며, 이 설정은 성능에 상당한 영향을 미칠 수 있습니다.
 :::
 
-- Download [MSI Afterburner](https://download.msi.com/uti_exe/vga/MSIAfterburnerSetup.zip?__token__=exp=1749546321~acl=/*~hmac=23e15a4588ad2bbcf279cd596b33c6b1dc5a2d193ff9a50a4b2ad66d00a7ad15) and run `MSIAfterburnerInstaller465.exe`.
-- Disable `Norton 360 for Gamer`, press `Install`, then unselect `RivaTuner Statistics Server` when prompted.
+- [MSI Afterburner](https://download.msi.com/uti_exe/vga/MSIAfterburnerSetup.zip?__token__=exp=1749546321~acl=/*~hmac=23e15a4588ad2bbcf279cd596b33c6b1dc5a2d193ff9a50a4b2ad66d00a7ad15)를 다운로드하고 `MSIAfterburnerInstaller465.exe`를 실행합니다.
+- `Norton 360 for Gamer`를 선택 해제하고 `Install`을 누른 뒤 설치 과정에서 `RivaTuner Statistics Server`의 선택을 해제합니다.
 
-	![MSIAfterBurner Install](https://github.com/user-attachments/assets/76b2246c-3cef-4a72-abf3-df000e270814)
+![MSIAfterBurner Install](https://github.com/user-attachments/assets/76b2246c-3cef-4a72-abf3-df000e270814)
 
-	![RTSS No](https://github.com/user-attachments/assets/06e72450-36db-4bfc-aefd-e69f071ed8fa)
+![RTSS No](https://github.com/user-attachments/assets/06e72450-36db-4bfc-aefd-e69f071ed8fa)
 
-- Open the `Settings` cogwheel, enabled `Disable ULPS`, click `Apply`, then `ok`.
+- `Settings` 톱니바퀴 버튼을 열고 `Disable ULPS`를 활성화한 뒤 `Apply`, `OK` 순서로 클릭합니다.
 
-	![MSI Afterburner 1](https://github.com/user-attachments/assets/8b7fa6e8-be93-4807-8df1-c3eb400076a7)
-	![MSI Afterburner 2](https://github.com/user-attachments/assets/cb6278f0-94b4-4d9a-8ae6-6d43bb28b23d)
+![MSI Afterburner 1](https://github.com/user-attachments/assets/8b7fa6e8-be93-4807-8df1-c3eb400076a7)
 
-- Restart your computer for the changes to take effect.
+![MSI Afterburner 2](https://github.com/user-attachments/assets/cb6278f0-94b4-4d9a-8ae6-6d43bb28b23d)
+
+- 설정이 적용되도록 컴퓨터를 다시 시작합니다.
+
+:::caution 한국어판 참고
+원본 MSI Afterburner 주소에는 만료될 수 있는 인증 토큰이 포함되어 있습니다. 다운로드가 실패한다면 제조사 공식 배포 페이지에서 최신 설치 파일을 확인하세요. 실행 파일 이름도 버전에 따라 달라질 수 있습니다.
+:::
 
 <br></br>
 <br></br>
