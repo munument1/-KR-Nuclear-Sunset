@@ -20,3 +20,19 @@ Run `py -3 tools/audit_local_dictionaries.py` from the `patcher/` folder. Result
 
 ## Distribution constraints
 These are local user translation sources. No original ESP/ESM/BSA or unverified third-party bundled resources have been committed to the GitHub branch. Do not set `translation_ready=true` or release until TTW plugin readback, translation accuracy, master order, and permission checks are complete.
+
+## Confirmed alternate source: FO3 KR.esm (The Pitt)
+
+User-provided/local translated plugin: `D:\Codex_Trans\비바 뉴 베가스\뉴클리어 선셋\ttw\FO3 KR.esm`.
+
+Compared read-only against the currently installed Nuclear Sunset TTW source:
+`C:\Modlists\NuclearSunset\mods\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)\ThePitt.esm`.
+
+- `FO3 KR.esm` includes `ThePitt.esm` in its TES4 master list.
+- The original ThePitt.esm has 32,394 self-owned records (including records not necessarily containing translatable text).
+- `FO3 KR.esm` has **3,344 ThePitt-owned overrides**, all 3,344 matched the original by FormID local ID and record signature.
+- In the conservative binary field sample (`FULL`, `DESC`, `NAM1`), 2,993 text subfield pairs were comparable; 2,787 differed and contained Hangul. Repeated field tags were matched by tag and occurrence index.
+- This confirms usable Korean The Pitt translation **exists in FO3 KR.esm**, even though a standalone `thepitt_en_ko.sst` is missing.
+- It does **not** yet confirm complete dialogue/quest coverage, nor compatibility of every translation with the current TTW version. Do not copy/ship the source plugin; extract translation pairs from matching fields into the independent SST catalog only after native verification.
+
+Reproduce: `py -3 tools/audit_fo3_kr_pitt.py --report .local/pitt-from-fo3-kr-audit.json`. The report stays local and is not committed.
