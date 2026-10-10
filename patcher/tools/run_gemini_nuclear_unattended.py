@@ -14,6 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 APP=Path(r"D:\translation\json-ai-translator")
 sys.path.insert(0,str(APP))
 from app import OpenAICompatibleTranslator
+from translation_field_policy import skip_reason
 BASE=Path(r"D:\Codex_Trans\비바 뉴 베가스\뉴클리어 선셋\미번역_번역작업_20261010\11_Gemini_JSON_번역대기")
 MANIFEST=BASE/"00_manifest.json"
 PROMPT=BASE/"00_NuclearSunset_user_prompt.txt"
@@ -80,10 +81,11 @@ def quota_wait(label,ledger):
         ledger[label][today]=ledger[label].get(today,0)+1
         atomic(RUN/"quota_attempts.json",ledger)
     time.sleep(COOLDOWN_SECS)
-def make_prompt(prompt,job):
+def make_prompt(prompt,job,keys):
     meta=load(BASE/job["index_file"])["entries"]
     lines=[]
-    for i,item in enumerate(meta.values(),1):
+    for i,key in enumerate(keys,1):
+        item=meta[key]
         lines.append(f"{i}: {item['signature']}:{item['field']} (original master: {item['origin_master']})")
     return prompt+"\n\n## Input batch context\n"+f"Plugin: {job['plugin']}\n"+"Item types in input order:\n"+"\n".join(lines)
 def translate_one(job,secret,label,ledger,prompt):
@@ -98,13 +100,24 @@ def translate_one(job,secret,label,ledger,prompt):
         return "invalid_saved_output",0
     original=load(src)
     assert len(original)==job["rows"] and all(isinstance(v,str) for v in original.values())
+    meta=load(BASE/job["index_file"])["entries"]
+    if list(meta)!=list(original):raise RuntimeError("Input/index key mismatch")
+    required_keys=[
+        key for key,value in original.items()
+        if not skip_reason(meta[key]["signature"],meta[key]["field"],value)
+    ]
+    # Restore the full original JSON shape after API translation, leaving
+    # technical/internal records unmodified even in mixed batches.
+    if not required_keys:
+        atomic(dest,original)
+        return "saved",0
     translator=OpenAICompatibleTranslator(
         api_key=secret,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         model=MODEL,
-        prompt_text=make_prompt(prompt,job),
+        prompt_text=make_prompt(prompt,job,required_keys),
         target_language="Korean")
-    vals=list(original.values())
+    vals=[original[key] for key in required_keys]
     # Split large batches only on parse/output failure. Every attempt counts in quota.
     calls=0
     def invoke(chunk,depth=0):
@@ -130,7 +143,9 @@ def translate_one(job,secret,label,ledger,prompt):
         return invoke(chunk[:half],depth+1)+invoke(chunk[half:],depth+1)
     result=invoke(vals)
     if len(result)!=len(original):raise RuntimeError("INCORRECT_BATCH_LENGTH")
-    document=dict(zip(original,result))
+    document=dict(original)
+    for key,translated in zip(required_keys,result):
+        document[key]=translated
     atomic(dest,document)
     return "saved",calls
 def lane_worker(key_number,secret,jobs,prompt,ledger,stop_on_limit=False):

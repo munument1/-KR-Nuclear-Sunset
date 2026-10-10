@@ -7,6 +7,7 @@ Save translations under 11_Gemini_JSON_번역대기/results/project_N/{input_ste
 from collections import Counter,defaultdict
 from pathlib import Path
 import csv,hashlib,json,re
+from translation_field_policy import skip_reason
 ROOT=Path(__file__).resolve().parents[1]
 W=Path(r"D:\Codex_Trans\비바 뉴 베가스\뉴클리어 선셋\미번역_번역작업_20261010")
 BASE=W/"11_Gemini_JSON_번역대기"
@@ -58,14 +59,20 @@ def validate_batch(job):
             problems_for_row.append("NO_HANGUL_CHECK")
         if len(source)>100 and len(result)<max(5, len(source)//8):
             problems_for_row.append("SUSPICIOUSLY_SHORT")
-        status="REVIEW_REQUIRED" if problems_for_row else "READY_FOR_HUMAN_QA"
+        reason=skip_reason(m["signature"],m["field"],source)
+        if reason:
+            # Explicitly prevent accepting AI translations of engine metadata.
+            status="SKIP_NON_DISPLAY"
+            problems_for_row=[]
+        else:
+            status="REVIEW_REQUIRED" if problems_for_row else "READY_FOR_HUMAN_QA"
         if problems_for_row:problems.append({"key":key,"checks":problems_for_row})
         rows.append({"project_lane":job["project_lane"],"source_file":job["source_file"],
                      "key":key,"plugin":m["plugin"],"formid":m["formid"],
                      "origin_master":m["origin_master"],"signature":m["signature"],
                      "field":m["field"],"occurrence":m["occurrence"],
-                     "english_source":source,"korean_candidate":result,
-                     "qa_status":status,"qa_notes":";".join(problems_for_row),
+                     "english_source":source,"korean_candidate":"" if reason else result,
+                     "qa_status":status,"qa_notes":reason if reason else ";".join(problems_for_row),
                      "reviewed_korean_translation":""})
     return "verified_structure",rows,problems
 def main():
@@ -77,6 +84,8 @@ def main():
         state,rows,issues=validate_batch(job)
         stats[state]+=1
         stats["output_rows"]+=len(rows)
+        stats["skipped_non_display_rows"]+=sum(r["qa_status"]=="SKIP_NON_DISPLAY" for r in rows)
+        stats["ready_human_review_rows"]+=sum(r["qa_status"]=="READY_FOR_HUMAN_QA" for r in rows)
         stats["flagged_rows"]+=len(issues)
         reports.append({"file":job["source_file"],"state":state,
                         "rows":len(rows),"review_flag_count":len(issues),
