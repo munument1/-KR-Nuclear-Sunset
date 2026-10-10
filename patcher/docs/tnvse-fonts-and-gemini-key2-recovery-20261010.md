@@ -54,3 +54,7 @@ API 키 자체는 출력·커밋·복사하지 않았다. 번역이 완결될 �
 변경 파일:
 - `patcher/tools/run_gemini_nuclear_unattended.py`
 - 본 문서
+
+## 2026-10-10 추가 업데이트: VNV 한국어 수정 DLL 포함
+
+이 문서의 초기 'tnvse.dll 미포함' 설명은 **옛 상태**다. Nuclear Sunset 기본 tNVSE에서는 상호작용 UI 한글이 깨진다는 실게임 피드백에 따라, VNV 한국어 수정 DLL(3,375,616바이트, SHA-256 `AD2A81F14406...`)과 GPL 라이선스·정확한 대응 소스 ZIP을 독립 MO2 한국어 폰트 모드에 추가했다. 자세한 SHA/검증/우선순위는 `docs/vnv-korean-tnvse-dll-integration-20261010.md`를 참고. 기본 tNVSE 원본은 여전히 보존한다.
