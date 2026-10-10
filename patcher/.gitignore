@@ -14,3 +14,4 @@ Output*/
 *.exe
 *.dll
 .local/
+xelib_log.txt
