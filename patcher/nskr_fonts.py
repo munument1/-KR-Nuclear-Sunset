@@ -165,7 +165,7 @@ def build_fonts(installation, catalog_dir, spec, stage, seen):
             + (f'MO2를 새로 고침하고 "{provider}" 모드를 체크한 뒤 기존 tNVSE 설정 모드보다 아래에 배치하세요.\n' if new_mod else '')
             + ('이 모드에는 VNV 한국어 수정 tNVSE DLL이 포함되어 있습니다. 기존에 별도 설치한 tNVSE보다 높은 MO2 우선순위로 활성화하세요.\n'
                if dll_present else 'tNVSE 71을 별도로 설치한 뒤 활성화하세요. 이 묶음에는 tNVSE DLL이 없습니다.\n')
-            '처음 실행할 때 폰트 준비가 완료될 때까지 기다리세요.\n'
+            + '처음 실행할 때 폰트 준비가 완료될 때까지 기다리세요.\n'
             '대화/HUD/Pip-Boy/터미널/MCM/Stewie 메뉴 표시 검증은 아직 수행하지 않았습니다.\n')
     write(prefix + 'NVSE/plugins/fonts/VNV_KR_FONT_README.txt', note.encode('utf-8-sig'), 'font_instructions')
     tnvse_installed = any(path.is_file() for path in
