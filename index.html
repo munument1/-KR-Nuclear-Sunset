@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0f15">
+  <meta name="description" content="Nuclear Sunset 비공식 한국어 안내. TTW 및 Wabbajack 기반 모드 목록의 설치 준비, 요구 사양, 업데이트, FAQ와 공식 문서 바로가기.">
+  <meta property="og:title" content="Nuclear Sunset | 비공식 한국어 안내">
+  <meta property="og:description" content="두 황무지의 끝에서. Nuclear Sunset 한국어 커뮤니티 안내.">
+  <meta property="og:type" content="website">
+  <title>Nuclear Sunset | 비공식 한국어 안내</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<div class="mobile-backdrop" id="mobile-backdrop"></div>
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="사이트 메뉴">
+    <a class="brand" href="#home"><span class="brand-mark" aria-hidden="true"></span><span><strong>NUCLEAR SUNSET</strong><small>KOREAN COMMUNITY GUIDE</small></span></a>
+    <div class="search-wrap"><input id="site-search" type="search" placeholder="메뉴 검색 · Ctrl+K" aria-label="메뉴 검색"></div>
+    <nav id="side-navigation" aria-label="주요 메뉴">
+      <div class="nav-caption">시작하기</div>
+      <a class="nav-link active" href="#home"><span class="nav-num">01</span>홈</a>
+      <a class="nav-link" href="#intro"><span class="nav-num">02</span>뉴클리어 선셋 소개</a>
+      <a class="nav-link" href="#features"><span class="nav-num">03</span>주요 특징</a>
+      <a class="nav-link" href="#requirements"><span class="nav-num">04</span>설치 요구 사항</a>
+      <a class="nav-link" href="#specs"><span class="nav-num">05</span>최소 PC 사양</a>
+      <a class="nav-link" href="#setup"><span class="nav-num">06</span>설치 안내</a>
+      <div class="nav-caption">이용 안내</div>
+      <a class="nav-link" href="#linux"><span class="nav-num">07</span>리눅스 설치</a>
+      <a class="nav-link" href="#controller"><span class="nav-num">08</span>컨트롤러</a>
+      <a class="nav-link" href="#updating"><span class="nav-num">09</span>업데이트</a>
+      <a class="nav-link" href="#faq"><span class="nav-num">10</span>자주 묻는 질문</a>
+      <div class="nav-caption">더 알아보기</div>
+      <a class="nav-link" href="#resources"><span class="nav-num">11</span>공식 자료 및 원문</a>
+      <a class="nav-link" href="#gallery"><span class="nav-num">12</span>갤러리</a>
+      <a class="nav-link" href="#credits"><span class="nav-num">13</span>제작 및 출처</a>
+    </nav>
+    <div class="sidebar-foot">이 웹사이트는 <strong>비공식 한국어 안내 사이트</strong>입니다. 최신 설치 절차는 원본에서 확인하세요.<p><a href="https://nuclearsunset.com/" target="_blank" rel="noopener noreferrer">공식 사이트 ↗</a> · <a href="https://github.com/munument1/-KR-Nuclear-Sunset" target="_blank" rel="noopener noreferrer">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="content-col">
+    <header class="topbar">
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false">☰ 메뉴</button>
+      <small>FALLOUT NEW VEGAS · FALLOUT 3 · TTW</small>
+      <div class="topbar-links">
+        <a href="#setup">설치 흐름</a>
+        <a href="https://nuclearsunset.com/docs/main/setup/" target="_blank" rel="noopener noreferrer">공식 설치 가이드 ↗</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="home" class="doc-section">
+        <div class="crumb">NUCLEAR SUNSET <span>›</span> <b>한국어 안내</b></div>
+        <div class="hero">
+          <div class="hero-copy">
+            <span class="hero-tag">● 비공식 한국어 커뮤니티 안내</span>
+            <span class="eyebrow">Fallout · Tale of Two Wastelands · Wabbajack</span>
+            <h1>두 황무지의 끝에서,<em>Nuclear Sunset</em></h1>
+            <p class="lead">폴아웃 3와 뉴 베가스를 하나의 여정으로. 설치 전에 꼭 알아야 할 요구 사항과 안내를 한국어로 정리했습니다.</p>
+            <div class="cta-row">
+              <a class="btn primary" href="#setup">설치 안내 확인 →</a>
+              <a class="btn" href="https://nuclearsunset.com/docs/main/setup/" target="_blank" rel="noopener noreferrer">공식 설치 지침 ↗</a>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong>1,500+</strong><span>원본 소개 기준 모드 수</span></div>
+          <div class="stat"><strong>FNV + FO3</strong><span>Tale of Two Wastelands 기반</span></div>
+          <div class="stat"><strong>Wabbajack</strong><span>모드 목록 설치 방식</span></div>
+        </div>
+        <aside class="callout"><strong>이 한국어 사이트의 범위</strong><p>원본 문서를 대신하는 완전한 번역본이 아니라, 핵심 사항을 독립적으로 정리하고 공식 자료로 연결하는 비공식 안내 사이트입니다. 실제 설치·문제 해결에는 원본의 최신 지침과 경고를 반드시 확인하세요.</p></aside>
+        <section class="section"><div class="section-head"><h2>어디서 시작할까요?</h2><small>처음 설치하는 사용자를 위한 바로가기</small></div>
+          <div class="card-grid">
+            <a class="card card-link" href="#requirements"><span class="kicker">01 · 준비</span><h3>설치 요구 사항</h3><p>게임과 DLC, 운영체제, 계정 및 지원 플랫폼을 먼저 확인합니다.</p><div class="arrow">↗</div></a>
+            <a class="card card-link" href="#specs"><span class="kicker">02 · PC</span><h3>최소 사양</h3><p>CPU, 메모리, 그래픽 카드, 저장 공간 기준을 살펴봅니다.</p><div class="arrow">↗</div></a>
+            <a class="card card-link" href="#setup"><span class="kicker">03 · 설치</span><h3>설치 흐름</h3><p>깨끗한 게임 설치부터 Wabbajack, TTW, MO2 실행까지 전체 흐름을 확인합니다.</p><div class="arrow">↗</div></a>
+          </div>
+        </section>
+      </section>
+
+      <section id="intro" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">WELCOME TO THE WASTELAND</span><h1>뉴클리어 선셋 소개</h1><p class="lead">Fallout: New Vegas와 Fallout 3를 통합한 TTW 환경에서 생존과 몰입에 초점을 맞춘 대규모 모드 목록입니다.</p></div>
+        <div class="prose"><p>Nuclear Sunset은 두 작품을 다수의 모드와 조정된 설정으로 재구성한 프로젝트입니다. 그래픽만 바꾸는 목록이 아니라 탐험, 전투, 생존, 인터페이스 및 음향까지 폭넓게 다룹니다.</p>
+          <p>원본은 여러 난이도 경험을 제공한다고 설명합니다. 다만 개별 모드를 임의로 수정하면 설치 목록이 의도한 상태에서 벗어날 수 있습니다.</p>
+          <aside class="callout"><strong>콘텐츠 유의 사항</strong><p>원본 안내는 자해·자살 사고, 성폭력, 강한 점멸 효과와 자극적인 음향 등 일부 이용자에게 불편할 수 있는 콘텐츠를 경고합니다.</p></aside>
+          <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/intro/" target="_blank" rel="noopener noreferrer">공식 소개 ↗</a><a class="btn" href="https://nuclearsunset.com/docs/main/highlights/" target="_blank" rel="noopener noreferrer">주요 모드 소개 ↗</a></div>
+        </div>
+      </section>
+
+      <section id="features" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">MODLIST HIGHLIGHTS</span><h1>주요 특징</h1><p class="lead">원본 프로젝트가 목표로 하는 플레이 경험을 요약했습니다.</p></div>
+        <div class="card-grid">
+          <div class="card"><span class="kicker">WORLD</span><h3>두 황무지의 변화</h3><p>모하비와 수도 황무지의 경관, 장소, 환경 및 조명을 폭넓게 개선합니다.</p></div>
+          <div class="card"><span class="kicker">SURVIVAL</span><h3>전투와 생존</h3><p>전투 난이도, 회복, 장비, NPC 행동과 각종 게임 규칙에 변화를 줍니다.</p></div>
+          <div class="card"><span class="kicker">PRESENTATION</span><h3>그래픽과 사운드</h3><p>텍스처, 시각 효과, 애니메이션, 환경음과 음악을 보강합니다.</p></div>
+          <div class="card"><span class="kicker">UI / UX</span><h3>인터페이스 개선</h3><p>HUD 및 Pip-Boy 기능, 조작 편의와 키 안내를 재구성합니다.</p></div>
+          <div class="card"><span class="kicker">CONTENT</span><h3>추가 콘텐츠</h3><p>새로운 지역, 장비, 생물, 적, 특전과 탐험할 거리를 포함합니다.</p></div>
+          <div class="card"><span class="kicker">OPTIMIZATION</span><h3>맞춤 최적화</h3><p>대규모 모드 구성을 안정적으로 운용하기 위한 조정이 포함됩니다.</p></div>
+        </div>
+        <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/features/" target="_blank" rel="noopener noreferrer">공식 기능 설명 ↗</a></div>
+      </section>
+
+      <section id="requirements" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">BEFORE YOU BEGIN</span><h1>설치 요구 사항</h1><p class="lead">다운로드를 시작하기 전에 게임 버전과 필수 준비물을 확인하세요.</p></div>
+        <div class="prose">
+          <h2>필수 게임과 DLC</h2>
+          <ul><li><strong>Fallout: New Vegas</strong> 및 모든 DLC</li><li><strong>Fallout 3</strong> 및 모든 DLC</li><li>두 게임 모두 합법적으로 구매한 정품이 필요합니다.</li></ul>
+          <h2>지원 플랫폼</h2>
+          <div class="table-wrap"><table><thead><tr><th>항목</th><th>공식 안내 기준</th></tr></thead><tbody>
+            <tr><td>Windows</td><td>정품 인증된 64비트 Windows 10 이상</td></tr>
+            <tr><td>New Vegas</td><td>Steam, Steam PCR, Steam 독일어판, GOG, Epic Games 지원. 독일어판은 별도 실행 파일 절차를 확인해야 합니다.</td></tr>
+            <tr><td>미지원</td><td>Fallout: New Vegas의 Windows Store / Game Pass 버전</td></tr>
+            <tr><td>Fallout 3</td><td>원본 요구 사항에 따르면 모든 버전 지원</td></tr>
+            <tr><td>컨트롤러</td><td>공식 컨트롤러 지원은 Steam 사용자에게 한정</td></tr>
+          </tbody></table></div>
+          <h2>도구와 계정</h2>
+          <ul><li>최신 그래픽 드라이버, <code>.NET Framework 4.8</code>, Visual C++ 재배포 패키지</li>
+            <li>압축 해제 도구(예: 7-Zip), 텍스트 편집기(예: Notepad++)</li>
+            <li><strong>Nexus Mods</strong>, <strong>ModPub</strong>, <strong>Discord</strong> 계정</li>
+            <li>Nexus Premium은 필수는 아니지만, 없다면 많은 파일을 수동으로 다운로드해야 합니다.</li>
+          </ul>
+          <aside class="callout info"><strong>변경될 수 있는 정보</strong><p>지원 버전과 모드 수는 업데이트에 따라 달라질 수 있습니다. 항상 최신 공식 요구 사항을 확인하세요.</p></aside>
+          <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/requirements/" target="_blank" rel="noopener noreferrer">공식 요구 사항 ↗</a></div>
+        </div>
+      </section>
+
+      <section id="specs" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">SYSTEM REQUIREMENTS</span><h1>최소 PC 사양</h1><p class="lead">2026년 10월 10일 확인한 원본 사양표를 바탕으로 정리했습니다.</p></div>
+        <div class="table-wrap"><table><thead><tr><th>부품</th><th>최소</th><th>권장</th></tr></thead><tbody>
+          <tr><td>CPU</td><td>Intel i5 2xxx / AMD FX 8xxx 이상</td><td>Intel i5 6xxx / Ryzen 5 이상</td></tr>
+          <tr><td>RAM</td><td>16GB 이상</td><td>듀얼 채널 구성 권장</td></tr>
+          <tr><td>GPU</td><td>GTX 1070 8GB / R9 390 8GB</td><td>8GB VRAM의 RTX / RDNA 계열</td></tr>
+          <tr><td>저장 공간</td><td>SSD 및 최소 200GB 여유 공간</td><td>NVMe SSD</td></tr>
+        </tbody></table></div>
+        <aside class="callout info"><strong>그래픽 옵션</strong><p>시스템 성능에 따라 설정과 프로필을 선택할 수 있지만, 원본 가이드에서는 일부 옵션을 피하라고 안내합니다. 상세 설정은 공식 설치 문서를 따르세요.</p></aside>
+        <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/specs/" target="_blank" rel="noopener noreferrer">공식 PC 사양 ↗</a></div>
+      </section>
+
+      <section id="setup" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">WINDOWS · INSTALLATION OVERVIEW</span><h1>설치 안내</h1><p class="lead">복잡한 설치 순서를 이해하기 위한 개요입니다. 구체적인 조작은 반드시 공식 원문을 함께 보세요.</p></div>
+        <aside class="callout"><strong>필독 — 전체 설치 지침이 아닙니다</strong><p>설치 위치와 순서를 잘못 적용하면 게임 실행에 실패할 수 있습니다. 생략된 예외 조건, 보안 설정, 프로그램별 옵션은 공식 설치 가이드에서 확인하세요. 이 요약만으로 설치를 완료하지 마세요.</p></aside>
+        <div class="step-list">
+          <article class="step"><h3>게임 및 계정 준비</h3><p>Fallout: New Vegas와 Fallout 3, 모든 DLC 및 필수 계정을 준비합니다. 정품 게임 버전과 운영체제가 공식 요구 조건에 맞는지 확인하세요.</p></article>
+          <article class="step"><h3>설치 폴더 생성</h3><p>예시 경로는 <code>C:\Modding\Wabbajack</code>, <code>C:\Modding\Nuclear Sunset</code>, <code>C:\Modding\Nuclear Sunset\downloads</code>입니다. 드라이브 문자는 사용자 환경에 맞게 바꿀 수 있습니다.</p></article>
+          <article class="step"><h3>기존 게임 백업 및 깨끗한 재설치</h3><p>기존 파일을 백업하고 게임을 깨끗하게 설치합니다. 모드가 적용된 기존 설치 폴더를 그대로 재사용하는 방식은 피하세요.</p></article>
+          <article class="step"><h3>기본 INI 파일 생성</h3><p>Fallout: New Vegas와 Fallout 3의 기본 런처를 한 차례씩 실행하여 설정 파일을 생성합니다.</p></article>
+          <article class="step"><h3>Wabbajack 실행</h3><p>전용 폴더에 Wabbajack Launcher를 설치하고 Nexus Mods 계정으로 로그인합니다.</p></article>
+          <article class="step"><h3>Nuclear Sunset 목록 설치</h3><p>Wabbajack에서 <code>Non-featured</code> 목록 표시를 활성화한 뒤 Nuclear Sunset을 찾아 설치합니다. 다운로드와 설치 경로가 맞는지 다시 확인하세요.</p></article>
+          <article class="step"><h3>Stock New Vegas 폴더 구성</h3><p>깨끗한 New Vegas 파일을 Nuclear Sunset 내부의 <code>[NoDelete] Stock New Vegas</code> 폴더로 복사합니다. 다른 모드 구성과 혼합하지 마세요.</p></article>
+          <article class="step"><h3>TTW와 YUPTTW 설치</h3><p>공식 절차에 따라 Tale of Two Wastelands를 설치 목록의 올바른 <code>MODS</code> 경로에 설치한 뒤 YUPTTW를 반영합니다. 특히 TTW 설치 대상 경로를 확인하세요.</p></article>
+          <article class="step"><h3>4GB 패치 및 실행 환경 준비</h3><p>게임 버전에 맞는 4GB Patcher를 사용하고, 공식 문서에서 지정한 그래픽 및 실행 환경 설정을 적용합니다. 운영체제의 보안 설정은 영향을 정확히 이해한 뒤 변경하세요.</p></article>
+          <article class="step"><h3>MO2 설정 및 실행</h3><p><code>ModOrganizer.exe</code>를 열고 그래픽 설정과 적절한 Nuclear Sunset 프로필을 선택한 뒤 MO2의 Nuclear Sunset 실행 항목으로 게임을 시작합니다.</p></article>
+        </div>
+        <section class="section">
+          <h2>자주 확인하는 경로</h2>
+          <div class="table-wrap"><table><thead><tr><th>구분</th><th>예시 경로</th></tr></thead><tbody>
+            <tr><td>모드 목록 설치</td><td><code>C:\Modding\Nuclear Sunset</code></td></tr>
+            <tr><td>다운로드</td><td><code>C:\Modding\Nuclear Sunset\downloads</code></td></tr>
+            <tr><td>깨끗한 NV 파일</td><td><code>C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas</code></td></tr>
+            <tr><td>TTW 모드</td><td><code>Nuclear Sunset\MODS\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)</code></td></tr>
+          </tbody></table></div>
+          <div class="cta-row"><a class="btn primary" href="https://nuclearsunset.com/docs/main/setup/" target="_blank" rel="noopener noreferrer">공식 Windows 설치 가이드 열기 ↗</a><a class="btn" href="https://nuclearsunset.com/docs/main/faq/" target="_blank" rel="noopener noreferrer">공식 문제 해결 ↗</a></div>
+        </section>
+      </section>
+
+      <section id="linux" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">LINUX</span><h1>리눅스 설치</h1><p class="lead">공식 사이트는 Steam 기반 Linux 설치 경로를 별도로 안내합니다.</p></div>
+        <div class="prose"><p>Linux 환경에서는 Wabbajack 대안인 <strong>Jackify</strong>, Proton 관련 설정, TTW 설치 및 4GB 패치를 포함한 별도의 절차를 따라야 합니다.</p>
+          <aside class="callout"><strong>지원 범위 확인</strong><p>현재 참고한 공식 Linux 안내는 Steam 버전을 대상으로 합니다. 배포판 및 설치 방식에 따라 설정이 달라질 수 있으니 원문을 우선하세요.</p></aside>
+          <div class="cta-row"><a class="btn primary" href="https://nuclearsunset.com/docs/main/linux/" target="_blank" rel="noopener noreferrer">공식 Linux 설치 안내 ↗</a></div>
+        </div>
+      </section>
+
+      <section id="controller" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">CONTROLLER SUPPORT</span><h1>컨트롤러</h1><p class="lead">지원되는 게임 배포판과 별도 설정 문서를 확인해야 합니다.</p></div>
+        <div class="prose"><p>원본 요구 사항에서는 기술적 제약으로 <strong>Steam 버전에 한해 컨트롤러를 지원</strong>한다고 안내합니다. GOG·Epic 사용자는 최신 정책을 별도로 확인해야 합니다.</p>
+          <p>컨트롤러 이용자를 위한 수동 설정 지침이 따로 제공되므로 게임 설치 후 필요한 단계를 진행하세요.</p>
+          <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/controller/" target="_blank" rel="noopener noreferrer">공식 컨트롤러 문서 ↗</a></div>
+        </div>
+      </section>
+
+      <section id="updating" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">UPDATES</span><h1>업데이트</h1><p class="lead">변경 이력의 수동 작업 지시를 확인한 뒤 Wabbajack 목록을 갱신하세요.</p></div>
+        <div class="step-list">
+          <article class="step"><h3>변경 이력 확인</h3><p>공식 Changelog에서 해당 버전의 변경 사항과 추가 수동 작업이 있는지 살펴봅니다.</p></article>
+          <article class="step"><h3>Wabbajack 설치기 다시 실행</h3><p>이미 설치한 Nuclear Sunset의 설치 경로를 대상으로 Wabbajack 목록 설치를 다시 진행합니다.</p></article>
+          <article class="step"><h3>설정과 변경 사항 확인</h3><p>개별적으로 수정한 모드 목록 설정은 업데이트 후 원래 상태로 돌아갈 수 있습니다. MO2와 게임 설정을 다시 확인하세요.</p></article>
+        </div>
+        <aside class="callout info"><strong>세이브 호환과 TTW</strong><p>공식 안내는 변경 이력에 예외가 명시되지 않은 일반적인 업데이트의 세이브 호환을 전제로 하며, 목록 갱신만을 위해 TTW를 다시 설치할 필요가 없다고 설명합니다. 버전별 공지가 가장 우선입니다.</p></aside>
+        <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/updating/" target="_blank" rel="noopener noreferrer">공식 업데이트 문서 ↗</a><a class="btn" href="https://nuclearsunset.com/docs/changelog/1.0.2.2/" target="_blank" rel="noopener noreferrer">변경 이력 ↗</a></div>
+      </section>
+
+      <section id="faq" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">HELP & SUPPORT</span><h1>자주 묻는 질문</h1><p class="lead">처음 설치하는 사용자에게 중요한 내용을 모았습니다.</p></div>
+        <div class="prose">
+          <details class="faq"><summary>Fallout 3도 별도로 구매해야 하나요?</summary><p>네. Fallout 3와 Fallout: New Vegas, 두 게임의 모든 DLC가 필요합니다.</p></details>
+          <details class="faq"><summary>Game Pass 버전 뉴 베가스로 설치할 수 있나요?</summary><p>아니요. 원본은 Windows Store 및 Game Pass 배포판의 Fallout: New Vegas를 지원하지 않습니다.</p></details>
+          <details class="faq"><summary>Nexus Mods Premium이 꼭 필요한가요?</summary><p>필수는 아니지만, 없다면 많은 모드 파일을 수동으로 다운로드해야 합니다. 원본은 Premium 이용을 강하게 권장합니다.</p></details>
+          <details class="faq"><summary>기존 뉴 베가스 모드 설치본을 재사용해도 되나요?</summary><p>원본은 깨끗한 게임 설치본과 분리된 Stock New Vegas 폴더를 요구합니다. 기존에 모드가 적용된 파일을 그대로 섞지 마세요.</p></details>
+          <details class="faq"><summary>개인적으로 모드를 추가해도 되나요?</summary><p>목록을 임의로 변경한 설치본은 원본 팀의 공식 지원 대상이 아닙니다. 변경된 목록에 관한 별도의 커뮤니티 채널을 이용하세요.</p></details>
+          <details class="faq"><summary>업데이트 때 TTW를 다시 설치해야 하나요?</summary><p>원본의 일반 업데이트 안내에 따르면 필요하지 않습니다. 다만 새 버전의 Changelog에 추가 지시가 있는지 확인하세요.</p></details>
+          <details class="faq"><summary>설치에 실패하거나 게임이 종료됩니다.</summary><p>공식 FAQ에서 문제 해결 단계를 순서대로 진행한 후 지정된 Nuclear Sunset 지원 채널을 이용하세요.</p></details>
+        </div>
+        <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/docs/main/faq/" target="_blank" rel="noopener noreferrer">공식 FAQ 전체 보기 ↗</a><a class="btn" href="https://nuclearsunset.com/docs/main/support/" target="_blank" rel="noopener noreferrer">공식 지원 정책 ↗</a></div>
+      </section>
+
+      <section id="resources" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">ORIGINAL DOCUMENTS</span><h1>공식 자료 및 원문</h1><p class="lead">영문 원본의 주요 문서를 한곳에서 찾을 수 있습니다.</p></div>
+        <div class="link-list">
+          <a href="https://nuclearsunset.com/docs/main/intro/" target="_blank" rel="noopener noreferrer">소개</a>
+          <a href="https://nuclearsunset.com/docs/main/features/" target="_blank" rel="noopener noreferrer">기능</a>
+          <a href="https://nuclearsunset.com/docs/main/highlights/" target="_blank" rel="noopener noreferrer">주요 모드 소개</a>
+          <a href="https://nuclearsunset.com/docs/main/requirements/" target="_blank" rel="noopener noreferrer">요구 사항</a>
+          <a href="https://nuclearsunset.com/docs/main/specs/" target="_blank" rel="noopener noreferrer">최소 사양</a>
+          <a href="https://nuclearsunset.com/docs/main/setup/" target="_blank" rel="noopener noreferrer">설치 지침</a>
+          <a href="https://nuclearsunset.com/docs/main/linux/" target="_blank" rel="noopener noreferrer">Linux 설치</a>
+          <a href="https://nuclearsunset.com/docs/main/controller/" target="_blank" rel="noopener noreferrer">컨트롤러</a>
+          <a href="https://nuclearsunset.com/docs/main/updating/" target="_blank" rel="noopener noreferrer">업데이트</a>
+          <a href="https://nuclearsunset.com/docs/main/reference/" target="_blank" rel="noopener noreferrer">게임 기능 참고 목록</a>
+          <a href="https://nuclearsunset.com/docs/main/faq/" target="_blank" rel="noopener noreferrer">FAQ</a>
+          <a href="https://nuclearsunset.com/docs/main/support/" target="_blank" rel="noopener noreferrer">지원 및 피드백</a>
+          <a href="https://nuclearsunset.com/docs/main/credits/" target="_blank" rel="noopener noreferrer">제작진</a>
+          <a href="https://nuclearsunset.com/docs/resources/overview/" target="_blank" rel="noopener noreferrer">추가 자료</a>
+          <a href="https://nuclearsunset.com/docs/resources/stars/" target="_blank" rel="noopener noreferrer">STARS 설치</a>
+          <a href="https://nuclearsunset.com/docs/changelog/1.0.2.2/" target="_blank" rel="noopener noreferrer">변경 이력</a>
+        </div>
+      </section>
+
+      <section id="gallery" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">SCREENSHOTS</span><h1>공식 갤러리</h1><p class="lead">원본 사이트에 게시된 스크린샷을 주제별로 감상할 수 있습니다.</p></div>
+        <div class="card-grid">
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/userinterface/" target="_blank" rel="noopener noreferrer"><span class="kicker">UI</span><h3>인터페이스</h3><p>HUD와 메뉴 화면</p><div class="arrow">↗</div></a>
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/mojavewasteland/" target="_blank" rel="noopener noreferrer"><span class="kicker">MOJAVE</span><h3>모하비 황무지</h3><p>뉴 베가스의 풍경</p><div class="arrow">↗</div></a>
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/capitalwasteland/" target="_blank" rel="noopener noreferrer"><span class="kicker">CAPITAL</span><h3>수도 황무지</h3><p>폴아웃 3의 풍경</p><div class="arrow">↗</div></a>
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/characters/" target="_blank" rel="noopener noreferrer"><span class="kicker">CHARACTERS</span><h3>캐릭터</h3><p>NPC와 인물 표현</p><div class="arrow">↗</div></a>
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/armor/" target="_blank" rel="noopener noreferrer"><span class="kicker">EQUIPMENT</span><h3>방어구</h3><p>장비와 의상</p><div class="arrow">↗</div></a>
+          <a class="card card-link" href="https://nuclearsunset.com/docs/gallery/creatures/" target="_blank" rel="noopener noreferrer"><span class="kicker">CREATURES</span><h3>생물</h3><p>황무지의 다양한 생물</p><div class="arrow">↗</div></a>
+        </div>
+        <aside class="callout info"><strong>이미지 안내</strong><p>원본 이미지는 이 한국어 사이트에 재업로드하지 않았습니다. 각 항목은 원본 갤러리로 연결됩니다.</p></aside>
+      </section>
+
+      <section id="credits" class="doc-section section">
+        <div class="page-header"><span class="eyebrow">CREDITS & ATTRIBUTION</span><h1>제작 및 출처</h1><p class="lead">원본 프로젝트와 비공식 한국어 안내 사이트의 범위를 구분합니다.</p></div>
+        <div class="prose"><h2>원본 Nuclear Sunset</h2>
+          <p>원본 모드 목록과 웹사이트는 <strong>Nuclear Sunset Team</strong>의 프로젝트입니다. 제작진 및 기여에 대한 자세한 정보는 <a href="https://nuclearsunset.com/docs/main/credits/" target="_blank" rel="noopener noreferrer">원본 크레딧</a>을 확인하세요.</p>
+          <h2>한국어 안내 사이트</h2>
+          <p>한국어판은 커뮤니티 이용자를 위한 독립적인 요약 및 원문 연결 페이지이며 원본 팀의 공식 번역이나 지원 채널이 아닙니다. 원문 전문, 원본 웹사이트 디자인, 스크린샷을 복제하지 않았습니다.</p>
+          <aside class="callout"><strong>저작권</strong><p>Nuclear Sunset과 관련 이미지·텍스트의 권리는 해당 권리자에게 있습니다. 원본 전체 번역과 이미지 재배포는 적절한 이용 허락을 확인한 뒤 별도로 진행할 수 있습니다.</p></aside>
+          <div class="cta-row"><a class="btn" href="https://nuclearsunset.com/" target="_blank" rel="noopener noreferrer">원본 웹사이트 ↗</a><a class="btn" href="https://github.com/FinalCatalyst/Nuclear-Sunset" target="_blank" rel="noopener noreferrer">원본 GitHub ↗</a><a class="btn" href="https://github.com/munument1/-KR-Nuclear-Sunset" target="_blank" rel="noopener noreferrer">한국어 저장소 ↗</a></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>비공식 한국어 커뮤니티 안내 · Nuclear Sunset Team과 무관한 독립 프로젝트</span>
+      <span>Original: <a href="https://nuclearsunset.com/" target="_blank" rel="noopener noreferrer">Nuclear Sunset</a> · <a href="#home">맨 위로 ↑</a></span>
+    </footer>
+  </div>
+</div>
+<script>
+(function(){
+  var menu=document.getElementById("menu-toggle");
+  var sidebar=document.getElementById("sidebar");
+  var backdrop=document.getElementById("mobile-backdrop");
+  function closeMenu(){sidebar.classList.remove("open");backdrop.classList.remove("open");menu.setAttribute("aria-expanded","false");}
+  menu.addEventListener("click",function(){var next=!sidebar.classList.contains("open");sidebar.classList.toggle("open",next);backdrop.classList.toggle("open",next);menu.setAttribute("aria-expanded",String(next));});
+  backdrop.addEventListener("click",closeMenu);
+  var links=Array.prototype.slice.call(document.querySelectorAll(".nav-link"));
+  links.forEach(function(a){a.addEventListener("click",function(){closeMenu();links.forEach(function(x){x.classList.remove("active");x.removeAttribute("aria-current");});a.classList.add("active");a.setAttribute("aria-current","location");});});
+  window.addEventListener("hashchange",function(){var id=location.hash.slice(1);links.forEach(function(a){var yes=a.getAttribute("href")==="#"+id;a.classList.toggle("active",yes);if(yes)a.setAttribute("aria-current","location");else a.removeAttribute("aria-current");});});
+  var search=document.getElementById("site-search");
+  search.addEventListener("input",function(){var q=search.value.trim().toLocaleLowerCase("ko");links.forEach(function(a){a.style.display=a.textContent.toLocaleLowerCase("ko").indexOf(q)<0?"none":"";});});
+  document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();}if(e.key==="Escape")closeMenu();});
+})();
+</script>
+</body>
+</html>
