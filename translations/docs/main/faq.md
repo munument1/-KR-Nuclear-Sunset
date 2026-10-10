@@ -236,80 +236,80 @@ sidebar_label: 자주 묻는 질문
 - **메가톤 폭탄 — 폭탄을 해체하려면 어떻게 하나요?**
 - 폭탄 해체 능력은 지능, 과학, 수리, 폭발물 수치에 따라 결정됩니다. 아래 공식으로 계산한 해체 능력치가 **90**이어야 합니다: `((Intelligence * Science) * .05) + Repair + Explosives`.
 
-- **모드 순서·로드 순서 — 실수로 순서를 바꿨습니다.**
-- Nuclear Sunset에는 백업이 포함되어 있습니다. 이 백업을 복구하거나 Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행하면 모드 목록과 로드 순서가 기본 구성으로 돌아갑니다.
+- **Mod Organizer 2 — 게임 실행 시 MO2가 잠기지 않는 이유는?**
+- BSA 압축 파일 분석 기능이 활성화된 상태에서 목록 새로 고침이 지나치게 오래 걸리는 현상을 피하기 위한 의도된 동작입니다.
 
-- **Manual Installs - Why must I manually install TTW?**  
-  - TTW requires manual installation due to ModPub restrictions.
+- **모듈화 — 원하는 대로 Nuclear Sunset을 수정할 수 있나요?**
+- Nuclear Sunset은 기본적으로 모듈식으로 구성된 목록이 아닙니다. 복잡한 최적화, 플러그인 병합, 맞춤 업데이트 등으로 인해 변경된 목록은 공식 지원 대상에서 제외됩니다.
 
-- **Meat - Why don't animals drop meat?**
-  - Without the Hunter perk, you struggle to hunt and harvest meat from your kills.
+- **모드 설정 메뉴(MCM) — 설정을 바꿔도 되나요?**
+- MCM 설정을 변경하는 것은 모드 목록을 수정하는 것으로 간주되며, 이 경우 공식 지원을 받을 수 없습니다.
 
-- **Megaton Bomb - How do I defuse the megaton bomb?**
-  - The formula now depends on intelligence, science, repair, and explosives levels. The player must be a defusal skill level of 90, which is calculated by the defusal skill formula, `((Intelligence * Science) * .05) + Repair + Explosives`.
+- **Nuclear Sunset 수정 — 모드를 수정해도 되나요?**
+- 모드 목록을 수정하면 공식 지원을 받을 수 없습니다. 커뮤니티의 도움이 필요하다면 Discord의 [support-modified-list](https://discord.com/channels/1445447774035251323/1445462031221264538) 채널을 이용하세요.
 
-- **Mod Order/Load Order - I accidentally messed up my mod order/load order. How do I fix it?**  
-  - A backup is pre-bundled with Nuclear Sunset. You can either restore from the backup or re-run the Nuclear Sunset Wabbajack Installer, which will revert the modlist and load order to default configuration.
+- **모드 — 비어 있거나 완전히 덮어씌워진 모드가 많은 이유는?**
+- 이런 모드는 병합되거나 최적화되었지만, 제작자가 적절한 다운로드 수, Donation Points, 창작자 표시를 받을 수 있도록 빈 상태로도 목록에 포함해 두었습니다.
 
-- **Mod Organizer 2 - Mod Organizer 2 isn't locking when I launch the game. Why?**
-  - This is intentional in order to avoid long refresh times with BSA archive parsing enabled.
+- **New Vegas Heap Replacer(NVHR) — 왜 포함하지 않았나요?**
+- 현재는 권장하지 않습니다. xNVSE는 바닐라 힙 메모리 관리 방식을 자체적으로 개선했으며, NVHR처럼 메모리 사용량을 크게 늘리지 않고도 더 나은 결과를 제공합니다.
 
-- **Modularity - Can I customize Nuclear Sunset to my preferences?**  
-  - Nuclear Sunset is not inherently modular. Due to various complicated optimizations, plugin merges, and custom updates, modified lists are unsupported.
+- **Nexus 업로드 — LODGen·Facegen·SOFT AF 업데이트를 별도로 설치해야 하나요?**
+- 아니요. 향후 업데이트를 준비하기 위해 올라온 파일로, 따로 설치하면 게임이 손상될 수 있습니다. Nuclear Sunset의 정식 업데이트에 포함되었거나 별도 지시가 있을 때만 모드를 업데이트하세요.
 
-- **Mod Configuration Menu (MCM) - Can I change settings in the MCM?**
-  - Doing so is considered modifying the list and will invalidate support.
+- **NoDelete — [NoDelete]는 무슨 뜻인가요?**
+- 이 표기가 붙은 폴더는 업데이트 과정에서 Wabbajack이 내부 파일을 수정하지 않도록 보호됩니다.
 
-- **Modifying Nuclear Sunset - Can I modify the mods?**
-  - Modifying the list voids official support. Use the [support-modified-list](https://discord.com/channels/1445447774035251323/1445462031221264538) Discord channel for community assistance.
+- **NVIDIA Profile Inspector 처리되지 않은 예외 — 어떻게 해결하나요?**
+- 그래픽 카드 드라이버를 업데이트하거나 다시 설치하세요.
 
-- **Mods - Why are there so many empty mods or mods that are completely overwritten in Nuclear Sunset?**
-  - They have been merged or optimized in some fashion, though they are still included in an empty state to ensure the author receives appropriate downloads, donation points, and recognition for their creation.
+- **최적화 — Nuclear Sunset은 어떻게 최적화했나요?**
+- Cathedral Asset Optimizer와 Nvidia Texture Tools를 이용하여 텍스처를 압축하고 2K로 축소하며 밉맵을 생성했습니다. 필요에 따라 SNIFF로 추가 조정합니다. 애니메이션은 압축한 뒤 BSArchPro로 BSA에 패킹하고, LOD 표시 거리를 최적화하며, 필요한 자원만 불러오도록 우선순위 플래그를 설정했습니다.
 
-- **New Vegas Heap Replacer (NVHR) - Why don't you include NVHR in the Nuclear Sunset installation?**
-  - It is no longer recommended. xNVSE has built in changes to the vanilla heap that are superior to those found in NVHR, but without the massively increased memory usage that results from NVHR.
+- **선택 모드 — 포함된 선택 모드는 어떻게 사용하나요?**
+- [선택 모드](https://nuclearsunset.com/docs/main/setup#-optional-mods-) 항목을 참고하세요.
 
-- **Nexus Upload - A new update to LODGen/Facegen/SOFT AF was posted to the Nexus page. Should I download it?**
-  - No. This was uploaded in preparation for a future update, and may break the game if downloaded in isolation. Mods should only be updated when included as part of Nuclear Sunset update or when instructed to.
+- **기존 모드 설치본 — Nuclear Sunset과 함께 유지할 수 있나요?**
+- 네. Nuclear Sunset은 `Stock New Vegas` 폴더 안에서 독립적으로 실행되므로 다른 설치본에 영향을 주지 않습니다.
 
-- **NoDelete - What does [NoDelete] mean?**  
-  - This tag prevents Wabbajack from modifying the contents of tagged folders during updates.
+- **Overwolf — Nuclear Sunset과 함께 사용할 수 있나요?**
+- 아니요. Overwolf는 게임 충돌을 일으킵니다.
 
-- **NVIDIA Profile Inspector Unhandled Exception - I received an error that there is an unhandled exception when trying to run the NVIDIA Profile Inspector. How do I fix it?**
-  - Update or reinstall your graphics card drivers.
+- **페이지 파일 — New Vegas를 위해 페이지 파일 크기를 늘려야 하나요?**
+- 아니요. Fallout: New Vegas의 메모리 한도는 3.9GB이므로 메모리 문제로 충돌하기 전에 페이지 파일이 사용되지 않습니다.
 
-- **Optimization - How is Nuclear Sunset optimized?**  
-  - We used Cathedral Asset Optimizer and Nvidia Texture Tools to compress textures, downsize to 2k, and generate mipmaps. These are subsequently further adjusted by SNIFF when appropriate. Animations are compressed then BSA-packed with BSArchPro, LOD distances are optimized, and priority flags are set to load only necessary items.
+- **Parse 오류 — 설치 중 구문 분석 오류가 발생해도 괜찮나요?**
+- 설치 프로그램이 마지막에 `Complete`를 표시했다면 문제없습니다.
 
-- **Optional Mods - How do I use the bundled optional mods?**
-  - Instructions are provided in the [Optional Mods](https://nuclearsunset.com/docs/main/setup#-optional-mods-) section.
+- **분홍색 화면 — 장면 전환 화면이 분홍색으로 보입니다.**
+- 4GB 패치 절차를 건너뛰었을 가능성이 큽니다. `[NoDelete] Stock New Vegas`에 있는 `FNVPatch.exe`를 확인하세요.
 
-- **Other Modded Instances - Can I keep my other modded setups while playing Nuclear Sunset?**  
-  - Yes. Nuclear Sunset is self-contained in the Stock New Vegas folder and won’t interfere with other setups.
+- **플러그인 누락·모드 없음 — 특정 플러그인이 없다는 알림이 나타납니다.**
+- 특별히 고지한 경우가 아니라면 문제가 아닙니다. 일부 플러그인은 최적화 과정에서 병합되거나 제거되며, 별도 안내가 없다면 저장 파일에 큰 영향을 주지 않습니다.
 
-- **Overwolf - Can I use Overwolf with Nuclear Sunset?**
-  - No. Overwolf causes the game to crash.
+- **정화 장치 — 활성화한 뒤 메인 메뉴로 돌아갑니다. 버그인가요?**
+- 플레이어가 사망한 것입니다. 정화 장치를 활성화하는 다른 방법을 시도해 보세요.
 
-- **Pagefile - Should I increase the pagefile size for New Vegas?**  
-  - No. Fallout: New Vegas has a 3.9GB memory limit, meaning that the pagefile will not even be used prior to memory-related crashes.
+- **방사능 — 방사능이 너무 심해 진행할 수 없습니다.**
+- 방호복, Rad-X, RadAway, 술 등을 조합하여 방사능의 영향을 줄이세요. 어느 지역이든 도저히 진행할 수 없을 정도로 방사능이 심하다면 공식 Discord의 [bug-reports](https://discord.com/channels/1445447774035251323/1445462772442857574) 채널에 해당 위치를 알려 주세요.
 
-- **Parse Errors - Are parse errors during installation an issue?**  
-  - No, as long as the installer shows "Complete" at the end.
+- **반사 효과 — 뒤에 건물이나 물체가 있는데도 창문에 지형이 비칩니다.**
+- 심각한 성능 저하를 피하기 위해 의도한 동작입니다.
 
-- **Pink Screen - Why do I see pink transition screens?**  
-  - You likely skipped the 4GB patching process (`FNVPatch.exe` in `[NoDelete] Stock New Vegas`).
+- **런타임 오류 — 게임 실행 시 런타임 오류가 발생합니다.**
+- `Stock New Vegas` 폴더를 만들기 전에 MO2를 실행했을 가능성이 큽니다. Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행하면 오류를 복구할 수 있습니다. 최초 설치보다 훨씬 빠릅니다.
 
-- **Plugin No Longer Present/Mod Missing - I'm notified that certain plugins are missing. Is this an issue?**  
-  - No, unless specifically noted. Some plugins may be merged or removed during optimization, which will not have a major impact on your save unless otherwise specified.
+- **저장 — Nuclear Sunset에서는 저장이 어떻게 작동하나요?**
+- 수동 저장 외에도 1분 간격으로 자동 저장 파일 10개를 순환하여 기록하는 기능이 있습니다.
 
-- **Purifier - Why do I return to main menu after activating the purifier? Is this a bug?**
-  - You died. Try a different method of activating the purifier.
+- **그림자 — 그림자가 부드럽게 움직이지 않고 갑자기 이동합니다.**
+- 계속 움직이는 그림자에서 생기는 성능 부담과 깜빡임을 줄이기 위한 NVR의 의도된 설계입니다.
 
-- **Radiation - ___ is too irradiated to complete! What can I do?**
-  - Use a combination of a Radiation Suits, Rad-x, Radaway, and Alcohol to mitigate the effects of radiation. However, if an area is too irradiated to even be possible, please report the location in the [bug-reports](https://discord.com/channels/1445447774035251323/1445462772442857574) Discord channel.
+- **반짝임·섬광·반딧불 효과 — 일부 물체가 반짝이는 이유는?**
+- NVR의 PBR 셰이더가 품질이 낮은 텍스처와 상호작용하면서 생기는 현상입니다. 이상적으로는 이런 텍스처를 점차 교체할 예정입니다.
 
-- **Reflections - Why are landscape reflections visible in windows despite there being a building or object behind me?**  
-  - This is intentional to prevent significant performance degradation.
+- **용량 — Nuclear Sunset은 왜 이렇게 큰가요?**
+- 최적화를 적용했지만 텍스처 개선 범위가 매우 넓습니다. 원본 다운로드 파일만으로도 50GB가 필요합니다.
 
 - **Runtime Error - I’m getting a runtime error at launch. Why?**  
   - You likely opened MO2 before creating your Stock New Vegas folder. Re-run the Nuclear Sunset Wabbajack Installer to correct the error. This will repair any errors and will be much quicker than the initial installation.
