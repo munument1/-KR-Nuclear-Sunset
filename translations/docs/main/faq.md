@@ -323,124 +323,125 @@ sidebar_label: 자주 묻는 질문
 - **용량 — Nuclear Sunset은 왜 이렇게 큰가요?**
   - 최적화를 적용했지만 텍스처 개선 범위가 매우 넓습니다. 원본 다운로드 파일만으로도 50GB가 필요합니다.
 
-- **Skill Tags - How do skill tags work in Nuclear Sunset? I do not see the 15 point increase I am used to?**
-  - Nuclear Sunset uses classic skill tagging, meaning that that all skill points input into the tagged skill are doubled per level up (each one skill point you have per level up would count as 2 for a tagged skill).
- 
-- **Sky - Why is my sky black? How do I fix it?**
-  - You used the `Low` preset in [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-), which breaks critical rendering functions.
+- **주요 기술 지정 — 기존처럼 15점이 증가하지 않는 이유는?**
+  - Nuclear Sunset은 고전 방식의 주요 기술 지정 시스템을 사용합니다. 지정한 기술에 레벨 상승 시 투자하는 기술 점수는 두 배로 계산됩니다. 즉, 해당 기술에 투자한 1점은 2점으로 적용됩니다.
 
-- **SPECIAL - What do SPECIAL do in Nuclear Sunset?**
-  - **All SPECIALS:**
-    - All grant extra items in starting gear in both Wastelands and various DLCs.
-    - Contribute the the players size during character creaton.
-  - **Strength:**
-    - Increased carry weight.
-    - Increased melee damage.
-    - Increased knockdown resistance.
-    - Improved hip fire spread.
-    - Improved recoil control.
-  - **Perception:**
-    - Improved NPC detection while sneaking.
-    - Improved non-damaging forced entry bonus.
-    - Improved bullet spread.
-    - Improved degree of time dilation associated with Just Bullet Time.
-  - **Endurance:**
-    - Increased HP.
-    - Increased radiation resistance.
-    - Increased poison resistance.
-    - Increased knockdown resistance.
-    - Increased health regeneration over time.
-    - Increased sleep and wait health regeneration.
-    - Reduced addiction chance.
-  - **Charisma:**
-    - Improved companion damage and defense.
-    - Higher number of recruitable companions.
-    - Improved barter prices.
-    - Easier dialogue checks.
-    - Increased reputation gains and decreased reputation losses.
-  - **Intelligence:**
-    - Improved skill points per level.
-    - Improved non-damaging forced entry bonus.
-    - Enemy intelligence reduces success in dialogue checks.
-  - **Agility:**
-    - Increased AP.
-    - Improved radiation decay.
-    - Improved non-damaging forced entry bonus.
-    - Improved lockpicking.
-    - Faster swim speed.
-    - Faster reload speed.
-    - Faster draw and holster speed.
-    - Faster weapon jam recovery speed.
-  - **Luck:**
-    - Improved chance for critical hit.
-    - Improved chance for crippled limb recovery while sleeping at full health.
-    - Reduced odds for item destruction during forced entry.
-    - Reduced chance for bypass tool to be destroyed.
-    - Improved outcomes in various scripted events, such as repairing electrical boxes.
-    - Improved lockpicking chances.
-    - Improved hacking chances when using Immersive Minigame Tweaks.
-    - Reduced weapon jam chance.
+- **하늘 — 하늘이 검게 보입니다. 어떻게 해결하나요?**
+  - [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-)에서 `Low` 프리셋을 사용했기 때문입니다. 해당 프리셋은 중요한 렌더링 기능을 손상시킵니다.
 
-- **Sound - Why is the music or sound cutting in and out or crackling?**
-  - Bluetooth sound devices do not work correctly with Fallout: New Vegas. One solution is to play some type of video or music in the background when launching the game, which then can be turned off after loading.
-    Another solution is to download and run the [Soundkeeper 64](https://veg.by/en/projects/soundkeeper/) executable. It plays a constant imperceptible tone to fix any audio lag or connection oddities when using bluetooth headphones.
+- **SPECIAL — Nuclear Sunset에서 각 능력치는 어떤 효과가 있나요?**
+  - **모든 SPECIAL 능력치:**
+    - 두 황무지와 여러 DLC에서 시작 장비에 추가 아이템을 제공합니다.
+    - 캐릭터 생성 시 플레이어의 체격에 영향을 줍니다.
+  - **힘(Strength):**
+    - 휴대 중량 증가.
+    - 근접 피해량 증가.
+    - 넘어짐 저항 증가.
+    - 지향 사격 탄 퍼짐 감소.
+    - 반동 제어 개선.
+  - **인지력(Perception):**
+    - 은신 중 NPC 탐지 능력 향상.
+    - 손상을 주지 않는 강제 진입 보너스 향상.
+    - 탄 퍼짐 감소.
+    - Just Bullet Time의 시간 감속 효과 향상.
+  - **지구력(Endurance):**
+    - HP 증가.
+    - 방사능 저항 증가.
+    - 독 저항 증가.
+    - 넘어짐 저항 증가.
+    - 시간 경과에 따른 체력 재생 증가.
+    - 수면 및 대기 중 체력 회복량 증가.
+    - 중독 가능성 감소.
+  - **매력(Charisma):**
+    - 동료 피해량과 방어력 향상.
+    - 영입 가능한 동료 수 증가.
+    - 상점 거래 가격 개선.
+    - 대화 판정 난이도 감소.
+    - 평판 획득량 증가 및 평판 손실량 감소.
+  - **지능(Intelligence):**
+    - 레벨 상승 시 기술 점수 증가.
+    - 손상을 주지 않는 강제 진입 보너스 향상.
+    - 적의 지능이 높을수록 대화 판정 성공률 감소.
+  - **민첩성(Agility):**
+    - AP 증가.
+    - 방사능 수치의 감소 속도 개선.
+    - 손상을 주지 않는 강제 진입 보너스 향상.
+    - 자물쇠 따기 향상.
+    - 수영 속도 증가.
+    - 재장전 속도 증가.
+    - 무기 꺼내기·집어넣기 속도 증가.
+    - 무기 걸림에서 회복하는 속도 증가.
+  - **행운(Luck):**
+    - 치명타 확률 증가.
+    - 체력이 최대일 때 수면으로 다친 팔다리가 회복될 확률 증가.
+    - 강제 진입 시 아이템이 파괴될 확률 감소.
+    - 우회 도구가 파괴될 확률 감소.
+    - 전기 상자 수리 등 각종 스크립트 이벤트에서 더 좋은 결과를 얻을 확률 증가.
+    - 자물쇠 따기 성공률 증가.
+    - Immersive Minigame Tweaks 사용 시 해킹 성공률 증가.
+    - 무기 걸림 확률 감소.
 
-- **Sped-up Game - Why is my game sped-up?**
-  - Cap your FPS below 120, this is a byproduct of exceeding the maximum capable FPS.
+- **사운드 — 음악이나 소리가 끊기거나 지직거립니다.**
+  - Bluetooth 오디오 기기는 Fallout: New Vegas와 올바르게 작동하지 않을 수 있습니다. 게임을 실행할 때 배경에서 동영상이나 음악을 재생한 뒤, 게임이 로딩되면 해당 재생을 중단하는 방법이 있습니다.
+    다른 방법으로 [Soundkeeper 64](https://veg.by/en/projects/soundkeeper/) 실행 파일을 다운로드해 실행할 수 있습니다. 이 도구는 들리지 않는 지속적인 소리를 재생하여 Bluetooth 헤드폰의 오디오 지연이나 연결 문제를 줄입니다.
 
-- **Start - For some reason my game launches with unmodded Fallout: New Vegas instead of Nuclear Sunset. How do I fix it?**
-  - This is due to incorrect filepaths. Rerun the Nuclear Sunset Wabbajack installer. This process will repair errors and is much quicker than the initial installation.
+- **게임 속도 — 게임이 너무 빠르게 진행됩니다.**
+  - FPS를 120 미만으로 제한하세요. 게임이 처리할 수 있는 최대 프레임 속도를 초과하면 이런 현상이 생깁니다.
 
-- **Start - How do I start in the Mojave Wasteland instead of the Capital Wasteland?**  
-  - Select `memory` when prompted after leaving the Vault 101 cave.
+- **시작 — Nuclear Sunset 대신 바닐라 New Vegas가 실행됩니다.**
+  - 파일 경로가 잘못되었기 때문입니다. Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행하면 오류가 복구됩니다. 처음 설치할 때보다 훨씬 빠릅니다.
 
-- **Start - Which Wasteland should I choose to start in?**
-  - Either! Mechanics are in place to promote balance regardless of starting location.
+- **시작 — 수도 황무지 대신 모하비 황무지에서 시작하려면?**
+  - 볼트 101 동굴을 나온 뒤 안내가 표시되면 `memory`를 선택하세요.
 
-- **Storage - What can be safely deleted/uninstalled after Nuclear Sunset installation?**
-  - Fallout 3 can be uninstalled from Steam/GOG and the `Nuclear Sunset > Downloads` folder can be deleted (though much of this will be redownloaded during updates).
+- **시작 — 어느 황무지에서 시작하는 편이 좋나요?**
+  - 어느 쪽이든 좋습니다! 시작 위치와 관계없이 균형 잡힌 플레이를 할 수 있도록 여러 시스템이 준비되어 있습니다.
 
-- **Tale of Two Wastelands - Is TTW required for Nuclear Sunset?**  
-  - Yes. The modlist cannot be installed or used without TTW.
+- **저장 공간 — 설치 후 어떤 파일을 삭제하거나 제거해도 되나요?**
+  - Steam/GOG에서 Fallout 3를 제거할 수 있고 `Nuclear Sunset > Downloads` 폴더도 삭제할 수 있습니다. 단, 업데이트할 때 이 폴더의 파일 상당수를 다시 다운로드해야 할 수 있습니다.
 
-- **Traits - I can choose 99 traits. Is this a bug?**  
-  - No, this is intentional behavior. Most traits have both benefits and downsides, which provide balance in having additional traits. Having the ability to have many traits provides ample opportunity for unique character experiences.
+- **Tale of Two Wastelands — TTW는 반드시 필요한가요?**
+  - 네. TTW 없이는 Nuclear Sunset 모드 목록을 설치하거나 사용할 수 없습니다.
 
-- **Traits - I chose a trait that said I could immediately select a new perk, but I was not offered a new perk. Why?**
-  - You will be able to choose this perk when you next level up.
+- **특성 — 99개의 특성을 선택할 수 있습니다. 버그인가요?**
+  - 아니요. 의도된 동작입니다. 대부분의 특성에는 장점과 단점이 함께 있어 많은 특성을 선택해도 균형을 유지합니다. 다양한 특성을 고를 수 있으므로 독특한 캐릭터를 만들 기회가 많아집니다.
 
-- **Traits - Why can I sometimes select new traits upon leveling up?**
-  - New trait selections occur every 4 levels (levels 5, 9, 13, 17, etc).
+- **특성 — 즉시 새로운 특전을 고를 수 있다고 했는데 선택지가 나오지 않았습니다.**
+  - 다음 레벨에 도달했을 때 해당 특전을 선택할 수 있습니다.
 
-- **Tweaks - Can I change settings in Stewie's Tweaks?**
-  - Doing so is considered modifying the list and will invalidate support.
+- **특성 — 레벨 상승 시 새로운 특성을 고를 수 있는 이유는?**
+  - 4레벨마다 새로운 특성을 선택할 기회가 옵니다(5, 9, 13, 17레벨 등).
 
-- **Ultrawide - Can I use an ultrawide resolution with Nuclear Sunset?**  
-  - Yes. Enable the appropriate preset corresponding to your monitor's aspect ratio in the `Optional - Settings` separator in Mod Organizer 2.
- 
-- **Updates - Will updating impact my saves?**  
-  - Unless specified otherwise, your saves will still work, though updates after starting a save may introduce small bugs.
+- **Stewie's Tweaks — 설정을 변경해도 되나요?**
+  - 설정 변경은 모드 목록 수정으로 간주되며 공식 지원을 받을 수 없게 됩니다.
 
-- **Updates - ___ mod updated. Should I update it?**  
-  - No. Unless instructed otherwise, you should not manually update any mods.
+- **울트라와이드 — Nuclear Sunset에서 울트라와이드 해상도를 지원하나요?**
+  - 네. MO2의 `Optional - Settings` 구분선에서 모니터 화면비에 맞는 프리셋을 활성화하세요.
 
-- **VATS - Can I disable Bullet Time and enable VATS instead?**  
-  - No. VATS is very difficult to balance and is inherently incompatible with other mods included in Nuclear Sunset. All perks and traits are functional with Bullet Time, which is a superior skill-based alternative to VATS.
+- **업데이트 — 기존 저장 파일에 영향을 주나요?**
+  - 별도 공지가 없는 한 저장 파일은 계속 사용할 수 있습니다. 다만 플레이를 시작한 뒤 업데이트하면 사소한 버그가 생길 수 있습니다.
 
-- **Wabbajack - The Nuclear Sunset installation froze in Wabbajack. What do I do?**
-  - Re-run the `Nuclear Sunset.wabbajack` installer. The installer will resume where it left off, correcting any errors that occurred along the way.
+- **업데이트 — 개별 모드가 업데이트되었는데 직접 갱신해야 하나요?**
+  - 아니요. 별도의 지시가 없다면 모드를 수동으로 업데이트하지 마세요.
 
-- **Weapon Sway - Why does my weapon sway around my crosshair?**
-  - You do not meet the required SPECIAL and weapon skill recommended in order to use the weapon, which are specified in the weapon statstics once you hover over the weapon in the Pip-Boy.
+- **VATS — Bullet Time을 끄고 VATS를 활성화할 수 있나요?**
+  - 아니요. VATS는 밸런스 조정이 매우 어렵고 Nuclear Sunset에 포함된 다른 모드와 근본적으로 호환되지 않습니다. 모든 특전과 특성은 Bullet Time에서도 정상 작동하며, Bullet Time은 VATS보다 플레이어의 실력에 더 초점을 맞춘 대안입니다.
 
-- **Wordle/Hacking - How do I play wordle?**
-  - Letters are categorized into three categories when words are played:
-    - Solid green highlight means the letter is in the correct position.
-    - Solid yellow/orange highlight means the letter is in the word but in the wrong position.
-    - No highlight means the letter is not in the word.
-  - Previously utilized letters that are not in the word will be darkened on the bottom keyboard.
+- **Wabbajack — Nuclear Sunset 설치 과정이 멈췄습니다.**
+  - `Nuclear Sunset.wabbajack` 설치 프로그램을 다시 실행하세요. 설치가 중단된 지점부터 계속 진행하며, 진행 중 발생한 오류도 수정합니다.
 
-  ![image](https://github.com/user-attachments/assets/b7be4085-6be8-4df9-bd14-a3dc546b5d44)
+- **무기 흔들림 — 조준점 주변으로 총이 흔들리는 이유는?**
+  - 사용 중인 무기의 권장 SPECIAL 능력치와 무기 기술을 충족하지 못했기 때문입니다. Pip-Boy에서 무기에 마우스를 올리면 표시되는 무기 능력치에서 요구 조건을 확인할 수 있습니다.
 
-- **XP - I do not always get XP when I kill enemies. Why?**  
-  - XP is reported collectively at the end of combat and the player will not be rewarded XP for companion kills.
+- **Wordle·해킹 — Wordle 미니게임은 어떻게 하나요?**
+  - 단어를 입력하면 글자가 세 가지 상태로 표시됩니다.
+    - **녹색 배경** — 글자가 정확한 위치에 있습니다.
+    - **노란색·주황색 배경** — 정답에 포함된 글자이지만 위치가 틀렸습니다.
+    - **배경색 없음** — 정답에 없는 글자입니다.
+  - 이전에 입력한 글자 중 정답에 없는 글자는 화면 아래 키보드에서 어둡게 표시됩니다.
+
+![image](https://github.com/user-attachments/assets/b7be4085-6be8-4df9-bd14-a3dc546b5d44)
+
+- **경험치(XP) — 적을 처치해도 항상 경험치가 들어오지 않습니다.**
+  - 경험치는 전투가 끝난 뒤 합산하여 표시됩니다. 동료가 처치한 적에 대해서는 플레이어에게 경험치가 지급되지 않습니다.
+
