@@ -36,3 +36,16 @@ Compared read-only against the currently installed Nuclear Sunset TTW source:
 - It does **not** yet confirm complete dialogue/quest coverage, nor compatibility of every translation with the current TTW version. Do not copy/ship the source plugin; extract translation pairs from matching fields into the independent SST catalog only after native verification.
 
 Reproduce: `py -3 tools/audit_fo3_kr_pitt.py --report .local/pitt-from-fo3-kr-audit.json`. The report stays local and is not committed.
+
+## Confirmed: The Pitt translation in local FO3 KR.esm (2026-10-10)
+
+Local source: D:\Codex_Trans\비바 뉴 베가스\뉴클리어 선셋\ttw\FO3 KR.esm
+
+- FO3 KR.esm lists ThePitt.esm among its 12 masters.
+- It includes 3,344 The Pitt-owned records (master index 08), including 1,585 INFO records.
+- Every one of these 3,344 FormIDs and record signatures matches the installed Nuclear Sunset ThePitt.esm.
+- 2,304 of these records contain UTF-8-decodable Korean syllables (record-level presence, NOT validated translation count).
+- Therefore The Pitt translation entries can be reconstructed into a dedicated SST after field-level and source-text validation.
+- Do not redistribute the full FO3 KR.esm or original game ESM files. Candidate text mappings remain local pending audit.
+
+Verification: py -3 tools/verify_thepitt_in_fo3kr.py
