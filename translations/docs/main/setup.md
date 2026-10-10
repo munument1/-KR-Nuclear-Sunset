@@ -438,153 +438,150 @@ AMD GPU에서는 Ultra-Low Power State(ULPS)가 기본적으로 활성화되어 
 <br></br>
 
 ### <p align="center"> ![Selecting a Nuclear Sunset Profile](https://github.com/user-attachments/assets/16974159-4dfb-46c5-ae36-77c33b1703a2) </p>
+- MO2의 드롭다운 메뉴에서 `A - Uranium Haze NVR High`를 선택한 뒤 원하는 프로필을 고릅니다.
 
-- In MO2, select `A - Uranium Haze NVR High` from the dropdown menu, then choose a profile.
+![NS Profile](https://github.com/user-attachments/assets/7a0f18c1-3825-491f-b045-d2cbebd5b734)
 
-  ![NS Profile](https://github.com/user-attachments/assets/7a0f18c1-3825-491f-b045-d2cbebd5b734)
- 
-  - **A - Uranium Haze NVR High**:
-  	- Enables all mods, settings and NVR with the highest preset of Uranium Haze.
-  - **B - Uranium Haze NVR Balanced**:
-  	- Enables all mods, settings and NVR with the balanced preset of Uranium Haze.
-  - **C - Uranium Haze NVR Performance**:
-  	- Enables all mods, settings and NVR with the performance preset of Uranium Haze.
-  - **D - Hikikomori NVR High**:
-  	- Enables all mods, settings and NVR with the highest preset of Hikikomori.
-  - **E - Hikikomori NVR Balanced**:
-  	- Enables all mods, settings and NVR with the balanced preset of Hikikomori.
-  - **F - Hikikomori NVR Performance**:
-  	- Enables all mods, settings and NVR with the performance preset of Hikikomori.
-  - **G - Hikikomori Legacy NVR High**:
-  	- Enables all mods, settings and NVR with the highest legacy preset of Hikikomori.
-  - **H - Hikikomori Legacy NVR Balanced**:
-    - Enables all mods, settings and NVR with the balanced legacy preset of Hikikomori.
-  - **I - Hikikomori Legacy NVR Performance**:
-    - Enables all mods, settings and NVR with the performance legacy preset of Hikikomori.
-  - **J - Nuclear Sunset - Low Quality Profile**:
-  	- Disables New Vegas Reloaded and Real Time Reflections.
-  - **K - Nuclear Sunset - Very Low Quality Profile**:
-  	- Disables New Vegas Reloaded additional effect and lighting mods (e.g., disables Radiation Visuals, Real Time Reflections, Lumen, and Vending Machine Flicker Emits Light).
-  - **L - Debugging Profile**:
-  	- Minimal load order, only essential mods enabled.
+- **A - Uranium Haze NVR High**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Uranium Haze의 최고 품질 프리셋을 적용합니다.
+- **B - Uranium Haze NVR Balanced**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Uranium Haze의 균형 프리셋을 적용합니다.
+- **C - Uranium Haze NVR Performance**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Uranium Haze의 성능 프리셋을 적용합니다.
+- **D - Hikikomori NVR High**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 최고 품질 프리셋을 적용합니다.
+- **E - Hikikomori NVR Balanced**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 균형 프리셋을 적용합니다.
+- **F - Hikikomori NVR Performance**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 성능 프리셋을 적용합니다.
+- **G - Hikikomori Legacy NVR High**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 Legacy 최고 품질 프리셋을 적용합니다.
+- **H - Hikikomori Legacy NVR Balanced**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 Legacy 균형 프리셋을 적용합니다.
+- **I - Hikikomori Legacy NVR Performance**
+  - 모든 모드와 설정 및 NVR을 활성화하고 Hikikomori의 Legacy 성능 프리셋을 적용합니다.
+- **J - Nuclear Sunset - Low Quality Profile**
+  - New Vegas Reloaded와 Real Time Reflections를 비활성화합니다.
+- **K - Nuclear Sunset - Very Low Quality Profile**
+  - New Vegas Reloaded의 추가 효과와 조명 모드를 비활성화합니다. 예: Radiation Visuals, Real Time Reflections, Lumen, Vending Machine Flicker Emits Light 비활성화.
+- **L - Debugging Profile**
+  - 필수 모드만 활성화한 최소한의 로드 순서입니다.
 
-:::tip Swapping profiles
-When swapping profiles, the same save can be used safely. Experiment and find out what profile works best for you!
+:::tip 프로필 변경
+프로필을 바꿔도 같은 저장 파일을 안전하게 사용할 수 있습니다. 여러 프로필을 시험해 보고 자신에게 맞는 설정을 찾으세요!
 
-If performance remains a concern despite changing profiles, try the recommendations listed in the `FPS/Stutter - How can I increase FPS/Reduce Stutter in Nuclear Sunset?` section of the [Frequently Asked Questions](https://nuclearsunset.com/docs/main/faq).
+프로필을 변경한 뒤에도 성능 문제가 남는다면 [자주 묻는 질문](https://nuclearsunset.com/docs/main/faq)의 `FPS/Stutter - How can I increase FPS/Reduce Stutter in Nuclear Sunset?` 항목을 참고하세요.
 :::
 
- <br></br>
- <br></br>
- 
-### <p align="center"> ![Optional Mods](https://github.com/user-attachments/assets/903a4ce3-c2bb-402f-b950-868a4a93206f) </p>
+<br></br>
+<br></br>
 
-- Various optional mods with associated descriptions are bundled that the user can enable or disable without voiding support.
-	- When enabling or disabling an optional mod, ensure that **all other mods sharing the root name** are also enabled or disabled.
- 	- These will need to be re-configured with each update.
- 
-  ![OptionalSeparators](https://github.com/user-attachments/assets/976d0ff7-c70e-435f-83b7-fe3939ac1cfc)
+### <p align="center"> ![Optional Mods](https://github.com/user-attachments/assets/903a4ce3-c2bb-402f-b950-868a4a93206f) </p>
+- 사용자 지원 자격을 잃지 않고 활성화하거나 비활성화할 수 있는 다양한 선택 모드가 설명과 함께 포함되어 있습니다.
+  - 선택 모드를 켜거나 끌 때는 **이름의 앞부분이 같은 관련 모드도 전부 함께** 활성화하거나 비활성화해야 합니다.
+  - 업데이트할 때마다 선택 모드 구성을 다시 설정해야 합니다.
+
+![OptionalSeparators](https://github.com/user-attachments/assets/976d0ff7-c70e-435f-83b7-fe3939ac1cfc)
 
 <details><summary>
-Expand - Optional Mod Descriptions
+펼치기 - 선택 모드 설명
 </summary>
 
-- **Optional Mods - Gameplay:**
-	- **Minigames - Wordle Hack** - Replaces the hacking minigame with Wordle.
-	- **Quick Start & Associated Addons - Nuclear Sunset Merge** - A merge of quick-start related mods. May be disabled by those who want to experience the Fallout 3 introduction sequence.
-	- **Perk Level Calibrator** - Relevels perk requirements based on the level cap of 60.
+- **Optional Mods - Gameplay (게임 플레이):**
+  - **Minigames - Wordle Hack** — 해킹 미니게임을 Wordle로 대체합니다.
+  - **Quick Start & Associated Addons - Nuclear Sunset Merge** — 빠른 시작 관련 모드를 병합한 구성입니다. Fallout 3의 도입부를 직접 경험하고 싶다면 비활성화할 수 있습니다.
+  - **Perk Level Calibrator** — 최대 레벨 60에 맞추어 특전의 요구 레벨을 재조정합니다.
 
-- **Optional Mods - Balance:**
-  	- **Fast Travel Expenses** - Adds a distance-based cost when fast traveling. Highly recommended to keep enabled for appropriate balance.
-  	- **Life After Death** - Adds punishments to death and reloads to prevent abuse of the save reload cycle. Recommended to enable to help push a "live with the consequence of your actions" type of gameplay loop.
-  	- **Permadeath** - Enables permadeath mode, in which the player only has a finite number of lives.
-  	  
-- **Optional Mods - Difficulty Presets:**
-	- **Nuclear Sunset Hardercore** - Various settings that dramatically increase the difficulty of Nuclear Sunset. The mod includes the following changes:
-		- One perk is gained every 3 levels.
-		- No perks are gained after being humbled (first time travel between wastelands) until the player reaches their pre-humbled level.
-		- 2 Less skill points are gained per level.
-		- 3 Less SPECIAL points to allocate when creating a character.
-		- Max of 5 traits can be selected when creating a character (Wild Wasteland is free).
-		- Hardcore need accumulation rate is doubled.
-		- Overencumbrance has a much more dramatic impact on movement speed.
-		- Sleeping will restore a much smaller amount of health. 
-		- Radiation resist effects are reduced by 50%.
-		- One follower can now be recruited at five permanent charisma, and two followers can be recruited at ten charisma.
-		- Nearly all Perk Level requirements have been increased.
-		- Pip-boy can no longer be used in combat.
-		- Fast travel now costs caps. This effect scales based on distance traveled and weight carried.
-		- Time dilation is halved when using quick select menus.
-		- Weapon sway is increased when not meeting weapon requirements.
-		- The Long Haul perk has been disabled, meaning the player can no longer fast travel when over encumbered.
-		- Locks and Terminals have a random chance to be a higher lock level.
-		- The Cola Comrade perk has been disabled.
-		- Selected bonus to health, AP, or carry weight on level up has been reduced.
-		- Higher level enemies will appear earlier. 
-		- Difficulty starts at normal but can be changed to Hard or Very Hard
-		- Addictions last 4 days
- 	- **Nuclear Sunset Softercore** - Various settings that dramatically reduce the difficulty of Nuclear Sunset. The mod includes the following changes:
-		- Hardcore needs accumulation rate is 33% of the base list.
-		- Weapon requirement penalties are reduced.
-		- Reduced lockpicking difficulty when unlocking locks that are higher level than the player.
-		- Terminal shock punishment when failing to hack a terminal is reduced.
-		- The radius of irradiated locations is reduced.
-		- Increases the material used by the Ammo Press and reduces the cooldown.
-		- Difficulty starts at normal but can be changed to Easy or Very Easy.
-		- Caps have no weight
-		- Barter settings are softened
-    
-- **Optional - Settings:**
-	- **Tutorial - Nuclear Sunset Tutorial** - A Nuclear Sunset specific tutorial.
-	- **UI - 16-10 Aspect Ratio Monitor Support** - Enables support for 16:10 monitors.
-	- **UI - 21-9 Aspect Ratio Monitor (Ultrawide) Support** - Enables support for ultrawide (21:9) monitors.
-	- **UI - 32-9 Aspect Ratio Monitor (Super Ultrawide) Support** - Enables support for super ultrawide (32:9) monitors.
+- **Optional Mods - Balance (밸런스):**
+  - **Fast Travel Expenses** — 빠른 이동에 이동 거리에 비례하는 비용을 부과합니다. 균형 잡힌 게임 플레이를 위해 활성화를 강력히 권장합니다.
+  - **Life After Death** — 사망과 저장 파일 불러오기에 불이익을 주어 불러오기 반복을 남용하지 못하게 합니다. 행동의 결과를 감수하는 게임 플레이를 위해 활성화를 권장합니다.
+  - **Permadeath** — 플레이어의 목숨이 제한된 영구 사망 모드를 활성화합니다.
+
+- **Optional Mods - Difficulty Presets (난이도 프리셋):**
+  - **Nuclear Sunset Hardercore** — 난이도를 대폭 높이는 설정입니다. 다음과 같은 변화가 적용됩니다.
+    - 3레벨마다 특전 하나를 획득합니다.
+    - 두 황무지 간 첫 이동인 Humbled 상태가 된 뒤 원래 레벨을 회복할 때까지 특전을 얻지 못합니다.
+    - 레벨당 기술 점수가 2점 줄어듭니다.
+    - 캐릭터 생성 시 분배할 SPECIAL 점수가 3점 줄어듭니다.
+    - 캐릭터 생성 시 최대 5개의 특성을 선택할 수 있습니다(Wild Wasteland는 선택 횟수에 포함되지 않음).
+    - 하드코어 생존 수치가 쌓이는 속도가 두 배로 증가합니다.
+    - 과적 상태에서 이동 속도가 훨씬 더 크게 감소합니다.
+    - 잠을 자도 체력이 훨씬 적게 회복됩니다.
+    - 방사능 저항 효과가 50% 감소합니다.
+    - 영구 카리스마가 5이면 동료 1명, 10이면 동료 2명을 영입할 수 있습니다.
+    - 거의 모든 특전의 요구 레벨이 상승합니다.
+    - 전투 중 Pip-Boy를 사용할 수 없습니다.
+    - 빠른 이동 시 이동 거리와 휴대 중량에 따라 캡을 소모합니다.
+    - 빠른 선택 메뉴 사용 시 시간 감속 효과가 절반으로 줄어듭니다.
+    - 무기 사용 조건을 충족하지 못하면 무기 흔들림이 더 커집니다.
+    - Long Haul 특전이 비활성화되어 과적 상태에서 빠른 이동을 할 수 없습니다.
+    - 잠금장치와 터미널의 잠금 등급이 무작위로 한 단계 높아질 수 있습니다.
+    - Cola Comrade 특전이 비활성화됩니다.
+    - 레벨 상승 시 선택하는 체력, AP 또는 휴대 중량 보너스가 감소합니다.
+    - 고레벨 적이 더 이른 시점에 등장합니다.
+    - 기본 난이도는 Normal이며 Hard 또는 Very Hard로 변경할 수 있습니다.
+    - 중독 증상은 4일 동안 지속됩니다.
+  - **Nuclear Sunset Softercore** — 난이도를 크게 완화하는 설정입니다.
+    - 하드코어 생존 수치가 쌓이는 속도가 기본 목록의 33%로 줄어듭니다.
+    - 무기 사용 조건 미충족에 따른 불이익이 줄어듭니다.
+    - 플레이어 수준보다 높은 잠금장치를 해제할 때의 자물쇠 따기 난이도가 낮아집니다.
+    - 터미널 해킹 실패로 인한 감전 불이익이 줄어듭니다.
+    - 방사능 오염 지역의 반경이 줄어듭니다.
+    - Ammo Press에 사용되는 재료량이 늘어나고 재사용 대기시간이 줄어듭니다.
+    - 기본 난이도는 Normal이며 Easy 또는 Very Easy로 변경할 수 있습니다.
+    - 캡에 무게가 적용되지 않습니다.
+    - 흥정 관련 설정이 완화됩니다.
+
+- **Optional - Settings (설정):**
+  - **Tutorial - Nuclear Sunset Tutorial** — Nuclear Sunset 전용 튜토리얼입니다.
+  - **UI - 16-10 Aspect Ratio Monitor Support** — 16:10 화면비 모니터를 지원합니다.
+  - **UI - 21-9 Aspect Ratio Monitor (Ultrawide) Support** — 21:9 울트라와이드 모니터를 지원합니다.
+  - **UI - 32-9 Aspect Ratio Monitor (Super Ultrawide) Support** — 32:9 슈퍼 울트라와이드 모니터를 지원합니다.
 </details>
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Launching The Game](https://github.com/user-attachments/assets/35668840-c4e6-43ad-97f6-a8a1f0ed1797) </p>
+- MO2에서 `Nuclear Sunset` 실행 항목을 선택하고 게임을 실행합니다.
 
-- Launch the game via MO2 with the `Nuclear Sunset` option selected.
+![Launch](https://github.com/user-attachments/assets/8f571b67-5936-4d46-bc62-eda9f5b3c053)
 
-	![Launch](https://github.com/user-attachments/assets/8f571b67-5936-4d46-bc62-eda9f5b3c053)
+- INI 파일이 읽기 전용이라는 메시지가 나타나면 `Clear the Read Only Flag`를 선택합니다.
+- Nuclear Sunset 대신 게임 런처가 실행된다면 [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) 단계를 다시 진행하세요.
+- 새 게임을 시작한 후 일시 정지 메뉴에서 `K`를 누르면 `Keybinds and Legend`(단축키 및 범례)를 볼 수 있습니다. 자세한 내용은 [모드 기능 참고표](https://nuclearsunset.com/docs/main/reference)를 확인하세요.
 
-- If prompted that INIs are read-only, select `Clear the Read Only Flag`.
-- If launching results in the game launcher opening instead of Nuclear Sunset opening, repeat the [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) steps.
-- After starting a new game, press `K` in the pause menu to view `Keybinds and Legend`. For more details, see the [Mod Feature Reference List](https://nuclearsunset.com/docs/main/reference).
+:::danger 게임 실행 이상
+- **실행 시 충돌:**
+  - Overwolf는 호환되지 않으며 실행 시 충돌을 일으킵니다.
+  - 다른 실행 오류가 발생했다면 지원 요청 전에 [자주 묻는 질문](https://nuclearsunset.com/docs/main/faq)의 해결 절차를 확인하세요.
+- **모드가 적용되지 않은 Fallout: New Vegas가 실행될 때:**
+  - [Nuclear Sunset Wabbajack 설치 프로그램](https://nuclearsunset.com/docs/main/setup#-installing-nuclear-sunset-)을 다시 실행합니다. 잘못된 파일 경로가 수정됩니다.
+  - 게임 런처에서 `Play`를 **누르지 마세요.** 해당 메뉴가 열린다면 [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) 단계를 반복하세요.
 
-:::danger Launch Abnormalities
-- Launch Crashes:
-	- Overwolf is incompatible and will cause a launch crash.
-	- For other sources of launch crashes, refer to [Frequently Asked Questions](https://nuclearsunset.com/docs/main/faq) for troubleshooting steps before requesting support.
-- Unmodded Fallout: New Vegas launches:
-	- Re-run the [Nuclear Sunset Wabbajack Installer](https://nuclearsunset.com/docs/main/setup#-installing-nuclear-sunset-). This will repair any incorrect filepaths.
- 	- DO NOT select `Play` from the game launcher. If this menu opens, repeat the [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) steps.
-    
-    ![NoPlay](https://github.com/user-attachments/assets/dd3d35e5-6461-444e-a8aa-dfbe8b87413d)
+![NoPlay](https://github.com/user-attachments/assets/dd3d35e5-6461-444e-a8aa-dfbe8b87413d)
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Modders - Installing Geck](https://github.com/user-attachments/assets/e2c64e21-d14b-4e86-a7b6-ff4a9d2b9877) </p>
-:::tip Authors Only
-This step is only necessary for mod authors.
+:::tip 모드 제작자 전용
+이 단계는 모드 제작자에게만 필요합니다.
 :::
 
-- Steam users:
-	- Navigate to Steam and install `GECK - New Vegas Edition`.
- 	- Navigate to `C:\[STEAM FILEPATH]\Fallout New Vegas` and move `SSCE5432.dll` into `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`.
- 	- Move `GECK.exe` from `C:\Modding\Nuclear Sunset` into `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`.
-  
-- GOG users:
-	- Move `GECK.exe` from `C:\Modding\Nuclear Sunset` into `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`, selecting `Replace` when prompted.
+- **Steam 사용자**
+  - Steam에서 `GECK - New Vegas Edition`을 설치합니다.
+  - `C:\[STEAM FILEPATH]\Fallout New Vegas`로 이동하여 `SSCE5432.dll`을 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`로 옮깁니다.
+  - `C:\Modding\Nuclear Sunset`의 `GECK.exe`를 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`로 옮깁니다.
+
+- **GOG 사용자**
+  - `C:\Modding\Nuclear Sunset`의 `GECK.exe`를 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas`로 옮기고, 메시지가 나오면 `Replace`(바꾸기)를 선택합니다.
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Controller Users](https://github.com/user-attachments/assets/589b46e6-a3d4-487e-a8a0-b00a8eefc728) </p>
-:::tip For Contoller Users Only
-
-Please follow **ALL** instructions on the **[Controller Instructions](https://nuclearsunset.com/docs/main/controller) page**.
+:::tip 컨트롤러 사용자 전용
+[컨트롤러 사용 안내](https://nuclearsunset.com/docs/main/controller) 페이지에 있는 **모든 지침**을 반드시 따르세요.
+:::
