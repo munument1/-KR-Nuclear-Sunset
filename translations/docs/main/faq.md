@@ -143,6 +143,22 @@ sidebar_label: 자주 묻는 질문
     - **Lonesome Road** — 협곡 잔해를 방문합니다.
 
 - **DLC·퀘스트 모드 — 권장 레벨은?**
+  - **수도 황무지:**
+    - **Point Lookout (Low Level Point Lookout 적용)** — 5~10
+    - **The Pitt** — 15~20
+    - **Mothership Zeta (Hardcore Zeta 적용)** — 20~25
+    - **Operation Anchorage (Anchorage Gameplay Expansion 적용)** — 25~30
+  - **모하비 황무지:**
+    - **Autumn Leaves** — 1
+    - **Dry Wells** — 5~10
+    - **Into the Deep** — 5~10
+    - **Race To The Bottom** — 10~15
+    - **Honest Hearts** — 10~15
+    - **Zion Trails** — 15~20
+    - **Old World Blues** — 25~30
+    - **Dead Money (Dead Money Tweaks 적용)** — 25~30
+    - **Lonesome Road** — 40~45
+
 - **모드 비활성화 — 특정 모드를 꺼도 되나요?**
   - 안전하게 켜거나 끌 수 있는 것은 `Optional` 구분선 아래에 있는 모드뿐입니다.
 
