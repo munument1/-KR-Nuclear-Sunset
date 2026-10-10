@@ -41,7 +41,18 @@ def secret_configs():
             data=load(p)
             secret=data.get("api_key","").strip()
             if secret and secret not in secrets:secrets.append(secret)
-    # Optional user-owned environment variables; never print/read into files.
+    # Optional local paths-only manifest for existing user-owned credentials.
+    # No key value is copied to this manifest or to the repository.
+    source_manifest=ROOT/".local"/"gemini_credentials_sources.json"
+    if source_manifest.is_file():
+        source_paths=json.loads(source_manifest.read_text(encoding="utf-8")).get("secret_source_files",[])
+        pattern=re.compile(r"(?<![A-Za-z0-9_])(AIza[A-Za-z0-9_-]{25,}|AQ\.[A-Za-z0-9_-]{20,})")
+        for filename in source_paths:
+            source=Path(filename)
+            if not source.is_file():raise RuntimeError("Configured Gemini credential source not found")
+            for key in pattern.findall(source.read_text(encoding="utf-8-sig")):
+                if key not in secrets:secrets.append(key)
+    # Optional user-owned environment variables; never print credentials.
     for i in range(1,5):
         secret=os.getenv(f"GEMINI_API_KEY_{i}","").strip()
         if secret and secret not in secrets:secrets.append(secret)
