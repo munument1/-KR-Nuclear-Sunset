@@ -19,7 +19,7 @@ MANIFEST=BASE/"00_manifest.json"
 PROMPT=BASE/"00_NuclearSunset_user_prompt.txt"
 RUN=BASE/"03_API_실행상태"
 MODEL="gemini-3.1-flash-lite"
-MAX_DAILY_PER_KEY=220
+MAX_DAILY_PER_KEY=500
 COOLDOWN_SECS=12
 API_KEY_CONFIGS=[
  Path(r"D:\translation\json-ai-translator\config.json"),
