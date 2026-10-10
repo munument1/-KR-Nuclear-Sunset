@@ -1,167 +1,172 @@
 ---
 sidebar_position: 9
-title: Frequently Asked Questions
+title: 자주 묻는 질문
 hide_title: true
-sidebar_label: Frequently Asked Questions
+sidebar_label: 자주 묻는 질문
 ---
 
 # ![Frequently Asked Questions Banner](https://github.com/user-attachments/assets/75ff4d9d-f408-4a7c-b2d5-315bf2758679)
 
 :::tip
-To find information quickly, use `Ctrl + F` to search for relevant keywords.
+원하는 정보를 빠르게 찾으려면 `Ctrl + F`를 눌러 관련 단어를 검색하세요.
 :::
 
-:::danger Troubleshooting
-For any installation errors, launch crashes, or launch freezes, perform these steps sequentially, testing again after each:
+:::danger 문제 해결
+설치 오류, 게임 시작 시 충돌 또는 실행 화면 멈춤이 발생하면 다음 단계를 **순서대로** 적용하되, 매 단계 후 문제가 해결됐는지 다시 시험하세요.
 <details><summary>
-Expand - Troubleshooting Steps
+펼치기 - 문제 해결 단계
 </summary>
 
-- Verify ownership of supported versions of `Fallout: New Vegas`, `Fallout 3`, and all DLCs, as specified in [Requirements](https://nuclearsunset.com/docs/main/requirements).
-- Log out and back into Nexus within the Wabbajack client, as outlined in [Installing Nuclear Sunset](https://nuclearsunset.com/docs/main/setup#-installing-nuclear-sunset-).
-- Reinstall the required .NET Framework and Visual C++ Runtime Libraries, per [Requirements](https://nuclearsunset.com/docs/main/requirements).
-- Verify the antivirus exclusions are appropriately configured, per [Creating Antivirus Exclusions](https://nuclearsunset.com/docs/main/setup#-creating-antivirus-exclusions-).
-- Disable or uninstall any 3rd party antivirus.
-- Disable any VPN.
-- Disable any overlay like Steam, Overwolf, Afterburner, Discord, Nvidia, etc. | Xbox Game Bar does not need disabling.
-- Disable Windows Defender.
-- If using a pre-built computer or laptop, close or uninstall any proprietary programs (for example, Omen Gaming Hub).
-- Right click the Nuclear Sunset folder and uncheck Read-only.
-- In MO2, Go to `Tools > Settings > Paths` and ensure the Managed Game path is to the exe in the Stock New Vegas folder. 
-- Restart your computer.
-- Launch Fallout: New Vegas once more from Steam/GOG, then try launching again through Mod Organizer 2.
-- Re-run the Nuclear Sunset Wabbajack Installer. This process will repair errors and is much quicker than the initial installation.
-- Ensure that the `Tale of Two Wastelands` filepath and mod size match the instructions in [Installing Tale of Two Wastelands (TTW)](https://nuclearsunset.com/docs/main/setup#-installing-tale-of-two-wastelands-ttw-) (this MUST be INSIDE of the `Nuclear Sunset > Mods` folder.
-- Repeat the [Running 4GB Patcher](https://nuclearsunset.com/docs/main/setup#-running-4gb-patcher-) step.
-- If using an older graphics card, confirm use of the correct version of DXVK, per [Intel iGPU Users and GPUs Without Vulkan Support - Downgrading DXVK](https://nuclearsunset.com/docs/resources/troubleshooting#-intel-igpu-users-and-gpus-without-vulkan-support---downgrading-dxvk-).
-- Try disabling DXVK itself in the stock folder by renaming `d3d9.dll` to `d3d9.dll.backup`. DXVK doesn't always play nice with all graphics cards and drivers.
-- If issues persist, delete the `Nuclear Sunset` folder and restart the installation process from the beginning.
-- For further help, share your crash log (found in `Nuclear Sunset > [NoDelete] Stock New Vegas > Crash Logs`) in the [support-unmodified-list](https://discord.com/channels/1445447774035251323/1445462089970880674) Discord channel.
+- [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에 따라 지원되는 `Fallout: New Vegas` 및 `Fallout 3` 버전과 두 게임의 모든 DLC를 보유했는지 확인합니다.
+- [Nuclear Sunset 설치](https://nuclearsunset.com/docs/main/setup#-installing-nuclear-sunset-)에 설명된 대로 Wabbajack에서 Nexus 계정에서 로그아웃한 뒤 다시 로그인합니다.
+- [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에 따라 필수 .NET Framework와 Visual C++ Runtime Libraries를 재설치합니다.
+- [백신 제외 설정](https://nuclearsunset.com/docs/main/setup#-creating-antivirus-exclusions-)에서 안내한 제외 설정이 올바른지 확인합니다.
+- 타사 백신 프로그램을 비활성화하거나 제거합니다.
+- VPN을 비활성화합니다.
+- Steam, Overwolf, Afterburner, Discord, Nvidia 등의 오버레이를 비활성화합니다. Xbox Game Bar는 비활성화할 필요가 없습니다.
+- Windows Defender를 비활성화합니다.
+- 완제품 PC나 노트북을 사용하는 경우 Omen Gaming Hub와 같은 제조사 전용 프로그램을 닫거나 제거합니다.
+- Nuclear Sunset 폴더를 마우스 오른쪽 버튼으로 클릭하고 `Read-only`(읽기 전용)를 해제합니다.
+- MO2에서 `Tools > Settings > Paths`로 이동하여 `Managed Game` 경로가 `Stock New Vegas` 폴더의 실행 파일을 가리키는지 확인합니다.
+- 컴퓨터를 다시 시작합니다.
+- Steam/GOG에서 Fallout: New Vegas를 한 번 더 실행한 다음 Mod Organizer 2로 다시 실행해 봅니다.
+- Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행합니다. 오류를 복구하는 작업이며 처음 설치할 때보다 훨씬 빠릅니다.
+- [Tale of Two Wastelands(TTW) 설치](https://nuclearsunset.com/docs/main/setup#-installing-tale-of-two-wastelands-ttw-)에 명시된 경로 및 모드 크기가 일치하는지 확인합니다. TTW는 반드시 `Nuclear Sunset > Mods` 폴더 **내부**에 있어야 합니다.
+- [4GB 패치 실행](https://nuclearsunset.com/docs/main/setup#-running-4gb-patcher-) 단계를 다시 진행합니다.
+- 오래된 그래픽 카드를 사용한다면 [Intel 내장 GPU 또는 Vulkan 미지원 GPU의 DXVK 다운그레이드](https://nuclearsunset.com/docs/resources/troubleshooting#-intel-igpu-users-and-gpus-without-vulkan-support---downgrading-dxvk-)에 따라 적절한 DXVK를 설치했는지 확인합니다.
+- `Stock New Vegas` 폴더에서 `d3d9.dll`을 `d3d9.dll.backup`으로 이름을 바꾸어 DXVK 자체를 꺼 보세요. 일부 GPU와 드라이버는 DXVK와 호환되지 않을 수 있습니다.
+- 문제가 계속된다면 `Nuclear Sunset` 폴더를 삭제하고 처음부터 설치를 다시 시작합니다.
+- 추가 지원이 필요하다면 `Nuclear Sunset > [NoDelete] Stock New Vegas > Crash Logs`에 있는 충돌 로그를 공식 Discord의 [support-unmodified-list](https://discord.com/channels/1445447774035251323/1445462089970880674) 채널에 공유합니다.
 </details>
 :::
 
-- **3rd Person - Is 3rd person supported?**
-  - Partially. The Fallout: New Vegas modding community lacks high quality 3rd person animation replacers, which impacts both aesthetics and balance. We recommend only using 3rd person as a vanity camera.
+:::caution 한국어판 보안 참고
+원본 문제 해결 지침에는 백신 및 Windows Defender 비활성화가 포함되어 있습니다. 이러한 조치는 악성코드 방어 기능을 약화시킬 수 있으므로 원인을 확인하지 않은 채 상시 적용하지 마세요. 가능한 한 필요한 범위에서만 점검하고, 사용 후 보안 기능을 복구하세요. 기존 데이터를 삭제하기 전에는 백업하세요.
+:::
 
-- **4GB Patcher - I am a GOG user and a 4GB patch is already bundled with GOG. I don't think 4GB patcher is necessary for me and I am much more stable without it.**
-  - This is a different utility than the one instructed for use with Nuclear Sunset. The 4GB patcher you are instructed to use patches the game to use xNVSE. Without running it, you are not playing with the majority of the mods included in Nuclear Sunset.
+- **3인칭 시점 — 3인칭으로 플레이해도 되나요?**
+- 부분적으로 지원합니다. Fallout: New Vegas 모딩 환경에는 품질 높은 3인칭 애니메이션 교체 모드가 부족해 외형과 게임 밸런스에 영향을 미칩니다. 3인칭은 화면 감상용 카메라로만 사용하는 편을 권장합니다.
 
-- **Abbreviations - What do the abbreviations in Mod Organizer 2 mod names mean?**
-  - These abbreviations help organize and maintain Nuclear Sunset:
-    - **ALT** - Altered mod.
-    - **OP** - Optimized mod.
-    - **MG** - Plugin merged into a master patch.
-    - **HID** - Plugin hidden following merge.
-    - **FL** - Plugin flagged as ESM.
-    - **INF** - Mod integrated into the Nuclear Sunset Wabbajack Installer.
-    - **AEN** - Mod included but defaults to disabled.
-    - **CDN** - Mod hosted on the Wabbajack server.
-    - **BOS** - Mod utilized base object swapper.
-    - **SOFT AF** - These mods were created by OrgasmicSneeze, specifically for Nuclear Sunset.
-    - **LQ, VLQ, DB** - Mod enabled or disabled in Low, Very Low Quality, or Debug profiles.
+- **4GB Patcher — GOG판에는 이미 4GB 패치가 포함되어 있는데도 실행해야 하나요?**
+- Nuclear Sunset에서 사용하도록 안내하는 유틸리티는 GOG에 동봉된 것과 다릅니다. 여기서 사용하는 4GB 패처는 게임이 xNVSE를 사용하도록 패치합니다. 이 작업을 생략하면 Nuclear Sunset에 포함된 대다수 모드가 작동하지 않습니다.
 
-- **Addiction - How does addiction work in Nuclear Sunset?**
-  - Addictions can be recovered from over time, after expereincing three days of withdrawals. Taking the associated chem resets the three day timer.
-  - Paying a doctor to addres your addiction or using a fixer will provide a period of immunity against the negative effects of the addiction. The addiction will still naturally recover at the same rate.
+- **약어 — MO2의 모드 이름에 붙은 약어는 무엇을 뜻하나요?**
+- 이 약어들은 Nuclear Sunset을 정리하고 관리하기 위한 표기입니다.
+    - **ALT** — 수정된 모드.
+    - **OP** — 최적화된 모드.
+    - **MG** — 마스터 패치에 플러그인이 병합된 모드.
+    - **HID** — 병합 후 플러그인이 숨김 처리된 모드.
+    - **FL** — ESM 플래그를 지정한 플러그인.
+    - **INF** — Nuclear Sunset Wabbajack 설치 프로그램에 통합된 모드.
+    - **AEN** — 포함되어 있으나 기본적으로 비활성화되는 모드.
+    - **CDN** — Wabbajack 서버에 호스팅된 모드.
+    - **BOS** — Base Object Swapper를 이용하는 모드.
+    - **SOFT AF** — OrgasmicSneeze가 Nuclear Sunset 전용으로 제작한 모드.
+    - **LQ, VLQ, DB** — Low, Very Low Quality, Debug 프로필에서 활성화 또는 비활성화되는 모드.
 
-- **Adding Mods - How do I add ___ mod?**
-  - The Nuclear Sunset support team are not obligated to provide any advice or instructions on how to add mods to Nuclear Sunset. You may do so at your own risk, though you void official support by doing so.
+- **중독 — Nuclear Sunset에서는 중독이 어떻게 작동하나요?**
+- 금단 증상을 3일 동안 겪으면 시간이 지나면서 중독에서 회복됩니다. 중독을 일으킨 약물을 다시 복용하면 3일 타이머가 초기화됩니다.
+  - 의사에게 중독 치료비를 내거나 Fixer를 사용하면 일정 시간 동안 중독의 부정적 효과가 억제됩니다. 중독 자체는 기존과 같은 속도로 자연 회복됩니다.
 
-- **Ammo Types - There are several different types of ammo included in each caliber. What do they each do?**
-  - **AP** - Expensive and uncommon. Reduces weapon damage, but significantly reduces enemy DT (Damage Threshold). Very effective against large, powerful, armored enemies.
-  - **HP** - Expensive and uncommon. Increases weapon damage, but multiplies enemy DT (Damage Treshold). Very effective against soft, weak, unarmored enemies.
-  - **Regular** - Cheap and common. Ineffective against armored enemies.
-  - **Junk/Surplus** - Cheap and common. Causes weapons to degrade in condition quicker and deals less damage.
-  - **Other** - Other unnoted types of ammo (SWC, JSP, Match, etc) are special ammo types that typically trump standard ammo types in some fashion.
+- **모드 추가 — 다른 모드를 추가하려면 어떻게 하나요?**
+- Nuclear Sunset 지원팀은 다른 모드를 추가하는 방법을 안내할 의무가 없습니다. 사용자가 위험을 감수하고 모드를 추가할 수는 있지만, 이 경우 공식 지원을 받을 수 없습니다.
 
-- **Application Load Error P:0000065432 - How do I fix this error?**
-  - Follow the Steam PCR Users instructions in [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-).
-- **Application Load Error P:0000065434 - How do I fix this error?**
-  - Ensure Steam is running and repeat the [Generating Fresh INI Files](https://nuclearsunset.com/docs/main/setup#-generating-fresh-ini-files-) and [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) steps.
+- **탄약 종류 — 구경별 여러 탄약은 어떤 차이가 있나요?**
+- **AP** — 비싸고 희귀합니다. 무기 피해량은 감소하지만 적의 DT(피해 임계값)를 크게 낮춥니다. 강력한 장갑 적에게 매우 효과적입니다.
+  - **HP** — 비싸고 희귀합니다. 무기 피해량이 증가하지만 적의 DT도 배가됩니다. 장갑이 없는 약한 적에게 매우 효과적입니다.
+  - **Regular** — 저렴하고 흔하지만 장갑을 입은 적에게는 효과가 떨어집니다.
+  - **Junk/Surplus** — 저렴하고 흔하지만 무기 상태가 더 빨리 나빠지고 피해량도 낮습니다.
+  - **Other** — SWC, JSP, Match 등 별도 설명이 없는 특수 탄약은 대체로 일반 탄약보다 특정 성능이 우수합니다.
 
-- **BASS Init/XD3 Input Errors - I got a BASS Init/XD3 Input Error while installing TTW. How do I fix it?**
-  - You are either using non-English versions of Fallout: New Vegas or Fallout 3, lack the associated DLCs, or have not completed a [clean installation](https://nuclearsunset.com/docs/main/setup#-creating-clean-installs-and-backups-) appropriately.
- 
-- **Black screen? - I have an infinite black screen**
-  - Check that your MO2 instance has the correct path to the executable. Click this ![image](https://github.com/user-attachments/assets/1e998eb6-90a5-46ae-acae-3ddb4771c369) icon on the top bar, click `Paths`, and make sure `Managed Game` is set to the executable in your Stock New Vegas Folder.
- 
-- **Bobbleheads/Skill Books - I used to know exactly where to find all of the bobbleheads/skill books, but they aren't where I expect them. Why?**
-  - They have all been relocated. Gone are the days of free, predictable SPECIAL/Skill points. We enjoy the sense of discovery associated with their relocation, and hope you will too.
+- **Application Load Error P:0000065432 — 해결 방법은?**
+- [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-)에 있는 Steam PCR 사용자 지침을 따르세요.
 
-- **Cannibal Perk - Why doesn’t the cannibalize perk work?**
-  - Ensure you’re crouching to use the cannibalize feature.
+- **Application Load Error P:0000065434 — 해결 방법은?**
+- Steam이 실행 중인지 확인하고 [새 INI 파일 생성](https://nuclearsunset.com/docs/main/setup#-generating-fresh-ini-files-)과 [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-) 단계를 반복합니다.
 
-- **Companion Combat - My companions keep running to their death, how can I stop them?**
-  - Open the Companions Command and Control menu (`C`) and try changing their tactics to `stay back` and `prefer ranged combat`.
-  - Make sure you give them a weapon, ammo, and aid.
- 
-- **Companion Healing - How do I heal my companions?**
-  - Companions heal in the same ways as the player does. Give them aid, pay the doctor for healing services (the doctor will stitch them up while they stitch you up), or sleep (they'll sleep when you sleep).
+- **BASS Init/XD3 Input 오류 — TTW 설치 중 오류가 발생합니다.**
+- Fallout: New Vegas 또는 Fallout 3가 영어판이 아니거나, 필요한 DLC가 없거나, [깨끗한 게임 설치](https://nuclearsunset.com/docs/main/setup#-creating-clean-installs-and-backups-)를 제대로 완료하지 않았을 가능성이 있습니다.
 
-- **Companion Recruitment - Why cant I recruit ___ companion?**
-  - The recruitment of companions is dependent on the player's permanent charisma (this does not take modifiers such as equipment or chems into account. The player can recruit one companion at 4 charisma, two companions at 7 charisma, and 3 companions at 10 charisma.
+- **검은 화면 — 화면이 계속 검은색으로 멈춥니다.**
+- MO2에 올바른 실행 파일 경로가 설정되어 있는지 확인합니다. 상단 바의 ![image](https://github.com/user-attachments/assets/1e998eb6-90a5-46ae-acae-3ddb4771c369) 아이콘을 클릭하고 `Paths`를 연 뒤 `Managed Game`이 `Stock New Vegas` 폴더의 실행 파일을 가리키는지 확인하세요.
 
-- **Controller Support - Is there controller support?**
-  - Yes, but only on Steam. Unfortunately there are no viable third party programs with similar capabilities for GOG or Epic Games users. Use Steam Input and follow the [Official Steam Controller Instructions](https://nuclearsunset.com/docs/main/controller).
+- **보블헤드·기술 서적 — 원래 있던 위치에서 찾을 수 없는 이유는?**
+- 모두 다른 위치로 옮겨졌습니다. 이제 익숙한 장소에서 SPECIAL과 기술 점수를 쉽게 얻을 수 없습니다. 새롭게 탐색하며 발견하는 재미를 즐겨 보세요.
 
-- **Console Commands - Can I safely use console commands when playing?**
-  - No. Almost all console commands can have unintended downstream consequences. Using console commands will void official support.
+- **식인 특전 — 식인 기능이 작동하지 않습니다.**
+- 식인 기능을 사용하려면 웅크린 상태여야 합니다.
 
-- **Crippled - How do I heal crippled limbs?**
-  - Visit a doctor.
-  - Use a Doctor's Bag or Splint.
-  - Use healing items beyond full health.
-  - Sleep beyond full health.
+- **동료 전투 — 동료가 무모하게 돌진해 죽습니다.**
+- `C`를 눌러 Companion Command and Control 메뉴를 연 다음 전술을 `stay back`(뒤에 머무르기)과 `prefer ranged combat`(원거리 전투 선호)으로 바꿔 보세요.
+  - 동료에게 무기, 탄약, 의약품을 제공했는지도 확인하세요.
 
-- **Damage Threshold (DT) and Damage Resistance (DR) - What are DT and DR? How do they work?**
-  - Damage Threshhold (DT) - A flat reduction in damage. This is applied AFTER DR. The maximum reduction in damage is 20% of the original damage value. Example: DT of 10 reduces a damage value of 40 to 30.
-  - Damage Resistance (DR) - A percent reduction in damage. This is applied BEFORE DT. The maximum reduction in damage is 85%. Example: DR of 30 reduces incoming damage by 30%.
+- **동료 치료 — 동료를 어떻게 치료하나요?**
+- 플레이어와 같은 방식으로 치료합니다. 의약품을 지급하거나 의사에게 치료비를 지불하거나 잠을 자세요. 의사는 플레이어를 치료할 때 동료도 함께 치료하고, 동료는 플레이어가 잠잘 때 같이 잡니다.
 
-- **Dialogue Skill Indicator - Why was it removed?**
-  - This feature was intentionally removed to enhance immersion and prevent metagaming.
-    
-- **DLCs - How do I initiate the various DLCs?**
-  - **Capital Wasteland:**
-    - **Point Lookout** - Walk past the Citadel towards the rivertboat, at which point a horn will sound.
-    - **The Pitt** - Listen to a radio broadcast near the Oasis.
-    - **Mothership Zeta** - Listen to the radio broadcast near MDPL-13 Power Station.
-    - **Operation Anchorage** - Listen to the radio broadcast near Bailey's Crossroads.
-  - **Mojave Wasteland:**
-    - **Autumn Leaves** - Visit Hypatia.
-    - **Into the Deep** - Visit Shamble.
-    - **Dry Wells** - Visit Blue Paradise Vacation Rentals.
-    - **Zion Trails** - Explore the Northwestern most corner of the Mojave Wasteland.
-    - **Race To The Bottom** - Visit Freeside Coop.
-    - **Honest Hearts** - Listen to the radio broadcast near Freeside.
-    - **Old World Blues** - Listen to the radio broadcast near the Crashed Satellite.
-    - **Dead Money** - Listen to the radio broadcast near Helios One.
-    - **Lonesome Road** - Visit the Canyon Wreckage.
+- **동료 영입 — 특정 동료를 영입할 수 없는 이유는?**
+- 동료 영입 수는 플레이어의 **영구적인 카리스마 수치**에 따라 결정됩니다. 장비나 약물 등 일시적 보정치는 포함되지 않습니다. 카리스마 4일 때 동료 1명, 7일 때 2명, 10일 때 3명을 영입할 수 있습니다.
 
-- **DLCs & Quest Mods - What levels are recommended for the DLCs and quest mods?**
-  - **Capital Wasteland:**
-    - **Point Lookout (with Low Level Point Lookout)** - 5-10
-    - **The Pitt** - 15-20
-    - **Mothership Zeta (with Hardcore Zeta)** - 20-25
-    - **Operation Anchorage (with Anchorage Gameplay Expansion)** - 25-30
-  - **Mojave Wasteland:**
-    - **Autumn Leaves** - 1
-    - **Dry Wells** - 5-10
-    - **Into the Deep** - 5-10
-    - **Race To The Bottom** - 10-15
-    - **Honest Hearts** - 10-15
-    - **Zion Trails** - 15-20
-    - **Old World Blues** - 25-30
-    - **Dead Money (with Dead Money Tweaks)** - 25-30
-    - **Lonesome Road** - 40-45
+- **컨트롤러 — 컨트롤러를 지원하나요?**
+- 지원하지만 Steam 버전만 가능합니다. GOG 또는 Epic Games 사용자에게는 비슷한 기능을 제공하는 적절한 타사 도구가 없습니다. Steam Input을 사용하고 [공식 Steam 컨트롤러 안내](https://nuclearsunset.com/docs/main/controller)를 따르세요.
 
-- **Disabling Mods - Can I disable ___ mod?**
-  - The only mods you can safely enable or disable are those in the `Optional` separators.
+- **콘솔 명령 — 게임에서 사용해도 안전한가요?**
+- 아니요. 거의 모든 콘솔 명령은 예상치 못한 후속 문제를 일으킬 수 있습니다. 콘솔 명령을 사용하면 공식 지원을 받을 수 없습니다.
 
-- **Disguise - What happened to the disguise system?**
-  - It is been removed due to unresolvable bugs in the base implementation.
+- **부상 — 불구가 된 팔다리는 어떻게 치료하나요?**
+- 의사를 방문합니다.
+  - Doctor's Bag 또는 Splint를 사용합니다.
+  - 체력이 최대인 상태에서도 치료 아이템을 추가로 사용합니다.
+  - 체력이 최대인 상태에서도 수면으로 추가 회복합니다.
 
-- **DMP Files - Mod Organizer 2 crashes on launch and opens 3 DMP files. Why?**  
-  - This is a result of outdated Runtimes. Instructions for updating are included in [Requirements](https://nuclearsunset.com/docs/main/requirements).
+- **DT와 DR — 피해 임계값과 피해 저항은 어떻게 작동하나요?**
+- **Damage Threshold(DT)** — 피해량을 일정한 수치만큼 감소시킵니다. DR 적용 **후**에 계산됩니다. 원래 피해량의 최대 20%까지 경감할 수 있다는 제한이 적용됩니다. 예를 들어 DT가 10이면 피해량 40이 30으로 감소합니다.
+  - **Damage Resistance(DR)** — 피해량을 비율로 감소시킵니다. DT 적용 **전**에 계산됩니다. 최대 피해 경감률은 85%입니다. 예를 들어 DR이 30이면 받는 피해량이 30% 줄어듭니다.
+
+- **대화 기술 표시 — 왜 제거했나요?**
+- 몰입도를 높이고 게임 외부 지식을 활용한 선택(메타게이밍)을 방지하기 위해 의도적으로 제거했습니다.
+
+- **DLC — 각 DLC는 어떻게 시작하나요?**
+- **수도 황무지:**
+    - **Point Lookout** — 시타델을 지나 강가의 배 쪽으로 가면 경적이 울립니다.
+    - **The Pitt** — 오아시스 근처에서 라디오 방송을 듣습니다.
+    - **Mothership Zeta** — MDPL-13 발전소 근처에서 라디오 방송을 듣습니다.
+    - **Operation Anchorage** — 베일리 교차로 근처에서 라디오 방송을 듣습니다.
+  - **모하비 황무지:**
+    - **Autumn Leaves** — 히파티아를 방문합니다.
+    - **Into the Deep** — 샴블을 방문합니다.
+    - **Dry Wells** — Blue Paradise Vacation Rentals를 방문합니다.
+    - **Zion Trails** — 모하비 황무지 최북서쪽 모퉁이를 탐험합니다.
+    - **Race To The Bottom** — 프리사이드 협동조합을 방문합니다.
+    - **Honest Hearts** — 프리사이드 근처에서 라디오 방송을 듣습니다.
+    - **Old World Blues** — 추락한 인공위성 근처에서 라디오 방송을 듣습니다.
+    - **Dead Money** — 헬리오스 원 근처에서 라디오 방송을 듣습니다.
+    - **Lonesome Road** — 협곡 잔해를 방문합니다.
+
+- **DLC·퀘스트 모드 — 권장 레벨은?**
+- **수도 황무지:**
+    - **Point Lookout (Low Level Point Lookout 적용)** — 5~10
+    - **The Pitt** — 15~20
+    - **Mothership Zeta (Hardcore Zeta 적용)** — 20~25
+    - **Operation Anchorage (Anchorage Gameplay Expansion 적용)** — 25~30
+  - **모하비 황무지:**
+    - **Autumn Leaves** — 1
+    - **Dry Wells** — 5~10
+    - **Into the Deep** — 5~10
+    - **Race To The Bottom** — 10~15
+    - **Honest Hearts** — 10~15
+    - **Zion Trails** — 15~20
+    - **Old World Blues** — 25~30
+    - **Dead Money (Dead Money Tweaks 적용)** — 25~30
+    - **Lonesome Road** — 40~45
+
+- **모드 비활성화 — 특정 모드를 꺼도 되나요?**
+- 안전하게 켜거나 끌 수 있는 것은 `Optional` 구분선 아래에 있는 모드뿐입니다.
+
+- **변장 — 변장 시스템은 어떻게 되었나요?**
+- 기본 구현에 해결하기 어려운 오류가 있어 제거했습니다.
+
+- **DMP 파일 — MO2 실행 시 충돌하면서 DMP 파일 3개가 열립니다.**
+- 런타임이 오래되었기 때문입니다. [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에서 런타임 업데이트 방법을 확인하세요.
 
 - **Failed or Slow Nexus Downloads - Why are my downloads slow or failing?**  
   - Relog into your Nexus account in the Wabbajack settings.
