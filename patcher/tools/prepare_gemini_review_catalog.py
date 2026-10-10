@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 import re
 
-RADIO_ID = re.compile(r"^\\{Song\\s+\\d+\\s+[^{}]+\\}$")
+RADIO_ID = re.compile(r"^\{Song\s+\d+\s+[^{}]+\}$")
 
 
 def sha256(path: Path) -> str:
