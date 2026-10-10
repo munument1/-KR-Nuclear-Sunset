@@ -143,114 +143,101 @@ sidebar_label: 자주 묻는 질문
     - **Lonesome Road** — 협곡 잔해를 방문합니다.
 
 - **DLC·퀘스트 모드 — 권장 레벨은?**
-- **수도 황무지:**
-    - **Point Lookout (Low Level Point Lookout 적용)** — 5~10
-    - **The Pitt** — 15~20
-    - **Mothership Zeta (Hardcore Zeta 적용)** — 20~25
-    - **Operation Anchorage (Anchorage Gameplay Expansion 적용)** — 25~30
-  - **모하비 황무지:**
-    - **Autumn Leaves** — 1
-    - **Dry Wells** — 5~10
-    - **Into the Deep** — 5~10
-    - **Race To The Bottom** — 10~15
-    - **Honest Hearts** — 10~15
-    - **Zion Trails** — 15~20
-    - **Old World Blues** — 25~30
-    - **Dead Money (Dead Money Tweaks 적용)** — 25~30
-    - **Lonesome Road** — 40~45
+- **Nexus 다운로드 오류·지연 — 다운로드가 느리거나 실패합니다.**
+- Wabbajack 설정에서 Nexus 계정에 다시 로그인하세요.
 
-- **모드 비활성화 — 특정 모드를 꺼도 되나요?**
-- 안전하게 켜거나 끌 수 있는 것은 `Optional` 구분선 아래에 있는 모드뿐입니다.
+- **Fallout 3 — Nuclear Sunset을 플레이하려면 반드시 필요한가요?**
+- 네. Fallout 3와 그 DLC를 보유하지 않고 Nuclear Sunset을 플레이할 수는 없습니다.
 
-- **변장 — 변장 시스템은 어떻게 되었나요?**
-- 기본 구현에 해결하기 어려운 오류가 있어 제거했습니다.
+- **빠른 이동 — Nuclear Sunset에서도 가능한가요?**
+- 네. 과적 상태이거나 전투 중이거나 퀘스트 진행상 빠른 이동이 제한된 상황이 아니라면 사용할 수 있습니다.
 
-- **DMP 파일 — MO2 실행 시 충돌하면서 DMP 파일 3개가 열립니다.**
-- 런타임이 오래되었기 때문입니다. [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에서 런타임 업데이트 방법을 확인하세요.
+- **처음 플레이 — Fallout 초보자에게도 적합한가요?**
+- 네. 도전적인 게임 플레이를 원하는 사용자에게 적합합니다. Nuclear Sunset이 지나치게 어렵다면 MO2의 [선택 모드](https://nuclearsunset.com/docs/main/setup#-optional-mods-0)에서 `Softercore`를 활성화해 보세요.
 
-- **Failed or Slow Nexus Downloads - Why are my downloads slow or failing?**  
-  - Relog into your Nexus account in the Wabbajack settings.
+- **처음 플레이·볼트 101 — Fallout 3 도입부를 직접 경험하고 싶습니다.**
+- Fallout 3의 도입부를 플레이하려면 MO2의 `Optional - Gameplay` 구분선에서 `[#] [INF] - Quick Start & Associated Addons - Nuclear Sunset Merge` 모드를 비활성화하세요.
 
-- **Fallout 3 - Is Fallout 3 absolutely required to play Nuclear Sunset?**  
-  - Yes. There is no way to play Nuclear Sunset without owning Fallout 3 and the associated DLCs.
+- **처음 플레이 — 잘 살아남기 위한 팁이 있나요?**
+- 캐릭터 생성 시 SPECIAL 능력치를 지나치게 낮추지 마세요. 일반적인 Fallout: New Vegas와 달리 Nuclear Sunset에는 쓸모없는 능력치가 없습니다.
+  - 게임 초반에는 무기 기술 두 가지를 선택해 집중적으로 육성하세요. 탄약과 기술 점수가 모두 부족합니다. 근접 전투도 강력하지만 무기가 쉽게 파손됩니다.
+  - 모든 특전과 특성이 개편되었습니다. 이후 예상치 못한 결과를 낳을 수 있으므로 효과를 주의 깊게 읽으세요.
+  - 잡동사니가 중요합니다. 가능한 모든 것을 수집하세요. 잡동사니를 팔아야 식량, 탄약, 의약품을 마련할 캡을 충분히 모을 수 있습니다.
+  - 빈 병은 물을 모으는 데 매우 유용합니다.
+  - 음식은 체력을 많이 회복시키지 않습니다. 수면과 의사 방문이 더 효과적인 회복 수단입니다.
+  - 약물과 술은 잠시 강력한 강화 효과를 주지만 중독 상태에서는 심각한 불이익이 생길 수 있습니다. 의사의 중독 치료는 일시적인 도움이 되며, 실제 중독에서 벗어나려면 자연 회복 시간이 필요합니다.
+  - 일부 제작 재료는 예상하지 못한 용도로 사용됩니다. 제작대를 주의 깊게 살펴보세요.
+  - 서로 다른 탄약을 사용하는 무기를 여러 개 휴대하세요. 탄약이 부족하기 때문에 무기를 자주 바꾸게 됩니다.
+  - 기존 Fallout: New Vegas 또는 Fallout 3에서 특정 무기와 아이템이 얼마나 유용했는지는 잊으세요. Nuclear Sunset에서는 모든 요소의 균형을 전면 재조정하여 예전에 약했던 무기가 훨씬 유용해졌을 수도 있습니다.
 
-- **Fast Traveling - Can I fast travel in Nuclear Sunset?**  
-  - Yes. The only circumstances in which fast travel is prohibited is when over-encumbered, while in combat, or while prohibited by quest content.
+- **FPS·화면 끊김 — 성능을 개선하려면 어떻게 하나요?**
+- NVIDIA GPU 사용자라면 [NVIDIA 프로필 적용](https://nuclearsunset.com/docs/main/setup#-nvidia-users---applying-nvidia-profile-) 지침을 완료했는지 확인합니다.
+  - AMD GPU 사용자라면 [ULPS 비활성화](https://nuclearsunset.com/docs/main/setup#-amd-users---disabling-ultra-low-power-state-ulps-) 지침을 완료했는지 확인합니다.
+  - [Nuclear Sunset 프로필](https://nuclearsunset.com/docs/main/setup#-selecting-a-nuclear-sunset-profile-)의 품질을 낮춥니다.
+  - [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-)에서 `Detail` 품질을 낮춥니다.
+  - 4K 모니터를 사용한다면 [게임 설정 구성](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-), 컴퓨터의 `Display Settings`, `[#] [INF] [DB] - OneTweak - Custom INI`에서 해상도를 2K로 낮춰 보세요.
+  - [Lossless Scaling](https://nuclearsunset.com/docs/resources/lossless)을 사용하는 것도 고려할 수 있습니다.
+    - Nuclear Sunset 팀은 Lossless Scaling과 제휴 관계가 없으며 해당 프로그램에 대한 지원을 제공하지 않습니다.
 
-- **First Time Playing - Is this list suitable for a Fallout newcomer?**  
-  - Yes. This list is ideal for anyone seeking a challenging experience. If Nuclear Sunset feels overwhelming, consider enabling `Softercore` in the [Optional Mods](https://nuclearsunset.com/docs/main/setup#-optional-mods-0) section of MO2.
+- **FPS 제한 프로그램 — 별도로 필요한가요?**
+- 네. RTSS는 CPU 기반 기능으로 FPS를 제한하므로 GPU 기반 방식보다 지연 시간이 낮고 프레임 간격이 일정합니다. 특히 Fallout: New Vegas에서 효과적입니다.
 
-- **First Time Playing/FO3 Vault Intro - I want to experience the intro/Fallout 3 Vault 101 sequence.**  
-  - To experience the intro sequence, disable the `[#] [INF] - Quick Start & Associated Addons - Nuclear Sunset Merge` mod in the Mod Organizer 2 `Optional - Gameplay` separator.  
+- **도박 — 전에는 쉽게 돈을 벌었는데 지금은 어려워진 이유는?**
+- [Gambling Luck Rebalance](https://www.nexusmods.com/newvegas/mods/92152)로 인해 행운이 도박 결과에 미치는 영향이 예전보다 훨씬 줄었습니다. 자세한 효과는 해당 모드 페이지에 설명되어 있습니다.
 
-- **First Time Playing - Do you have any tips on how to be successful?**  
-  - Avoid reducing any SPECIAL stat too low during character creation. No stat is useless in Nuclear Sunset, despite this being contrary to standard Fallout: New Vegas.
-  - Choose two weapon skills to focus on at the start of the game. Ammo is scarce, as are skill points. Melee is powerful, though weapons break easily.
-  - All perks and traits have been overhauled. Review their effects carefully, as they may have unintended consequences later on.
-  - Trash is important. Scavenge for everything possible. Selling trash will be important to gaining enough caps to afford food, ammo, and aid.
-  - Empty bottles are invaluable for water collection.
-  - Food will not provide much healing. The best ways to heal are by sleeping and by visiting doctors.
-  - Chems and alcohol can give strong transient buffs, though are also associated with severe drawbacks during times of addiction. Visiting a doctor about the player's addiction will only help for a period of time while the player takes time to naturally recover from their addiction.
-  - Some crafting items have unexpected uses. Study crafting stations carefully.
-  - Carry multiple weapons that require different ammo types. Ammo scarcity will require you to switch weapons frequently.
-  - Forget any preconceptions of the utility of certain weapons or items in standard Fallout: New Vegas or Fallout 3. Everything in Nuclear Sunset has been completely rebalanced, and weapons that were weak previously may now be much more useful.
+- **하드코어 — 하드코어 모드를 끌 수 있나요?**
+- 아니요. Nuclear Sunset의 여러 모드는 하드코어 모드를 전제로 하며, 전체 목록 역시 이를 중심으로 설계되었습니다.
 
-- **FPS/Stutter - How can I increase FPS/Reduce Stutter in Nuclear Sunset?**  
-  - If using NVIDIA, ensure that the [Applying NVIDIA Profile](https://nuclearsunset.com/docs/main/setup#-nvidia-users---applying-nvidia-profile-) instructions have been followed.
-  - If using AMD, ensure that the [Disabling Ultra-Low Power State (ULPS)](https://nuclearsunset.com/docs/main/setup#-amd-users---disabling-ultra-low-power-state-ulps-) instructions have been followed.
-  - Reduce the [Nuclear Sunset Profile](https://nuclearsunset.com/docs/main/setup#-selecting-a-nuclear-sunset-profile-) quality.
-  - Reduce the `Detail` quality in [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-).
-  - If using a 4k monitor, try reducing resolution to 2k in [Configuring Game Settings](https://nuclearsunset.com/docs/main/setup#-configuring-game-settings-), your computers `Display Settings`, and in `[#] [INF] [DB] - OneTweak - Custom INI`.
-  - Consider trying [Lossless Scaling](https://nuclearsunset.com/docs/resources/lossless).
-    - Please note that the Nuclear Sunset team has no affiliation with Lossless Scaling and does not provide support for it.
+- **Hardercore — 선택 모드를 사용하면 무엇이 달라지나요?**
+- 변경 사항은 설치 안내의 [선택 모드](https://nuclearsunset.com/docs/main/setup#-optional-mods-) 항목에서 확인할 수 있습니다.
 
-- **FPS Limiters - Do I need a separate FPS limiter?**  
-  - Yes. RTSS utilizes CPU-based functions to limit FPS, which offers lower latency and better consistency than GPU-based methods, especially in Fallout: New Vegas.
+- **치료 — 의사에게 돈을 내도 체력이 완전히 회복되지 않습니다.**
+- 의도된 밸런스입니다. 완전히 회복하려면 여러 차례 치료비를 지불하거나 다른 회복 방법을 사용해야 합니다.
 
-- **Gambling - I used to be able to easily win gambling and earn free money, but now it's harder. Why?**
-  - Luck plays a much smaller part of gambling that before thanks to [Gambling Luck Rebalance](https://www.nexusmods.com/newvegas/mods/92152). The effects luck has while gambling can be found on the mod page.
+- **HDR — 모니터가 HDR을 지원하지 않는데 런처의 HDR을 꺼야 하나요?**
+- 아니요. Fallout: New Vegas에서 HDR은 렌더링 품질을 가리키는 표현으로, 모니터의 HDR 지원 여부와 관계가 없습니다.
 
-- **Hardcore - Can I disable the hardcore mode?**  
-  - No. Many mods in Nuclear Sunset rely on hardcore mode, and the list is designed around it.
+- **Humbled·황무지 간 이동 — 이동할 때 무엇을 유지하나요?**
+- 플레이어의 레벨, 기술, 카르마가 초기화됩니다. 특전은 유지되며 기술 서적으로 얻은 기술 점수도 남습니다. 캡은 도난당해 영구적으로 사라집니다. 장비도 도난당하지만 나중에 되찾을 수 있습니다.
 
-- **Hardercore - What changes does the Hardercore Optional Mod change?**  
-  - The changes for hardercore can be found in the [Optional Mods Section](https://nuclearsunset.com/docs/main/setup#-optional-mods-) of the Setup Instructions
+- **아이템 — 다음 도구들은 무엇에 사용하나요?**
+- **Air Scrubber** — 방독면 및 방사능 저항을 제공하는 물품 수리에 사용합니다.
+  - **Bypass Module** — 모듈과 마이크로퓨전 셀을 조합하여 터미널 해킹을 우회합니다. 필요한 재료량은 해킹 난이도에 따라 달라집니다.
+  - **Grinder** — 연마 디스크와 소형 에너지 셀을 사용해 문 잠금장치를 우회합니다. 필요한 재료량은 잠금 난이도에 따라 달라집니다.
+  - **Power Drill** — 드릴 비트와 소형 에너지 셀을 사용해 보관함 잠금장치를 우회합니다. 필요한 재료량은 잠금 난이도에 따라 달라집니다.
+  - **Skill Items** — 플레이어의 소지품에 들어 있으면 지정된 기술 보너스를 제공합니다.
+  - **Welding Torch** — 화염방사기 연료와 은화 또는 금화 등을 이용하여 방어구·무기 수리를 강화할 때 사용합니다.
 
-- **Healing - When I pay a doctor to heal me, I do not heal fully. Why?**  
-  - This is an intentional balance design. You will need to pay for several different healing sessions or heal through other means to fully heal.
+- **아이템 위치 — 예전에 있던 곳에서 찾을 수 없습니다.**
+- 이전 위치에 집착하기보다는 새로운 장소를 발견하는 재미를 즐겨 주세요. 사라진 아이템은 의도적인 개편에 따라 다른 위치로 옮겨졌습니다. 새로운 위치는 알려 드리지 않습니다.
 
-- **HDR - The launcher is configured with HDR on, but my monitor doesn't support HDR. Should I turn it off?**  
-  - No, Fallout: New Vegas uses the term HDR to reference the quality of rendering, which is independent of your monitor.
+- **단축키 — Nuclear Sunset 단축키 목록은 어디서 확인하나요?**
+- 일시 정지 메뉴에서 `K`를 누르세요.
 
-- **Humbled/Traveling to the Mojave/Capital Wasteland - What do I get to keep when I transition from from one Wasteland to the other (get humbled/Benny'd)?**
-  - The players level, skills, and karma are reset. Perks are retained. Skills gained from skill books are retained. Caps are stolen and permanently removed. Gear is stolen, though can later be recovered.
+- **실행 — 설치 후 바닐라 Fallout: New Vegas만 실행됩니다.**
+- Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행하면 잘못된 파일 경로를 복구할 수 있습니다.
+  - 게임 런처에서 직접 게임을 실행하지 않았는지 확인하세요.
 
-- **Items - What does ___ item do?**
-  - **Air Scrubber** - Used to repair gas masks and other items that provide radiation resistance.
-  - **Bypass Module** - Uses a combination of modules and microfusion cells to bypass terminal hacking. The amount of material required depends on the hacking difficulty.
-  - **Grinder** - Uses a combination of discs and small energy cells to bypass door locks. The amount of material required depends on the lock difficulty.
-  - **Power Drill** - Uses a combination of drill bits and small energy cells to bypass container locks. The amount of material required depends on the lock difficulty.
-  - **Skill Items** - Add specified skill bonuses while held in the players inventory.
-  - **Welding Torch** - Used to augment armor and weapon repair, alongside flamer fuel, and silver or gold coins.
- 
-- **Items - Where is ___ item located? It used to be in this very specific location!**  
-  - Please enjoy the thrill of discovery, rather than focusing on what used to be. Any missing items you encounter have been relocated as part of an intentional overhaul. No, we will not tell you the new location.
+- **저장·불러오기 — Skyrim처럼 빠른 저장과 빠른 불러오기를 피해야 하나요?**
+- 아니요. 빠른 저장, 자동 저장, 일반 저장은 기능적으로 거의 같으며 게임에 부정적인 영향을 주지 않습니다. 마찬가지로 저장 파일을 다시 불러오는 행위도 게임의 안정성에 악영향을 주지 않습니다.
 
-- **Keybinds - How can I view Nuclear Sunset’s keybinds?**  
-  - Press `K` in the pause menu.
+- **최대 레벨 — Nuclear Sunset의 레벨 상한은?**
+- Tale of Two Wastelands에서 지정한 **60레벨**입니다.
 
-- **Launch/Start - When I launch Nuclear Sunset after finishing the installation process, it launches unmodded/vanilla Fallout: New Vegas. How do I fix it?**
-  - Re-run the Nuclear Sunset Wabbajack installer, it will fix repair any incorrect filepaths.
-  - Ensure the game is not being launched from the launcher.
+- **로딩 — 로딩 화면이 너무 오래 지속됩니다.**
+- FPS 제한값을 지나치게 낮게 설정했을 가능성이 큽니다.
 
-- **Loading & Saving - In Skyrim I am told I can't quicksave or quickload. Is this also true in Nuclear Sunset?**
-  - No. Quicksaves, autosaves, and full saves are also functionally similar, and none of these negatively impact the game. Similarly, reloading will not negatively impact your game.
+- **수동 설치 — 왜 TTW는 직접 설치해야 하나요?**
+- ModPub의 제한 사항 때문에 TTW는 수동으로 설치해야 합니다.
 
-- **Level Cap - What is the level cap in Nuclear Sunset?**  
-  - 60, as set by Tale of Two Wastelands.
+- **고기 — 동물이 고기를 떨어뜨리지 않는 이유는?**
+- Hunter 특전이 없으면 사냥한 동물의 고기를 채취하기 어렵습니다.
 
-- **Long Load Screens - I have very long load screens, why?**  
-  - You likely capped your FPS at too low a value.
+- **메가톤 폭탄 — 폭탄을 해체하려면 어떻게 하나요?**
+- 폭탄 해체 능력은 지능, 과학, 수리, 폭발물 수치에 따라 결정됩니다. 아래 공식으로 계산한 해체 능력치가 **90**이어야 합니다: `((Intelligence * Science) * .05) + Repair + Explosives`.
+
+- **모드 순서·로드 순서 — 실수로 순서를 바꿨습니다.**
+- Nuclear Sunset에는 백업이 포함되어 있습니다. 이 백업을 복구하거나 Nuclear Sunset Wabbajack 설치 프로그램을 다시 실행하면 모드 목록과 로드 순서가 기본 구성으로 돌아갑니다.
 
 - **Manual Installs - Why must I manually install TTW?**  
   - TTW requires manual installation due to ModPub restrictions.
