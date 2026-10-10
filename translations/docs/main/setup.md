@@ -1,16 +1,16 @@
 ---
 sidebar_position: 6
-title: Setup Instructions
+title: 설치 안내
 hide_title: true
-sidebar_label: Setup Instructions
+sidebar_label: 설치 안내
 ---
 
-# ![Banner Setup Instructions](https://github.com/user-attachments/assets/c33fd668-6295-4c27-be33-a3c99cc33993)
+# ![설치 안내 배너](https://github.com/user-attachments/assets/c33fd668-6295-4c27-be33-a3c99cc33993)
 
-:::danger Important
-Follow these instructions carefully and in the exact order specified. Skipping steps may lead to installation issues.
+:::danger 중요
+다음 지침을 **지정된 순서대로 정확하게** 따르세요. 단계를 건너뛰면 설치에 문제가 생길 수 있습니다.
 
-Before requesting support, check the [Frequently Asked Questions](https://nuclearsunset.com/docs/main/faq) for troubleshooting common errors.
+지원 요청 전에 [자주 묻는 질문](https://nuclearsunset.com/docs/main/faq)에서 일반적인 오류 해결 방법을 확인하세요.
 :::
 
 <br></br>
@@ -18,28 +18,28 @@ Before requesting support, check the [Frequently Asked Questions](https://nuclea
 
 ### <p align="center"> ![Installing on Linux](https://github.com/user-attachments/assets/56a10969-00a9-41a6-a8ca-2b488423a1e7)</p>
 <details><summary>
-Expand - Linux Installation Instructions
+펼치기 - Linux 설치 안내
 </summary>
 
-Linux inherently requires above average operating system knowledge and troubleshooting capability. For any linux related assisance, please use the [#linux-support](https://discord.com/channels/1445447774035251323/1505659799398776873) channel on our Discord server.
+Linux에서는 운영체제에 관한 평균 이상의 지식과 문제 해결 능력이 필요합니다. Linux 관련 도움이 필요하다면 공식 Discord의 [#linux-support](https://discord.com/channels/1445447774035251323/1505659799398776873) 채널을 이용하세요.
 
-Linux instructions were generously provided by queenglizzyandthelizzywizzy on Discord. Thank you, Liz!
+Linux 설치 지침은 Discord의 queenglizzyandthelizzywizzy가 친절하게 제공했습니다. Liz님, 감사합니다!
 
-[Linux Instructions](https://nuclearsunset.com/docs/main/linux)
+[Linux 설치 안내](https://nuclearsunset.com/docs/main/linux)
 </details>
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Creating Necessary File Paths](https://github.com/user-attachments/assets/7f0a2b00-9990-434d-b7e6-bc8ed273f78c) </p>
-- Navigate to the `Root Directory` (e.g., `C:\`, `D:\`).
-- Create a folder named `Modding` and open it.
-- Inside, create a folder named `Wabbajack` (**DO NOT** open it).
-- Create another folder named `Nuclear Sunset` and open it. 
-- Inside `Nuclear Sunset`, create a folder named `downloads`.
+- 드라이브의 `루트 디렉터리`(예: `C:\`, `D:\`)로 이동합니다.
+- `Modding`이라는 폴더를 만들고 엽니다.
+- 그 안에 `Wabbajack` 폴더를 만듭니다. (**아직 열지 마세요.**)
+- `Nuclear Sunset` 폴더도 만들고 엽니다.
+- `Nuclear Sunset` 안에 `downloads` 폴더를 만듭니다.
 
-:::important Double Check
-Verify these file paths exist (Root Directory may vary):
+:::important 다시 확인하세요
+다음 경로가 실제로 존재하는지 확인하세요. 루트 드라이브 문자는 달라도 됩니다.
 - `C:\Modding\Nuclear Sunset\downloads`
 - `C:\Modding\Wabbajack`
 :::
@@ -48,200 +48,204 @@ Verify these file paths exist (Root Directory may vary):
 <br></br>
 
 ### <p align="center"> ![Creating Antivirus Exclusions](https://github.com/user-attachments/assets/02361941-840d-42d9-9c62-172b14385880) </p>
-:::tip Why?
-Excluding these folders prevents Windows or third-party antivirus from blocking essential files.
+:::tip 이 작업을 하는 이유
+이 폴더들을 백신 프로그램의 예외 항목에 추가하면 Windows 또는 타사 백신이 필수 파일을 차단하는 일을 줄일 수 있습니다.
 :::
 
-- Open `Windows Security`.
-- Go to `Virus & Threat Protection`.
-- Under `Virus & Threat Protection Settings`, select `Manage Settings`.
-- Scroll to `Exclusions` and select `Add or Remove Exclusions`.
-- Add exclusions for:
+- `Windows Security`(Windows 보안)를 엽니다.
+- `Virus & Threat Protection`(바이러스 및 위협 방지)으로 이동합니다.
+- `Virus & Threat Protection Settings`(바이러스 및 위협 방지 설정)의 `Manage Settings`(설정 관리)를 선택합니다.
+- `Exclusions`(제외)까지 스크롤한 뒤 `Add or Remove Exclusions`(제외 추가 또는 제거)를 선택합니다.
+- 다음 폴더를 예외 항목에 추가합니다.
   - `C:\Modding\Nuclear Sunset`
   - `C:\Modding\Wabbajack`
 
-	![Exclusions](https://github.com/user-attachments/assets/69897eb3-f0ed-427c-beb6-548934c2e1a6)
+![Exclusions](https://github.com/user-attachments/assets/69897eb3-f0ed-427c-beb6-548934c2e1a6)
 
-- Repeat this process for any third-party antivirus software.
+- 타사 백신을 사용하는 경우에도 동일한 설정을 진행합니다.
+
+:::caution 한국어판 보안 참고
+백신 예외 설정은 해당 폴더에 대한 악성코드 검사를 줄이므로 보안상 위험이 커질 수 있습니다. 원본 가이드의 절차를 소개한 것이며, 신뢰할 수 없는 파일에는 적용하지 마세요. 사용 중인 보안 정책과 위험을 확인한 후 결정하세요.
+:::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Downloading Wabbajack](https://github.com/user-attachments/assets/25c0d463-f69c-4347-b7ad-ffc7d6780787) </p>
+- [Wabbajack 설치 파일](https://www.wabbajack.org/)을 다운로드합니다.
+- 다운로드한 파일을 `C:\Modding\Wabbajack`로 이동합니다.
+- `Wabbajack.exe`의 이름을 `Wabbajack Launcher.exe`로 변경합니다.
+- `Wabbajack Launcher.exe`를 실행해 설치를 완료합니다.
+- Wabbajack을 닫습니다.
 
-- Download the [Wabbajack Installation file](https://www.wabbajack.org/).
-- Move the downloaded file to `C:\Modding\Wabbajack`.
-- Rename `Wabbajack.exe` to `Wabbajack Launcher.exe`
-- Run `Wabbajack Launcher.exe` to complete the installation.
-- Close Wabbajack.
+:::warning 버전 확인
+기존에 설치해 둔 Wabbajack이나 이전에 만든 바로 가기를 **사용하지 마세요.**
 
-:::warning Version Check
-**DO NOT** use pre-existing installations of Wabbajack or pre-existing Wabbajack shortcuts.
-
-Wabbajack should **ONLY** be launched from the `Wabbajack Launcher.exe`.
+Wabbajack은 **반드시** `Wabbajack Launcher.exe`를 통해 실행해야 합니다.
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Creating Clean Installs and Backups](https://github.com/user-attachments/assets/7674881e-a80b-4cc3-94f7-9a8630e89980) </p>
-
-:::tip Self-Contained
-This is part one of a process that creates a **SELF-CONTAINED** installation that won't interfere with preexisting modded setups.
+:::tip 독립 실행형 설치
+기존의 모드 설치 환경에 영향을 주지 않는 **독립적인 설치본**을 만드는 첫 번째 단계입니다.
 :::
 
 :::danger
-If clean installs are not appropriately created, the Nuclear Sunset installation process will fail. Simply uninstalling the game through Steam/GOG/Epic Games is insufficient.
+깨끗한 게임 설치본을 제대로 만들지 않으면 Nuclear Sunset 설치가 실패합니다. Steam/GOG/Epic Games에서 게임을 제거하는 것만으로는 충분하지 않습니다.
 :::
 
-- Navigate to `C:\[STEAM, GOG, or EPIC FILEPATH]` and:
-	- Move the `Fallout New Vegas` folder to the desktop.
-	- Delete the `Fallout New Vegas` folder instead if backups are not desired.
-	- Delete the `Fallout 3` folder.
-- Navigate to `C:\Users\[USERNAME]\Documents\My Games` and:
-	- Move the `FalloutNV` folder to the desktop.
-	- Delete the `FalloutNV` folder if backups are not desired.
- 	- Delete the `Fallout3` folder.
-- Open `Steam, GOG, or Epic` and:
-	- Uninstall `Fallout: New Vegas` and `Fallout 3` if they are still installed.
- 	- Reinstall `Fallout: New Vegas` and `Fallout 3`.
+- `C:\[STEAM, GOG, or EPIC FILEPATH]`로 이동하여 다음 작업을 진행합니다.
+  - `Fallout New Vegas` 폴더를 바탕 화면으로 이동합니다.
+  - 백업이 필요하지 않다면 `Fallout New Vegas` 폴더를 삭제해도 됩니다.
+  - `Fallout 3` 폴더를 삭제합니다.
+- `C:\Users\[USERNAME]\Documents\My Games`로 이동하여 다음 작업을 진행합니다.
+  - `FalloutNV` 폴더를 바탕 화면으로 이동합니다.
+  - 백업이 필요하지 않다면 `FalloutNV` 폴더를 삭제해도 됩니다.
+  - `Fallout3` 폴더를 삭제합니다.
+- `Steam, GOG, or Epic`을 열어 다음 작업을 진행합니다.
+  - `Fallout: New Vegas`와 `Fallout 3`가 여전히 설치된 것으로 표시된다면 제거합니다.
+  - `Fallout: New Vegas`와 `Fallout 3`를 다시 설치합니다.
 
-:::tip Default Filepath Locations
-The default filepaths for each launcher are as follows:
+:::tip 기본 설치 경로
+게임 런처별 기본 경로는 다음과 같습니다.
 - Steam: `C:\Program Files\Steam\steamapps\common\[Fallout: New Vegas OR Fallout 3]`
 - GOG: `C:\Program Files\GOG Galaxy\Games\[Fallout: New Vegas OR Fallout 3]`
 - Epic: `C:\Program Files\Epic Games\[Fallout: New Vegas OR Fallout 3 (please note that these folders are nested within a second Fallout folder)]`
 
-If stuggling to find the correct filepath, `right click` the `Fallout: New Vegas` in the respective launcher and find the appropriate option to view local files.
+정확한 경로를 찾기 어렵다면 게임 런처에서 `Fallout: New Vegas`를 마우스 오른쪽 버튼으로 클릭하고 로컬 파일 위치를 여는 메뉴를 찾으세요.
 :::
 
 :::note
-These clean installations and backups will be utilized in the [Creating a Clean Stock New Vegas Folder](https://nuclearsunset.com/docs/main/setup#-creating-a-clean-stock-new-vegas-folder-) section.
+여기서 준비한 깨끗한 설치본과 백업은 뒤의 [깨끗한 Stock New Vegas 폴더 만들기](https://nuclearsunset.com/docs/main/setup#-creating-a-clean-stock-new-vegas-folder-)에서 사용합니다.
+:::
+
+:::caution 파일 삭제 전 확인
+기존 설치 파일과 게임 설정·저장 파일을 보존하려면 먼저 별도 위치에 백업하세요. 삭제 작업은 되돌리기 어렵습니다.
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Generating Fresh INI Files](https://github.com/user-attachments/assets/a72c56ce-9374-457b-8056-c79e2088c404) </p>
-- Launch Fallout: New Vegas from `Steam/GOG/Epic Games`.
-- Click `OK` when prompted with `Detecting Video Hardware`.
-- Close the launcher.
-- Repeat this process for Fallout 3.
+- `Steam/GOG/Epic Games`에서 Fallout: New Vegas를 실행합니다.
+- `Detecting Video Hardware`(비디오 하드웨어 감지) 메시지가 나타나면 `OK`를 선택합니다.
+- 런처를 닫습니다.
+- Fallout 3에서도 동일한 과정을 반복합니다.
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Installing Nuclear Sunset](https://github.com/user-attachments/assets/85079f81-db32-48ad-b319-c8a219fe85ca) </p>
-- Launch the `Wabbajack application`.
-- Open the `settings` page and log into your Nexus account.
+- `Wabbajack application`을 실행합니다.
+- `settings` 페이지를 열어 Nexus 계정으로 로그인합니다.
 
-  ![WJLogIn](https://github.com/user-attachments/assets/365c2c63-67a1-48d0-be77-15a4b6dac42f)
+![WJLogIn](https://github.com/user-attachments/assets/365c2c63-67a1-48d0-be77-15a4b6dac42f)
 
-- Open the `Browse Lists` page, check the `Non-featured` box, and type `Nuclear Sunset` into the search bar, and click the `Nuclear Sunset modlist` image.
+- `Browse Lists` 페이지를 열어 `Non-featured` 항목을 체크하고, 검색창에 `Nuclear Sunset`을 입력한 뒤 `Nuclear Sunset modlist` 이미지를 클릭합니다.
 
-  ![WJBrowse](https://github.com/user-attachments/assets/c0da4d4a-fd17-46d4-a0da-6b03939da4ea)
+![WJBrowse](https://github.com/user-attachments/assets/c0da4d4a-fd17-46d4-a0da-6b03939da4ea)
 
-- Click `Download & Install`.
+- `Download & Install`을 클릭합니다.
 
-  ![WJDownload](https://github.com/user-attachments/assets/03a2825b-c428-4c72-81f9-0ae2866742dd)
+![WJDownload](https://github.com/user-attachments/assets/03a2825b-c428-4c72-81f9-0ae2866742dd)
 
-- **COPY** (`Ctrl+C`) `C:\Modding\Nuclear Sunset`, changing the Root Directory if necessary, and **PASTE** (`Ctrl+V`) it into the `Installation Location`.
-- `Download Location` will **auto-populate** `C:\Modding\Nuclear Sunset\downloads`.
-- Once finished, click `Install`.
+- 필요한 경우 루트 드라이브 문자를 변경한 `C:\Modding\Nuclear Sunset` 경로를 **복사**(`Ctrl+C`)하여 `Installation Location`에 **붙여넣습니다**(`Ctrl+V`).
+- `Download Location`에는 `C:\Modding\Nuclear Sunset\downloads`가 **자동으로 입력됩니다.**
+- 확인한 후 `Install`을 클릭합니다.
 
-  ![WJNSInstall](https://github.com/user-attachments/assets/06d99a21-e2dd-4aaf-983d-af2982ec0663)
+![WJNSInstall](https://github.com/user-attachments/assets/06d99a21-e2dd-4aaf-983d-af2982ec0663)
 
-- Begin the installation and accept the `Nexus Mods API request` if prompted.
-- If you are not a Nexus Mods premium user, manually click download on each mod.
-- When complete, Wabbajack will display `Finished Installing Nuclear Sunset` at the top.
-- Close Wabbajack. **DO NOT** select the `Create Desktop Shortcut` option.
+- 설치를 시작하고 `Nexus Mods API request` 창이 표시되면 승인합니다.
+- Nexus Mods Premium 구독자가 아니라면 모드마다 다운로드 버튼을 수동으로 눌러야 합니다.
+- 설치가 완료되면 Wabbajack 상단에 `Finished Installing Nuclear Sunset` 메시지가 표시됩니다.
+- Wabbajack을 닫습니다. `Create Desktop Shortcut` 옵션은 **선택하지 마세요.**
 
-:::danger Red `INSTALLATION FAILED` Notification
-- Please refer to [Frequently Asked Questions](https://nuclearsunset.com/docs/main/faq) for a list of initial troubleshooting steps for common installation errors **PRIOR** to requesting support.
+:::danger 빨간색 `INSTALLATION FAILED` 알림
+지원을 요청하기 **전에** [자주 묻는 질문](https://nuclearsunset.com/docs/main/faq)에서 일반적인 설치 오류에 대한 초기 문제 해결 절차를 확인하세요.
 :::
 
-:::warning Reminder
-Let the installation **FINISH COMPLETELY** prior to starting the following sections.
+:::warning 주의
+뒤의 단계를 시작하기 전에 설치가 **완전히 종료될 때까지** 기다리세요.
 
-**DO NOT** open Mod Organizer 2 **BEFORE** being instructed to do so.
+지시가 나오기 **전에 Mod Organizer 2를 실행하지 마세요.**
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Creating a Clean Stock New Vegas Folder](https://github.com/user-attachments/assets/5007576c-8c12-4685-8ee6-ae4aea333c5e) </p>
-:::tip Self-Contained
-This is part two of a process that creates a **SELF-CONTAINED** installation that won't interfere with preexisting modded setups.
+:::tip 독립 실행형 설치
+기존 모드 설치본에 영향을 주지 않는 **독립적인 설치본**을 만드는 두 번째 단계입니다.
 :::
 
-#### Step 1: Creating the Clean Stock New Vegas Folder
-- Navigate to the newly **reinstalled** `C:\[STEAM, GOG, or EPIC FILEPATH]\Fallout New Vegas` folder, **COPY** ***ALL*** of the contents (click inside the folder, press `Ctrl+A`, then `Ctrl+C`), and **PASTE** (`Ctrl+V`) them into the `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas` folder.
+#### 1단계: 깨끗한 Stock New Vegas 폴더 생성
+- **새로 설치한** `C:\[STEAM, GOG, or EPIC FILEPATH]\Fallout New Vegas` 폴더로 이동합니다. 폴더 안의 **모든 파일**을 **복사**(폴더 안에서 `Ctrl+A`, `Ctrl+C`)하여 `C:\Modding\Nuclear Sunset\[NoDelete] Stock New Vegas` 폴더에 **붙여넣습니다**(`Ctrl+V`).
 
-#### Step 2: Restoring Backups of Current Installs/Modded Instances
+#### 2단계: 기존 설치본과 모드 설치본의 백업 복구
 :::important
-**SKIP** step 2 if **not** backing up another modded instance of Fallout: New Vegas.
+기존 Fallout: New Vegas 모드 설치본을 **백업하지 않았다면** 2단계는 **건너뛰세요.**
 :::
-- After successfully creating the `Clean Stock New Vegas folder`, restore the files that were previously backed up.
-  - If restoring files, create an additional backup of these clean folders for future use, as a clean installation will be required when updating Nuclear Sunset.
-  - Move your `Fallout New Vegas` folder from your desktop back into its origin in the `C:\[STEAM, GOG, or EPIC FILEPATH]` folder, selecting `Replace` when prompted.
-  - Move your `FalloutNV` folder from your desktop back into its origin in the `C:\Users\[USERNAME]\Documents\My Games` folder, selecting `Replace` when prompted.
+
+- `Clean Stock New Vegas folder`를 올바르게 만든 뒤 이전에 백업한 파일들을 복구합니다.
+  - 앞으로 Nuclear Sunset을 업데이트할 때 깨끗한 설치본이 다시 필요하므로, 복구 전에 이 깨끗한 폴더를 별도로 백업해 두세요.
+  - 바탕 화면의 `Fallout New Vegas` 폴더를 원래 `C:\[STEAM, GOG, or EPIC FILEPATH]` 위치로 되돌리고, 메시지가 나타나면 `Replace`(바꾸기)를 선택합니다.
+  - 바탕 화면의 `FalloutNV` 폴더를 원래 `C:\Users\[USERNAME]\Documents\My Games` 위치로 되돌리고, 메시지가 나타나면 `Replace`(바꾸기)를 선택합니다.
 
 :::danger
-If a clean `Stock New Vegas` folder is not appropriate created, the game will fail to launch.
+깨끗한 `Stock New Vegas` 폴더를 올바르게 만들지 않으면 게임이 실행되지 않습니다.
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Launching Mod Organizer 2 (MO2)](https://github.com/user-attachments/assets/9a2d0b71-6761-48b9-b27c-76e5640447c2) </p>
-- Launch `ModOrganizer.exe` from `C:\Modding\Nuclear Sunset`.
-- If prompted that `FalloutNV_lang.esp` was found, select `Yes`.
-- If prompted to `register to handle nxm links`, select `Yes`.
+- `C:\Modding\Nuclear Sunset`에서 `ModOrganizer.exe`를 실행합니다.
+- `FalloutNV_lang.esp`를 발견했다는 메시지가 나오면 `Yes`를 선택합니다.
+- `register to handle nxm links`(nxm 링크 처리 등록) 메시지가 나오면 `Yes`를 선택합니다.
 
-:::tip Epic Game Users
-- Open `executable settings` ![executable settings](https://github.com/user-attachments/assets/744ae726-8c62-452c-8bd5-a0f75515d083).
-- Select `Nuclear Sunset`, select the `Arguments` box, add `-EpicPortal`, then select `Apply`.
+:::tip Epic Games 사용자
+- `executable settings`(실행 파일 설정)을 엽니다. ![executable settings](https://github.com/user-attachments/assets/744ae726-8c62-452c-8bd5-a0f75515d083)
+- `Nuclear Sunset`을 선택하고 `Arguments` 입력란에 `-EpicPortal`을 추가한 다음 `Apply`를 누릅니다.
 
- 	![EPIC](https://github.com/user-attachments/assets/0992c94d-e5c2-49d3-9bcf-a1d43c03abf6)
+![EPIC](https://github.com/user-attachments/assets/0992c94d-e5c2-49d3-9bcf-a1d43c03abf6)
 :::
 
 <br></br>
 <br></br>
 
 ### <p align="center"> ![Configuring Game Settings](https://github.com/user-attachments/assets/df73a3a0-b0c7-4a1d-b406-74f44ee30be3) </p>
+:::tip Steam 폴란드어·체코어·러시아어(PCR) 버전
+- `executable settings`(실행 파일 설정)을 엽니다. ![352871292-1de0e254-e1a2-4d2a-bac2-df9630e0677b](https://github.com/user-attachments/assets/744ae726-8c62-452c-8bd5-a0f75515d083)
+- `Configuring Game Settings`를 선택하고 `Overwrite Steam AppID`를 체크한 다음 입력란에 `22490`을 입력하고 `Apply`를 클릭합니다.
+- `Application Load Error P:0000065432` 오류가 나타나면 `22490` 대신 `22380`을 시도합니다.
 
-:::tip Steam Polish-Czech-Russian (PCR) Version
-- Open `executable settings` ![352871292-1de0e254-e1a2-4d2a-bac2-df9630e0677b](https://github.com/user-attachments/assets/744ae726-8c62-452c-8bd5-a0f75515d083).
-- Select `Configuring Game Settings`, check the `Overwrite Steam AppID` box, enter `22490` in the corresponding field, and click `Apply`.
-
-- If you receive `Application Load Error P:0000065432`, try `22380` instead of `22490`
-
- 	![PCR](https://github.com/user-attachments/assets/7f7280e7-9a20-4ad7-a085-57021c3d6845)
+![PCR](https://github.com/user-attachments/assets/7f7280e7-9a20-4ad7-a085-57021c3d6845)
 :::
 
-- In the top-right corner of MO2, open the drop-down menu labeled `Nuclear Sunset` and select `Configuring Game Settings`.
-- Click `Run`.
+- MO2 오른쪽 위의 `Nuclear Sunset` 드롭다운 메뉴를 열고 `Configuring Game Settings`를 선택합니다.
+- `Run`을 클릭합니다.
 
-	![Configuring Game Settings](https://github.com/user-attachments/assets/f54f07cc-83e9-4ed2-add4-bf64c383e634)
+![Configuring Game Settings](https://github.com/user-attachments/assets/f54f07cc-83e9-4ed2-add4-bf64c383e634)
 
-- Navigate to `Options` and select the `Ultra` preset.
-  
-:::tip Detail
-- Ultra provides textures at the intended resolution, though for those with performance concerns, lower `Detail` presets will uniformly downsize all of the textures in Nuclear Sunset, which may be beneficial for users with weaker computers.
-	- DO NOT use `Low` preset. This setting disables critical rendering functions.
+- `Options`로 이동한 뒤 `Ultra` 프리셋을 선택합니다.
 
- 	![Launcher Presets](https://github.com/user-attachments/assets/ed9051aa-1a8e-4212-afcc-604be9ced244)
+:::tip 세부 설명
+- `Ultra`는 텍스처를 의도한 해상도로 표시합니다. 성능에 문제가 있다면 더 낮은 `Detail` 프리셋으로 Nuclear Sunset의 모든 텍스처 해상도를 일괄 낮출 수 있으므로 사양이 낮은 컴퓨터에 도움이 될 수 있습니다.
+- **`Low` 프리셋은 사용하지 마세요.** 필수 렌더링 기능이 비활성화됩니다.
+
+![Launcher Presets](https://github.com/user-attachments/assets/ed9051aa-1a8e-4212-afcc-604be9ced244)
 :::
- 
-- Uncheck the `Windowed` option if checked and select your monitor's resolution.
-	- If your monitor's resolution is unavailable, manually set it by opening MO2's INI editor, navigating to the `Falloutprefs.ini` tab, and adjusting `iSize W` and `iSize H` under the `Display` section to match your screen's width and height.
-- Click `OK` and close the launcher.
 
-	![Game Settings](https://github.com/user-attachments/assets/7b3de77d-03f8-4f86-82b2-8411b5f98dd0)
+- `Windowed` 항목이 체크되어 있다면 해제하고 모니터 해상도를 선택합니다.
+  - 해상도 목록에 모니터 해상도가 없다면 MO2의 INI 편집기를 열고 `Falloutprefs.ini` 탭의 `Display` 항목에서 `iSize W`(너비), `iSize H`(높이)를 실제 화면에 맞게 직접 수정합니다.
+- `OK`를 누르고 런처를 닫습니다.
 
+![Game Settings](https://github.com/user-attachments/assets/7b3de77d-03f8-4f86-82b2-8411b5f98dd0)
 
-:::danger Configuring Game Settings Crashes
-Refer to [Frequently Asked Questions](https://nuclearsunset.com/docs/main/faq) for common troubleshooting steps before requesting support.
+:::danger 게임 설정 구성 중 충돌
+지원을 요청하기 전에 [자주 묻는 질문](https://nuclearsunset.com/docs/main/faq)에서 일반적인 문제 해결 절차를 확인하세요.
 :::
 
 <br></br>
