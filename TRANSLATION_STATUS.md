@@ -1,55 +1,56 @@
-# Nuclear Sunset 한국어 번역 진행 현황
+# Nuclear Sunset 비공식 한국어판 — 검수 현황
 
-기준: 2026-10-10 · 원본 [FinalCatalyst/Nuclear-Sunset](https://github.com/FinalCatalyst/Nuclear-Sunset), 커밋 `50a606c7d43ffe0a338d22812661c5bfeba64dce`
+기준: 2026-10-10  
+원본: https://github.com/FinalCatalyst/Nuclear-Sunset  
+원본 소스 고정 커밋: `50a606c7d43ffe0a338d22812661c5bfeba64dce` (2026-09-05)
 
-## 현재 상태
+## 한국어 문서 대응 파일: 63 / 63 (100%, **파일 기준**)
 
-- 원본 Markdown 문서: **63개**
-- 한국어 덮어쓰기 문서: **53개 (84.1%, 파일 기준)**
-- 이미지 및 갤러리 컴포넌트: 원본 자산 그대로 사용
-- 갤러리 제목 현지화: **30/30** (사진 자체와 갤러리 컴포넌트는 원본)
-- 설치 지침: `docs/main/setup.md` **전체 23구간 번역 완료**, 스크린샷 56개/URL 75개 보존 확인
-- Linux 안내: `docs/main/linux.md` **전체 13구간 번역 완료**, 이미지 12개/원문 URL 15개 보존 확인
-- 주요 모드 소개: `docs/main/highlights.md` **70개 설명 번역 완료**
-- Sweet 추천 모드: **39개 설명 번역 완료**, 링크 48개 보존 확인
-- 기타 주요 본문: 소개, 기능, 요구 사양, 설정 참고표, 업데이트, 컨트롤러, 지원, 크레딧, 후원, NSVS 소개 등
-- 자료실: 7개 중 6개 번역 완료 (`stars.md` 제외)
-- FAQ: **97/97문답 한국어 번역 완료**. 이미지 3개, URL 31개 일치, 빈 답변 0건 확인
-- Docusaurus 자동 빌드: 기존 성공 실행 확인. **최신 커밋의 배포 완료 여부는 Actions에서 별도 확인 필요**
+| 문서 분류 | 원본 | 한국어 대응 파일 | 번역 범위 |
+| --- | ---: | ---: | --- |
+| main | 14 | 14 | 본문 번역 |
+| resources | 7 | 7 | 본문·지침 번역 |
+| changelog | 9 | 9 | 수정·변경 설명 현지화, 모드명·버전 그대로 |
+| NSVS | 2 | 2 | 소개 번역 / 원본 setup은 본문 없음 |
+| gallery | 30 | 30 | **문서 제목 현지화**; 이미지·React 컴포넌트 원본 유지 |
+| videointro | 1 | 1 | 제목 현지화; 원본 임베드 유지 |
+| **총합** | **63** | **63** | 영어 원본을 기본으로 하는 미포함 Markdown 없음 |
 
-> **84.1%는 파일 수 기준**입니다. 30개 갤러리는 문서 제목만 한국어로 바뀌었고, 남은 FAQ·STARS·변경 이력은 상대적으로 분량이 커서 실제 번역 분량 완성도와 동일하게 볼 수 없습니다.
+> 100%는 원본 Markdown의 경로가 모두 한국어판에 대응한다는 뜻입니다. 모든 이미지의 설명·코드 내부 문자열·갤러리 컴포넌트의 텍스트까지 전부 번역하고 육안으로 검증했다는 뜻은 아닙니다.
 
-## 미번역 문서 10개
+## 핵심 검수 완료
 
-- `docs/resources/stars.md` — STARS 상세 설명
-- `docs/changelog/1.0.0.0.md`
-- `docs/changelog/1.0.0.1.md`
-- `docs/changelog/1.0.0.2.md`
-- `docs/changelog/1.0.1.0.md`
-- `docs/changelog/1.0.1.1.md`
-- `docs/changelog/1.0.1.2.md`
-- `docs/changelog/1.0.2.0.md`
-- `docs/changelog/1.0.2.1.md`
-- `docs/changelog/1.0.2.2.md`
+- Windows 설치 안내 `docs/main/setup.md`: 23구간 번역, 원본 스크린샷 56개 및 URL 75개 대조
+- Linux 설치 안내 `docs/main/linux.md`: 13구간 번역, 이미지 12개 및 URL 15개 대조
+- FAQ `docs/main/faq.md`: 97/97개 질문과 답변 번역, 빈 답변 0건, 이미지 3개 및 URL 31개 보존
+- 모드 특징 `docs/main/highlights.md`: 모드 70개 설명 번역
+- `docs/resources/sweetrecommendedmods.md`: 설명 39개 번역
+- STARS `docs/resources/stars.md`: 전체 설치 절차 번역, 원본 다운로드 URL 96개와 파일·INI 명칭 보존
+- 릴리스 변경 이력 `docs/changelog/`: 9/9개 파일 번역 완료
 
-## 고위험 검수
+## 별도 확인이 필요한 사항
 
-- 게임 및 OS 설정값, 명령어, 경로, 모드 이름과 플러그인 파일명은 원문 표기를 유지합니다.
-- 백신 제외, ASLR 해제, Steam DLL 권한 변경, `rm -rf` 명령어는 보안이나 데이터 손실에 영향을 줄 수 있어 한국어판에 별도 주의사항을 추가했습니다.
-- 원본 Linux 지침에 Flatpak 백업 폴더명 `FNVBackup` / `NVBackup` 불일치가 있어 확인을 권고했습니다.
-- 원본 AMD MSI Afterburner 다운로드 주소에 만료 가능성이 있는 인증 토큰이 포함되어 있습니다.
-- 새 버전의 설치 지침 변경은 영어 원본과 비교 검수한 뒤 반영해야 합니다.
+- 원본 Linux 설치 지침에는 `FNVBackup`과 `NVBackup`이라는 백업 폴더명의 불일치가 있습니다. 번역문에 경고를 추가했습니다.
+- 원본 STARS의 Sea Captain Hat 압축 해제 절차에 Spice of Life 폴더명을 잘못 언급한 부분이 있어 대상 경로를 확인하도록 안내했습니다.
+- Windows 백신 제외, Windows Defender 비활성화, Mandatory ASLR 변경, Steam DLL 접근 권한 변경, Linux `rm -rf` 명령어는 보안 또는 데이터 손실 위험이 있습니다. 원문과 별도로 한국어 주의사항을 추가했습니다.
+- 원본의 일부 다운로드 링크는 시한부 서명 URL이므로 링크 유효성 확인이 필요합니다.
+- 실제 Windows/Linux 환경의 설치 동작과 모든 모드의 게임 내 동작은 별도 실사용 테스트 대상입니다.
+- 갤러리 30개는 제목만 번역했으며, 이미지 속 문구나 갤러리 React 컴포넌트의 모든 부가 문자열까지 현지화한 것은 아닙니다.
 
 ## 배포
 
-`.github/workflows/build-korean-site.yml`이 고정한 업스트림 Docusaurus 프로젝트에 `translations/docs/`의 한국어 파일을 덮어쓰고 `gh-pages` 브랜치로 게시합니다.
+자동 빌드는 `.github/workflows/build-korean-site.yml`을 사용합니다. 원본의 Docusaurus 구조와 이미지를 그대로 불러오고 `translations/docs/`의 한국어 문서를 덮어씌워 `gh-pages` 브랜치에 게시합니다.
 
-- 배포 워크플로: https://github.com/munument1/-KR-Nuclear-Sunset/actions/workflows/build-korean-site.yml
-- 사이트 예정 주소: https://munument1.github.io/-KR-Nuclear-Sunset/
-- GitHub Pages 설정의 게시 브랜치는 `gh-pages /(root)`이어야 합니다.
+- Actions: https://github.com/munument1/-KR-Nuclear-Sunset/actions/workflows/build-korean-site.yml
+- Pages: https://github.com/munument1/-KR-Nuclear-Sunset/settings/pages
+- 공개 예정 사이트: https://munument1.github.io/-KR-Nuclear-Sunset/
 
-## 다음 작업
+**마지막 문서 커밋의 빌드와 공개 페이지까지 자동으로 성공했다고 추정하지 않습니다.** GitHub Actions의 마지막 빌드 성공 및 Pages의 `gh-pages /(root)` 설정, 실제 URL 접속을 별도로 확인해야 합니다.
 
-1. STARS 문서 전체 번역
-2. 9개 과거 변경 이력 번역
-3. 빌드·내부 링크·목차·스크린샷·모바일 화면 최종 점검
+## 최종 검수 작업
+
+1. 최신 커밋 기준 GitHub Actions 성공 확인
+2. 전체 페이지의 내부 링크·URL·원본 이미지·React 갤러리 작동 확인
+3. 원문과 한국어 문서의 섹션·리스트 구조를 추가 검사
+4. 화면 폭별 메뉴·폰트·표·스크린샷 표시 확인
+5. 원본 업데이트 때 설치 절차와 설정값 변경 여부를 비교
