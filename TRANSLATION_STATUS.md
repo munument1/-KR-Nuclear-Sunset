@@ -2,34 +2,55 @@
 
 기준: 2026-10-10 · 원본 [FinalCatalyst/Nuclear-Sunset](https://github.com/FinalCatalyst/Nuclear-Sunset), 커밋 `50a606c7d43ffe0a338d22812661c5bfeba64dce`
 
-## 현재
+## 현재 상태
 
 - 원본 Markdown 문서: **63개**
-- 한국어 덮어쓰기 파일: **43개**
-- 갤러리 제목 현지화: **30/30** (이미지·컴포넌트는 원본과 동일, 사진 설명의 추가 번역은 필요 시 별도 작업)
-- 주요 본문 한국어 번역: `main/intro`, `main/features`, `main/requirements`, `main/specs`, `main/updating`, `main/support`, `main/controller`, `main/credits`, `main/donations`, `main/reference`, `resources/overview`, `NSVS/intro`
-- `NSVS/setup`은 원본과 마찬가지로 본문 없이 제목만 있습니다.
-- 아직 한국어 덮어쓰기 파일이 없는 원본 문서: **20개**
+- 한국어 덮어쓰기 문서: **52개 (82.5%, 파일 기준)**
+- 이미지 및 갤러리 컴포넌트: 원본 자산 그대로 사용
+- 갤러리 제목 현지화: **30/30** (사진 자체와 갤러리 컴포넌트는 원본)
+- 설치 지침: `docs/main/setup.md` **전체 23구간 번역 완료**, 스크린샷 56개/URL 75개 보존 확인
+- Linux 안내: `docs/main/linux.md` **전체 13구간 번역 완료**, 이미지 12개/원문 URL 15개 보존 확인
+- 주요 모드 소개: `docs/main/highlights.md` **70개 설명 번역 완료**
+- Sweet 추천 모드: **39개 설명 번역 완료**, 링크 48개 보존 확인
+- 기타 주요 본문: 소개, 기능, 요구 사양, 설정 참고표, 업데이트, 컨트롤러, 지원, 크레딧, 후원, NSVS 소개 등
+- 자료실: 7개 중 6개 번역 완료 (`stars.md` 제외)
+- Docusaurus 자동 빌드: 기존 성공 실행 확인. **최신 커밋의 배포 완료 여부는 Actions에서 별도 확인 필요**
 
-문서 파일 수는 번역 분량과 같지 않습니다. 특히 설치 지침·FAQ·변경 이력 등 장문은 아직 영어 원문을 사용합니다. 이 자료를 한국어로 번역한 것으로 간주하면 안 됩니다.
+> **82.5%는 파일 수 기준**입니다. 30개 갤러리는 문서 제목만 한국어로 바뀌었고, 남은 FAQ·STARS·변경 이력은 상대적으로 분량이 커서 실제 번역 분량 완성도와 동일하게 볼 수 없습니다.
 
-## 우선순위
+## 미번역 문서 11개
 
-1. `docs/main/setup.md` — Windows 설치 절차(경로·단축키·OS 보안 설정까지 교차 검증)
-2. `docs/main/faq.md` — 설치 오류, 성능, 기술 지원 문답
-3. `docs/main/linux.md` — Linux 설치(명령어와 경로 불변)
-4. `docs/main/highlights.md` — 모드별 특징
-5. `docs/resources/*.md` — 리소스 안내
-6. `docs/changelog/*.md` — 릴리즈별 변경 이력 9개
-7. `docs/videointro.md` — 동영상 소개 문서
+- `docs/main/faq.md` — FAQ 전수, 설치 오류 및 각종 기술 지원
+- `docs/resources/stars.md` — STARS 상세 설명
+- `docs/changelog/1.0.0.0.md`
+- `docs/changelog/1.0.0.1.md`
+- `docs/changelog/1.0.0.2.md`
+- `docs/changelog/1.0.1.0.md`
+- `docs/changelog/1.0.1.1.md`
+- `docs/changelog/1.0.1.2.md`
+- `docs/changelog/1.0.2.0.md`
+- `docs/changelog/1.0.2.1.md`
+- `docs/changelog/1.0.2.2.md`
 
-## 검수 규칙
+## 고위험 검수
 
-- 코드 블록, 이미지 URL, 외부 다운로드 주소, 파일명 및 경로는 원문과 동일하게 유지합니다.
-- 원문에 오류가 의심되면 설치 절차를 임의로 고치지 않고 별도 검토 항목으로 남깁니다.
-- 기술적 경고, 예외 조건, 구분된 플랫폼 절차를 생략하지 않습니다.
-- 모든 수정은 `translations/docs/`에 기록하여 원문 업데이트와 별도 비교합니다.
+- 게임 및 OS 설정값, 명령어, 경로, 모드 이름과 플러그인 파일명은 원문 표기를 유지합니다.
+- 백신 제외, ASLR 해제, Steam DLL 권한 변경, `rm -rf` 명령어는 보안이나 데이터 손실에 영향을 줄 수 있어 한국어판에 별도 주의사항을 추가했습니다.
+- 원본 Linux 지침에 Flatpak 백업 폴더명 `FNVBackup` / `NVBackup` 불일치가 있어 확인을 권고했습니다.
+- 원본 AMD MSI Afterburner 다운로드 주소에 만료 가능성이 있는 인증 토큰이 포함되어 있습니다.
+- 새 버전의 설치 지침 변경은 영어 원본과 비교 검수한 뒤 반영해야 합니다.
 
-## 게시
+## 배포
 
-`Build Korean Nuclear Sunset`가 실행되면 원본 Docusaurus 소스를 바탕으로 `gh-pages` 브랜치에 배포 파일을 생성하도록 구성했습니다. 빌드 성공 여부와 Pages 접근 가능 여부를 각각 확인해야 합니다.
+`.github/workflows/build-korean-site.yml`이 고정한 업스트림 Docusaurus 프로젝트에 `translations/docs/`의 한국어 파일을 덮어쓰고 `gh-pages` 브랜치로 게시합니다.
+
+- 배포 워크플로: https://github.com/munument1/-KR-Nuclear-Sunset/actions/workflows/build-korean-site.yml
+- 사이트 예정 주소: https://munument1.github.io/-KR-Nuclear-Sunset/
+- GitHub Pages 설정의 게시 브랜치는 `gh-pages /(root)`이어야 합니다.
+
+## 다음 작업
+
+1. FAQ 97개 질문 및 문제 해결 지침 전수 번역
+2. STARS 문서 전체 번역
+3. 9개 과거 변경 이력 번역
+4. 빌드·내부 링크·목차·스크린샷·모바일 화면 최종 점검
