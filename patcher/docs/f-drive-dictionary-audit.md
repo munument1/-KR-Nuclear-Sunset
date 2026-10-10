@@ -49,3 +49,25 @@ Local source: D:\Codex_Trans\비바 뉴 베가스\뉴클리어 선셋\ttw\FO3 KR
 - Do not redistribute the full FO3 KR.esm or original game ESM files. Candidate text mappings remain local pending audit.
 
 Verification: py -3 tools/verify_thepitt_in_fo3kr.py
+
+## The Pitt extraction and TTW catalog import (2026-10-10)
+
+- Extracted `3,200` candidate Korean text pairs from matching `FO3 KR.esm` overrides into local `.local/thepitt/thepitt_en_ko.sst`.
+- Candidate pairs cover 2,283 The Pitt-owned records (from 3,344 signature-matched override records).
+- The experimental SSU9 SST was successfully roundtripped with the local SST reader; native xTranslator GUI and xEditLib readback validation are still pending.
+- Rebuilt an **unreleased** local Nuclear Sunset SST catalog from 36 directly matching active plugins.
+- Candidate direct SST mapping rows: **218,853**. All reference text fields present in the current backend's `plugin_fields` configuration; this is not proof that installed source field paths and English strings match.
+- Local candidate catalog: `.local/ns-sst-expanded/catalog.json` (translation_ready=false). Not committed to GitHub because it contains source translation data pending attribution/permissions and tests.
+
+## Coverage categories over the current 252 active plugins
+
+- 36: direct SST source and exact identity candidates (including Fallout 3, TTW and The Pitt)
+- 48: some base-game/DLC/TTW override text has fallback candidates, no dedicated SST source
+- 159: contains original English user-facing record text but has no matching dedicated SST; requires dedicated translation for full coverage, though some override fields may inherit translations
+- 8: no English text subrecords detected by the audit, but loose MCM/UI/script content may still exist
+- 1: no current SST translation match in detected English plugin text
+
+See `nuclear-sunset-plugin-coverage.md` for the complete 252-plugin table.
+Priority candidate projects by detected own-text volume: `AutumnLeaves.esp`, `LoneWandererThemeTTW.esm`, `RaceToTheBottom.esm`, `Party Banter 2.esm`, `ZionTrail.esm`, `Into The Deep.esm`, `AWorldOfPainFO3.esm`.
+
+All findings are preflight-only. Full coverage requires native XEditLib exact path/source verification and game UI testing. No installed game file was modified.
