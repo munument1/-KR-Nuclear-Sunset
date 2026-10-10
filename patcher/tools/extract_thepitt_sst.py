@@ -90,15 +90,18 @@ def diff(km,srcm,idx,kr,orig):
                  "signature_counts":dict(sig_count.most_common()),
                  "skipped":dict(skipped),"master_index":idx}
 
-def write_sst(dest:Path,plugin_masters:list[str],rows:list[dict]):
+def write_sst(dest:Path,plugin_masters:list[str],rows:list[dict],target_name="ThePitt.esm"):
     # SSU9-format export, parsed back to verify structural integrity; needs xTranslator GUI compatibility check.
-    plugins=plugin_masters+["ThePitt.esm"]
+    plugins=plugin_masters+[target_name]
     data=bytearray(b"SSU9\x00"+struct.pack("<I",len(plugins)))
     for p in plugins:
         b=p.encode("utf-16le")
         data+=struct.pack("<I",len(b))+b
+    owner_indexes={name.casefold():i for i,name in enumerate(plugins)}
     for row in rows:
-        fid=((len(plugins)-1)<<24)|int(row["id"],16)
+        owner=row["owner"].casefold()
+        if owner not in owner_indexes: raise ValueError("Unknown SST owner: "+owner)
+        fid=(owner_indexes[owner]<<24)|int(row["id"],16)
         src=row["source"].encode("utf-16le")
         ko=row["dest"].encode("utf-16le")
         data+=struct.pack("<I",fid)
@@ -112,7 +115,7 @@ def write_sst(dest:Path,plugin_masters:list[str],rows:list[dict]):
         raise RuntimeError("SST roundtrip structure differs")
     for i,item in enumerate(reread.entries):
         r=rows[i]
-        if (item.form_id&0x00ffffff)!=int(r["id"],16) or item.source!=r["source"] or item.dest!=r["dest"]:
+        if (item.form_id&0x00ffffff)!=int(r["id"],16) or reread.plugins[item.form_id>>24].casefold()!=r["owner"].casefold() or item.source!=r["source"] or item.dest!=r["dest"]:
             raise RuntimeError(f"SST data roundtrip mismatch at index {i}")
 
 def main():

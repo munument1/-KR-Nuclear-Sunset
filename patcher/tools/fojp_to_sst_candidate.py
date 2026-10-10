@@ -164,7 +164,7 @@ def main():
     with (out/"candidate_mappings.csv").open("w",newline="",encoding="utf-8-sig") as fp:
         w=csv.DictWriter(fp,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
     # write_sst includes plugin as new local master; xTranslator GUI and xEdit still need validation.
-    write_sst(out/(plugin.stem+"_en_ko.sst"),masters(plugin),rows)
+    write_sst(out/(plugin.stem+"_en_ko.sst"),masters(plugin),rows,target_name=plugin.name)
     report={
         "target_plugin":plugin.name,
         "fojp_pairs":sourcefiles,

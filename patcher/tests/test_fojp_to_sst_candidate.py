@@ -27,7 +27,7 @@ class FoJpTest(unittest.TestCase):
             self.assertEqual(len(rows),1)
             self.assertEqual(rows[0]["dest"],"원문 대화입니다")
             out=p/"Example_en_ko.sst"
-            write_sst(out,[],rows)
+            write_sst(out,[],rows,target_name="Example.esp")
             restored=read_sst(out)
             self.assertEqual(len(restored.entries),1)
             self.assertEqual(restored.entries[0].form_id,0x00000123)
