@@ -54,3 +54,14 @@
 스크립트:
 - `patcher/tools/prepare_gemini_json_batches.py`
 - `patcher/tools/check_gemini_json_results.py`
+
+## 추가 확인: 기존 JSON AI Translator 프롬프트 발견
+
+- 실제 도구: `D:\translation\json-ai-translator\app.py`
+- 기존 프롬프트 폴더: `D:\translation\json-ai-translator\prompts`
+- 현지화 철학을 정리한 상세 프롬프트: `prompts\새 폴더\user_prompt.txt` (스카이림 중심, 약 28KB)
+- 루트에 있던 `starwars_genesis_localizer_prompt.txt`, `glossary_starwars_expanded.txt`, `새 텍스트 문서.txt`는 스타워즈 제네시스 관련 데이터다.
+- 앱의 `get_prompt_files()`는 **prompt 폴더 바로 아래의 .txt/.md만** 읽으며 하위 폴더 파일은 읽지 않는다. 또한 읽은 루트 프롬프트를 모두 합친다.
+- Nuclear Sunset 전용 프롬프트는 원문 스타일 원칙을 보존하고 Fallout 3/NV/TTW의 세계관, FormID, JSON 배열 보존 등을 재구성하여 로컬 번역 배치 루트에 `00_NuclearSunset_user_prompt.txt`로 저장했다.
+- 기존 최상위 prompt 폴더와 API 키 설정은 변경하지 않았다. 따라서 **전용 프롬프트는 아직 앱의 자동 로딩 대상이 아니다.** 실행 시 사용자별 프로젝트 프롬프트만 선택할 수 있는 설정 또는 격리 실행 환경이 필요하다.
+- 번역 실행 및 Gemini 호출은 아직 진행하지 않았다.
