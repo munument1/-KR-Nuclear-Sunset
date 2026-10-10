@@ -13,3 +13,4 @@ Output*/
 *.ba2
 *.exe
 *.dll
+.local/
