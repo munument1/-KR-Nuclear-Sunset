@@ -1,41 +1,41 @@
-# Nuclear Sunset 한국어 안내 사이트
+# Nuclear Sunset 비공식 한국어 번역
 
-**비공식 한국어 커뮤니티 안내 페이지 (Unofficial Korean community guide)**
+원본 Nuclear Sunset 웹사이트의 한국어 번역 프로젝트입니다. 원작자의 번역 허락을 받았으며, 공식 Nuclear Sunset Team 웹사이트와는 별도로 운영됩니다.
 
-- 원본 공식 사이트: https://nuclearsunset.com/
-- 원본 프로젝트: https://github.com/FinalCatalyst/Nuclear-Sunset
-- 한국어 사이트 예정 주소: https://munument1.github.io/-KR-Nuclear-Sunset/
+- 원본 사이트: https://nuclearsunset.com/
+- 원본 소스: https://github.com/FinalCatalyst/Nuclear-Sunset
+- 한국어 사이트 주소: https://munument1.github.io/-KR-Nuclear-Sunset/
+- 배포 상태: GitHub Actions 결과 및 Pages 설정을 확인해야 함
+- 원본 기준 커밋: `50a606c7d43ffe0a338d22812661c5bfeba64dce` (2026-09-05)
 
-이 저장소는 Nuclear Sunset 설치 전 알아야 할 사항과 공식 문서에 접근하기 위한 **독립적인 한국어 안내 사이트**입니다. Nuclear Sunset Team의 공식 번역 또는 공식 지원 사이트가 아닙니다.
+## 번역 및 빌드 구조
 
-> **중요:** 원본 문서에는 현재 별도의 재배포 라이선스가 명시되어 있지 않습니다. 이에 따라 원본 웹사이트의 소스, 스크린샷, 본문을 그대로 복제하지 않습니다. 전체 문서의 정식 한국어 번역 및 원본 이미지 재사용은 권리자의 허락을 확인한 다음 진행해야 합니다.
+- `translations/docs/`: 영어 원본 경로를 그대로 따른 한국어 Markdown 문서
+- `scripts/configure-site.cjs`: 원본 Docusaurus의 언어, 제목, URL, 탐색 메뉴 현지화
+- `.github/workflows/build-korean-site.yml`: 원본 GitHub 소스를 체크아웃해 한국어 문서를 덮어쓰고 사이트를 빌드하는 배포 작업
+- `TRANSLATION_STATUS.md`: 문서별 작업 범위와 남은 작업
 
-## 공개 및 운영
+대용량 원본 스크린샷이나 소스 코드 전체를 이 저장소 `main`에 다시 복제하지 않습니다. 배포 시 원본의 이미지를 포함한 Docusaurus 프로젝트를 특정 커밋으로 체크아웃하고 한국어 내용을 반영하여 `gh-pages` 브랜치에 정적 사이트를 생성합니다. 이 방식은 원본 디자인 및 모든 갤러리 컴포넌트의 호환성을 유지합니다.
 
-순수 HTML/CSS/JavaScript로 작성되어 별도의 빌드 과정이 없습니다. GitHub Pages에서 `main` 브랜치의 `/(root)` 폴더를 게시하면 됩니다.
+현재는 일부 문서만 한국어로 번역되었습니다. **미번역 문서는 그대로 영어로 표시됩니다.** 번역 작업의 진행률은 문서 제목 현지화와 본문 전체 번역을 구분하여 관리합니다.
 
-1. GitHub 저장소 **Settings → Pages**로 이동합니다.
-2. **Build and deployment → Source: Deploy from a branch**를 선택합니다.
-3. **Branch: main / (root)**를 선택하고 저장합니다.
-4. 배포가 완료되면 https://munument1.github.io/-KR-Nuclear-Sunset/ 에서 확인합니다.
+## GitHub Pages 활성화
 
-## 작성 기준
+1. 저장소 **Actions** 탭에서 `Build Korean Nuclear Sunset` 작업이 성공했는지 확인합니다.
+2. **Settings → Pages → Build and deployment**에서 `Deploy from a branch`를 선택합니다.
+3. `gh-pages` 브랜치와 `/(root)` 폴더를 선택하고 저장합니다.
+4. 사이트의 링크와 이미지·페이지를 확인합니다.
 
-- 번역 명칭보다 원본의 설치 순서, 경로, 버전 및 옵션명을 우선합니다.
-- 설치 프로그램·모드·폴더·실행 파일의 이름은 영문 그대로 유지합니다.
-- 사용자가 원본의 최신 설치 문서를 쉽게 찾을 수 있도록 원본 링크를 제공합니다.
-- 제공하는 정보는 공식 가이드의 대체물이 아니며 설치 작업 전에 최신 원본을 확인해야 합니다.
-- 수정된 모드 목록에 대한 지원은 원본 팀의 지원 정책을 따릅니다.
+이전에 만든 `index.html`은 초기 한국어 안내 사이트이며 `main` 브랜치에 남아 있습니다. 전체 원본 기반 Docusaurus 번역판은 `gh-pages` 브랜치로 배포됩니다.
 
-## 작업 현황
+## 번역 원칙
 
-- [x] 한국어 랜딩 페이지 및 주요 메뉴
-- [x] 요구 사양과 설치 흐름 한국어 요약
-- [x] 지원·업데이트·FAQ·관련 문서 링크
-- [ ] 전체 원문 번역 및 이미지 현지화 (권리 확인 후)
-- [ ] 원본과 자동 변경 비교
-- [ ] 실사용자 설치 검증
+- 모드명, 실행 파일명, 폴더명, 설정 키와 프로그램 내 버튼 이름은 원문 유지
+- 설치 지침과 FAQ의 단계 순서·위험 경고·예외 규칙은 원문을 정확하게 보존
+- 이미지·링크·코드 블록·표·갤러리 import는 유지
+- 원본 및 모든 기여자에 대한 출처 표기 유지
+- 업스트림 변경 사항을 비교·검수한 다음 워크플로에서 고정된 커밋을 갱신
 
-## 저작권 및 출처
+## 출처 및 저작권
 
-Nuclear Sunset은 Nuclear Sunset Team의 프로젝트입니다. Fallout 및 관련 상표는 해당 권리자에게 귀속됩니다. 이 한국어 안내 사이트는 별도의 비공식 커뮤니티 프로젝트입니다.
+Nuclear Sunset의 원본 제작진은 [Nuclear Sunset Team](https://nuclearsunset.com/docs/main/credits/)입니다. 원본 텍스트·이미지·기타 자산의 권리는 각 권리자에게 있으며, 각 모드의 이용 허락은 해당 제작자의 정책에 따릅니다. 한국어 번역 및 운영: [munument1](https://github.com/munument1).
