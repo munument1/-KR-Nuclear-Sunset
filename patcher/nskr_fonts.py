@@ -96,6 +96,13 @@ def build_fonts(installation, catalog_dir, spec, stage, seen):
             if physical.is_relative_to(installation.mods):
                 provider = physical.relative_to(installation.mods).parts[0]
                 break
+    strategy = spec.get('provider_strategy', 'active_config_provider')
+    if strategy == 'separate_mod':
+        # TTW may ship tNVSE Default Config already. Prefer a distinct,
+        # reversible high-priority Korean font mod over editing that provider.
+        provider = default_mod
+    elif strategy != 'active_config_provider':
+        raise ValueError('Unsupported font provider strategy')
     provider = provider or default_mod
     prefix = f'mods/{provider}/'
     new_mod = provider not in installation.mods_enabled
@@ -142,7 +149,7 @@ def build_fonts(installation, catalog_dir, spec, stage, seen):
         else:
             baseline = source or bundled
             raw = merge_xml(baseline.read_bytes(), planned)
-        if source and source.resolve().is_relative_to(installation.root):
+        if strategy != 'separate_mod' and source and source.resolve().is_relative_to(installation.root):
             relative = source.resolve().relative_to(installation.root).as_posix()
         else:
             relative = prefix + config_path
@@ -151,9 +158,10 @@ def build_fonts(installation, catalog_dir, spec, stage, seen):
             raise ValueError('tNVSE source changed during font generation')
     for item in spec['assets']:
         write(prefix + nskr.virtual_path(item['path']), payload(catalog_dir, item).read_bytes(), 'font_asset')
-    note = ('VNV Korean Fonts - tNVSE\n\n'
-            'Output의 mods 폴더를 VNV MO2 폴더로 복사하세요.\n'
-            + (f'MO2를 새로 고침하고 "{provider}" 모드를 체크한 뒤 tNVSE보다 아래에 배치하세요.\n' if new_mod else '')
+    display_name = spec.get('title', 'VNV Korean Fonts - tNVSE')
+    note = (display_name + '\n\n'
+            'Output의 mods 폴더를 현재 MO2의 mods 폴더로 복사하세요.\n'
+            + (f'MO2를 새로 고침하고 "{provider}" 모드를 체크한 뒤 기존 tNVSE 설정 모드보다 아래에 배치하세요.\n' if new_mod else '')
             + 'tNVSE 71 및 선행 모드는 별도로 설치해야 합니다. 이 묶음에는 tNVSE DLL이 없습니다.\n'
             '처음 실행할 때 폰트 준비가 완료될 때까지 기다리세요.\n'
             '대화/HUD/Pip-Boy/터미널/MCM/Stewie 메뉴 표시 검증은 아직 수행하지 않았습니다.\n')

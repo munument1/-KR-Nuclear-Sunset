@@ -133,6 +133,8 @@ def translate_one(job,secret,label,ledger,prompt):
                 if any(t in error_text for t in ("401","403","unauthorized","invalid api key","permission denied")):
                     raise RuntimeError("AUTH_ERROR") from None
                 if any(t in error_text for t in ("429","resource_exhausted","quota", "rate limit")):
+                    if any(t in error_text for t in ("perday","per_day","requestsperday","daily quota","quota per day")):
+                        raise RuntimeError("DAILY_QUOTA_REACHED") from None
                     raise RuntimeError("RATE_LIMIT_REACHED") from None
                 if any(t in error_text for t in ("404","model not found", "model is not supported")):
                     raise RuntimeError("MODEL_NOT_AVAILABLE") from None
@@ -142,7 +144,7 @@ def translate_one(job,secret,label,ledger,prompt):
         half=len(chunk)//2
         return invoke(chunk[:half],depth+1)+invoke(chunk[half:],depth+1)
     result=invoke(vals)
-    if len(result)!=len(original):raise RuntimeError("INCORRECT_BATCH_LENGTH")
+    if len(result)!=len(required_keys):raise RuntimeError("INCORRECT_BATCH_LENGTH")
     document=dict(original)
     for key,translated in zip(required_keys,result):
         document[key]=translated
@@ -151,6 +153,7 @@ def translate_one(job,secret,label,ledger,prompt):
 def lane_worker(key_number,secret,jobs,prompt,ledger,stop_on_limit=False):
     label=f"key_slot_{key_number+1}"
     counts={"saved":0,"skipped":0,"failed":0}
+    consecutive_429=0
     for job in jobs:
         name=job["source_file"]
         while True:
@@ -162,12 +165,22 @@ def lane_worker(key_number,secret,jobs,prompt,ledger,stop_on_limit=False):
                 else:
                     counts["failed"]+=1
                     atomic(RUN/"problems"/(Path(name).stem+".json"),{"batch":name,"reason":outcome})
+                consecutive_429=0
                 break
             except Exception as exc:
                 tag=str(exc)[:60]
                 if tag=="RATE_LIMIT_REACHED":
-                    # Google API daily quota or exhaustion. Stop requests
-                    # from this key until the next local calendar day.
+                    # A transient HTTP 429 is *not* proof of exhausted daily quota.
+                    # Back off before a new attempt; quota_wait still counts each call.
+                    consecutive_429+=1
+                    delay=min(600,60*(2**min(consecutive_429-1,4)))
+                    set_status("TEMPORARY_RATE_LIMIT_BACKOFF",last_lane=label,
+                               last_batch=name,backoff_seconds=delay)
+                    if stop_on_limit:return counts
+                    time.sleep(delay)
+                    continue
+                if tag=="DAILY_QUOTA_REACHED":
+                    # Only explicitly daily quota failures pause this key.
                     with _lock:
                         today=date.today().isoformat()
                         ledger.setdefault(label,{})[today]=MAX_DAILY_PER_KEY
