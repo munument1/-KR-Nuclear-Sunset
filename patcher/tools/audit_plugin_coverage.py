@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 import nskr
 from nskr_sst import read_sst
-from tes4_text_scan import masters,plugin_records,DISPLAY_FIELDS,clean_text,HANGUL,ENGLISH
+from tools.tes4_text_scan import masters,plugin_records,DISPLAY_FIELDS,clean_text,HANGUL,ENGLISH
 from tools.build_sst_catalog import FLAT_SIGNATURES
 
 SST=Path(r"F:\번역\프로그램\xTranslator\UserDictionaries\FalloutNV")

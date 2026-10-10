@@ -9,7 +9,7 @@ import json,struct,zlib,sys,hashlib
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from nskr_sst import read_sst
 import nskr_xedit
-from tes4_text_scan import plugin_records, masters, clean_text, HANGUL, ENGLISH, DISPLAY_FIELDS,field_occurrences
+from tools.tes4_text_scan import plugin_records, masters, clean_text, HANGUL, ENGLISH, DISPLAY_FIELDS,field_occurrences
 
 ROOT=Path(__file__).resolve().parents[1]
 TTW=Path(r"C:\Modlists\NuclearSunset\mods\[NoDelete] [INF] [DB] - Tale of Two Wastelands (TTW)")
