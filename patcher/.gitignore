@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+.tools/
+build/
+dist/
+Output*/
+*.report.json
+*.report.txt
+*.esm
+*.esp
+*.bsa
+*.ba2
+*.exe
+*.dll
+.local/
+xelib_log.txt

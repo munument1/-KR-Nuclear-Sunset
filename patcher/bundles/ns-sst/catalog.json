@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "target_modlist": "nuclear-sunset-ttw",
+  "translation_ready": false,
+  "files": [],
+  "plugin_fields": {},
+  "game_validation": "not_run",
+  "notes": [
+    "Template only. No release.",
+    "Add reviewed Fallout 3 and TTW SST maps."
+  ]
+}
