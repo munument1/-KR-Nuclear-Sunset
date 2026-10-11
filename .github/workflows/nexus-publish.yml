@@ -175,7 +175,7 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. No original game files, original mod data, or complete pre-patched mod pack is included.
-            [url=https://munument1.github.io/-KR-Nuclear-Sunset/]Installation and recovery guide (Korean)[/url]
+            [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main
           archive_existing_version: 'false'
