@@ -102,6 +102,28 @@ def run_worker(request, job, phase, worker_override=None):
 
 def _session_plugins(installation, entries, source_overrides):
     """Use only the load-order prefix needed by the selected targets."""
+    if getattr(installation, 'all_installed', False):
+        from tools.tes4_text_scan import masters
+        overrides = {name.casefold(): path for name, path in (source_overrides or {}).items()}
+        ordered, visiting, done = [], set(), set()
+
+        def visit(name):
+            key = name.casefold()
+            if key in done:
+                return
+            if key in visiting:
+                raise ValueError(f'Circular plugin master dependency: {name}')
+            visiting.add(key)
+            source = overrides.get(key) or installation.source(name)
+            for master in masters(source):
+                visit(master)
+            visiting.remove(key)
+            done.add(key)
+            ordered.append(name)
+
+        for entry in entries:
+            visit(entry['path'])
+        return ordered
     active = list(installation.active)
     if source_overrides:
         plugins = active[:]

@@ -43,7 +43,7 @@ def build(args):
          '--manifest', str(root / 'tools/xedit_worker_utf8.manifest'),
          '--distpath', str(destination), '--workpath', str(destination / 'worker-build'),
          '--specpath', str(destination / 'spec'), str(root / 'nskr_xedit_worker.py')])
-    run(['--noconfirm', '--onefile', '--windowed', '--name', 'NuclearSunsetKoreanPatcher-Dev',
+    run(['--noconfirm', '--onefile', '--windowed', '--name', 'NuclearSunsetKoreanPatcher',
          '--distpath', str(destination), '--workpath', str(destination / 'patcher-build'),
          '--specpath', str(destination / 'spec'),
          '--add-data', f'{catalog_dir};TranslationData',
@@ -53,7 +53,7 @@ def build(args):
          '--add-data', f'{args.backend / "icudtl.dat"};Backend',
          '--add-data', f'{args.backend / "LICENSE"};Backend',
          str(root / 'nskr_gui.py')])
-    executable = destination / 'NuclearSunsetKoreanPatcher-Dev.exe'
+    executable = destination / 'NuclearSunsetKoreanPatcher.exe'
     with executable.open('rb') as stream:
         digest = hashlib.file_digest(stream, 'sha256').hexdigest()
     return {**summary, 'executable': str(executable), 'sha256': digest,

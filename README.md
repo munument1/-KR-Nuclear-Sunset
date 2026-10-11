@@ -10,9 +10,9 @@
 
 ## 번역 및 빌드 구조
 
-### 게임 한국어 패치 — 시험 배포판
+### 게임 한국어 패치
 
-- [패쳐 v0.1.0-beta.1 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v0.1.0-beta.1)
+- [패쳐 v1.0.0 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.0.0)
 - [설치 및 복구 안내](https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch)
 - [패쳐 소스와 검증 범위](patcher/README.md)
 

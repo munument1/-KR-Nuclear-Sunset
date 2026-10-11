@@ -28,14 +28,14 @@ def main():
     assert report["translation_ready"] is False
     assert not report["warnings"] and not report["skipped"]
     assert sum(row.get("unmatched", 0) for row in report["files"]) == 0
-    exe = build / "NuclearSunsetKoreanPatcher-Dev.exe"
+    exe = build / "NuclearSunsetKoreanPatcher.exe"
     root = Path(__file__).resolve().parents[1]
     for row in report["files"]:
         output = args.report.parent / args.report.name.removesuffix(".report.json")
         assert digest(output / row["output_path"]) == row["output_sha256"]
     args.destination.mkdir(parents=True, exist_ok=True)
-    target = Path(tempfile.mkdtemp(prefix="NSKR-v0.1.0-beta.1-", dir=args.destination))
-    name = "NuclearSunset-Korean-Patcher-v0.1.0-beta.1.zip"
+    target = Path(tempfile.mkdtemp(prefix="NSKR-v1.0.0-", dir=args.destination))
+    name = "NuclearSunset-Korean-Patcher-v1.0.0.zip"
     with zipfile.ZipFile(target / name, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.write(exe, exe.name)
         archive.write(root / "README.md", "README.md")
@@ -45,7 +45,7 @@ def main():
                 if source.is_file() and (source.suffix.lower() in {".txt", ".html", ".md", ".zip"}
                                          or source.name == "LICENSE"):
                     archive.write(source, "Licenses-and-Source/" + source.relative_to(data).as_posix())
-    data_name = "NuclearSunset-TranslationData-v0.1.0-beta.1.zip"
+    data_name = "NuclearSunset-TranslationData-v1.0.0.zip"
     with zipfile.ZipFile(target / data_name, "w", zipfile.ZIP_DEFLATED) as archive:
         for source in data.rglob("*"):
             if source.is_file():

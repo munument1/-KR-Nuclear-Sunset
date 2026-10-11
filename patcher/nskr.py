@@ -17,7 +17,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
-VERSION = "0.1.0-dev"
+VERSION = "1.0.0"
 ROOT = Path(__file__).resolve().parent
 RESERVED = {"meta.ini", ".vnv-kr-report.json"}
 HASH = re.compile(r"[0-9a-f]{64}\Z")
@@ -76,8 +76,10 @@ def list_lines(path: Path, encoding="utf-8-sig") -> list[str]:
 class Installation:
     """Offline loose-file provider inventory; does not claim live VFS proof."""
 
-    def __init__(self, root: Path, profile: str | None = None, game_dir: Path | None = None):
+    def __init__(self, root: Path, profile: str | None = None, game_dir: Path | None = None,
+                 *, all_installed=False):
         self.root = root.resolve()
+        self.all_installed = all_installed
         config = configparser.ConfigParser(interpolation=None, strict=False)
         config.read_string((self.root / "ModOrganizer.ini").read_text(encoding="utf-8-sig"))
         general = config["General"]
@@ -85,8 +87,8 @@ class Installation:
         if game not in {"ttw", "tale of two wastelands", "fallout new vegas", "fallout: new vegas", "falloutnv", "new vegas", "newvegas"}:
             raise ValueError(f"This is not a New Vegas MO2 instance: {game!r}")
         self.is_ttw = game in {"ttw", "tale of two wastelands"}
-        self.profile = profile or qt_value(general.get("selected_profile", ""))
-        if not self.profile or Path(self.profile).name != self.profile or self.profile in (".", ".."):
+        self.profile = '' if all_installed else profile or qt_value(general.get("selected_profile", ""))
+        if not all_installed and (not self.profile or Path(self.profile).name != self.profile or self.profile in (".", "..")):
             raise ValueError("Choose a valid --profile explicitly")
         settings = config["Settings"] if config.has_section("Settings") else {}
         base_value = qt_value(settings.get("base_directory", str(self.root)))
@@ -110,7 +112,7 @@ class Installation:
         self.data = self.game / "Data"
         if not (self.data / "FalloutNV.esm").is_file():
             raise ValueError(f"FalloutNV.esm is missing: {self.data}")
-        self.profile_dir = contained(self.profiles, self.profile)
+        self.profile_dir = self.profiles if all_installed else contained(self.profiles, self.profile)
         self.warnings: list[str] = []
         self.providers: dict[str, list[dict]] = {}
         self.mods_enabled: list[str] = []
@@ -152,6 +154,15 @@ class Installation:
         # in game Data, while FalloutNV.esm and the main DLC ESMs are overridden
         # by the enabled Fixed ESMs mod.
         self.add_tree(self.data, "game:Data")
+        if self.all_installed:
+            for mod in sorted(self.mods.iterdir(), key=lambda p: p.name.casefold()):
+                if mod.is_dir() and not mod.name.endswith("_separator"):
+                    self.mods_enabled.append(mod.name)
+                    self.add_tree(contained(self.mods, mod.name), mod.name)
+            self.active = [chain[-1]['path'] for chain in self.providers.values()
+                           if chain[-1]['category'] == 'plugin']
+            self.active_keys = {name.casefold() for name in self.active}
+            return
         # MO2 persists modlist in descending priority: first enabled entry wins.
         for line in reversed(list_lines(self.profile_dir / "modlist.txt")):
             if line.startswith("+") and not line.endswith("_separator"):

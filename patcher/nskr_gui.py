@@ -41,13 +41,13 @@ class App:
         self.events = queue.Queue()
         self.output = None
         self.report_file = None
-        suffix = ' · 개발 검수용' if self.development else ''
+        suffix = ''
         window.title(f'Nuclear Sunset 한국어 패쳐 v{nskr.VERSION}{suffix}')
         window.minsize(840, 440)
         frame = ttk.Frame(window, padding=22)
         frame.pack(fill='both', expand=True)
         frame.columnconfigure(0, weight=1)
-        notice = ('개발 검수용 · 정식 릴리즈가 아닙니다. 원본은 변경하지 않고 Output만 생성합니다.'
+        notice = ('기본 실행·자동 검증 완료 · 전 구간 플레이 테스트는 미완료입니다. 원본은 변경하지 않습니다.'
                   if self.development else '원본은 변경하지 않고 별도 Output만 생성합니다.')
         ttk.Label(frame, text=notice, foreground='#a33b12', wraplength=790).grid(
             row=0, column=0, columnspan=3, sticky='w', pady=(0, 16))
@@ -57,25 +57,22 @@ class App:
         ttk.Entry(frame, textvariable=self.mo2).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(6, 12))
         self.browse = ttk.Button(frame, text='찾아보기', command=self.choose)
         self.browse.grid(row=2, column=2, padx=(8, 0), pady=(6, 12))
-        ttk.Label(frame, text='MO2 프로필 (빈칸이면 현재 선택된 프로필)').grid(
+        ttk.Label(frame, text='프로필 선택 없이 설치된 전체 번역 대상을 처리합니다.').grid(
             row=3, column=0, columnspan=3, sticky='w')
-        self.profile = tk.StringVar(value=self.metadata.get('tested_profile', ''))
-        ttk.Entry(frame, textvariable=self.profile).grid(
-            row=4, column=0, columnspan=3, sticky='ew', pady=(6, 12))
         self.ui = tk.BooleanVar(value=True)
         self.fonts = tk.BooleanVar(value=True)
         self.plugins = tk.BooleanVar(value=self.metadata.get('full_translation_catalog') is True)
         self.scope_buttons = []
         if self.development:
             for row, text, variable in (
-                (5, 'MCM·Translations 한국어 번역 + 포함된 TTW UI·라디오 (검수용)', self.ui),
+                (5, 'MCM·Translations 한국어 번역 + TTW UI·라디오', self.ui),
                 (6, '한국어 폰트·수정 tNVSE DLL (별도 오버레이 모드)', self.fonts),
-                (7, '기존 SST 플러그인 시험 (미검수 후보 · 정확한 레코드 경로만)', self.plugins),
+                (7, '전체 대상 플러그인 번역 (원문·레코드 경로가 일치하는 항목)', self.plugins),
             ):
                 button = ttk.Checkbutton(frame, text=text, variable=variable)
                 button.grid(row=row, column=0, columnspan=3, sticky='w', pady=2)
                 self.scope_buttons.append(button)
-        self.generate = ttk.Button(frame, text='검수용 Output 생성' if self.development else 'Output 생성',
+        self.generate = ttk.Button(frame, text='Output 생성',
                                    command=self.start)
         self.generate.grid(row=8, column=0, sticky='w', pady=(16, 0))
         self.open_button = ttk.Button(frame, text='Output 폴더 열기', command=self.open_output, state='disabled')
@@ -110,7 +107,6 @@ class App:
 
     def start(self):
         root = Path(self.mo2.get().strip())
-        profile = self.profile.get().strip() or None
         if not (root / 'ModOrganizer.ini').is_file():
             messagebox.showerror('폴더 확인', 'mods 폴더가 아니라 ModOrganizer.ini가 있는 Nuclear Sunset MO2 폴더를 선택해주세요.')
             return
@@ -121,14 +117,6 @@ class App:
         except ValueError as error:
             messagebox.showerror('번역 범위 확인', str(error))
             return
-        if self.development and 'plugins' in scopes:
-            if not messagebox.askyesno(
-                    'SST 플러그인 시험 확인',
-                    '이 범위는 정식 검수 완료 번역이 아닙니다.\n'
-                    '기존 SST에서 레코드 경로·식별자·현재 원문이 일치하는 항목만 시험합니다.\n'
-                    '미검수 Gemini 번역과 신규 플러그인 자동 상속은 제외됩니다.\n\n'
-                    '별도 Output 생성 시험을 진행할까요?'):
-                return
         target = self.folder / 'Output'
         if (target.exists() or target.with_name(target.name + '.report.json').exists()
                 or target.with_name(target.name + '.report.txt').exists()):
@@ -141,7 +129,7 @@ class App:
 
         def run():
             try:
-                installation = nskr.Installation(root, profile=profile)
+                installation = nskr.Installation(root, all_installed=True)
                 report = build_output(
                     installation, self.catalog, target, development=self.development, scopes=scopes,
                     progress=lambda message: self.events.put(('status', message)))
@@ -233,7 +221,7 @@ def packaged_self_test(args):
         scopes.add('plugins')
 
     def generate(output):
-        return build_output(nskr.Installation(Path(args.self_test), profile=args.profile),
+        return build_output(nskr.Installation(Path(args.self_test), all_installed=True),
                             catalog, output, development=development, scopes=scopes,
                             only_plugins=args.only_plugin)
 

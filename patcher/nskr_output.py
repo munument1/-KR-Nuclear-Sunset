@@ -561,6 +561,50 @@ def original_installation(installation, excluded):
     return result
 
 
+def installed_catalog(installation, catalog):
+    """Expand known translations to every installed physical mod variant."""
+    result = copy(installation)
+    excluded = set(catalog.get('excluded_test_providers', []))
+    excluded.update(spec['mod'] for spec in catalog.get('runtime_mods', []))
+    if catalog.get('font_bundle'):
+        excluded.add(catalog['font_bundle']['default_mod'])
+    result = original_installation(result, excluded)
+    result.providers = {key: list(chain) for key, chain in result.providers.items()}
+    entries, seen = [], set()
+    variants = {(entry['path'].casefold(), entry['provider']): entry
+                for entry in catalog['files'] if entry.get('optional')}
+    for entry in catalog['files']:
+        key = entry['path'].casefold()
+        chain = result.providers.get(key, [])
+        if entry.get('optional'):
+            chain = [row for row in chain if row['provider'] == entry['provider']]
+        elif chain:
+            preferred = next((row for row in chain if row['provider'] == entry.get('provider')), chain[-1])
+            chain = [row for row in chain if row is not preferred] + [preferred]
+            result.providers[key] = chain
+        for row in chain:
+            # Raw Data is a fallback only; installed mod copies are all retained.
+            if row['provider'] == 'game:Data' and len(chain) > 1:
+                continue
+            identity = (key, row['provider'])
+            if identity in seen:
+                continue
+            seen.add(identity)
+            item = dict(variants.get(identity, entry))
+            item['provider'] = row['provider']
+            if row is not chain[-1] or entry.get('optional'):
+                item['optional'] = True
+            elif not entry.get('optional'):
+                item.pop('optional', None)
+            entries.append(item)
+        if not chain and not entry.get('optional'):
+            entries.append(entry)
+    result.active = [chain[-1]['path'] for chain in result.providers.values()
+                     if chain[-1]['category'] == 'plugin']
+    result.active_keys = {name.casefold() for name in result.active}
+    return result, {**catalog, 'files': entries}
+
+
 def build_output(installation, catalog_dir, output, progress=None, *,
                  development=False, scopes=None, only_plugins=None):
     output = output.resolve()
@@ -578,6 +622,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                              development, scopes, only_plugins)
     if development and catalog.get('full_translation_catalog'):
         installation = original_installation(installation, catalog.get('excluded_test_providers', []))
+    if getattr(installation, 'all_installed', False):
+        installation, catalog = installed_catalog(installation, catalog)
     if development and not {'fallout3.esm', 'taleoftwowastelands.esm'}.issubset(installation.active_keys):
         raise ValueError('선택한 프로필에서 Fallout 3 및 TTW 마스터를 확인할 수 없습니다.')
     # Optional providers may deliberately contain the same virtual plugin name.
@@ -590,7 +636,9 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         if progress:
             progress(message)
 
-    emit(f'Nuclear Sunset 프로필 "{installation.profile}"의 현재 원본을 확인하고 있습니다.')
+    emit('설치된 전체 번역 대상의 원본을 확인하고 있습니다.'
+         if getattr(installation, 'all_installed', False)
+         else f'Nuclear Sunset 프로필 "{installation.profile}"의 현재 원본을 확인하고 있습니다.')
     inheritance_memory = [] if development else base_translation_memory(catalog)
     if inheritance_memory:
         inherited_entries, discovery_skipped = discover_new_plugin_entries(installation, catalog)
@@ -606,6 +654,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
     }
 
     report = {'mo2_root': str(installation.root), 'profile': installation.profile,
+              'target_scope': ('all_installed_catalog_providers'
+                               if getattr(installation, 'all_installed', False) else 'selected_profile'),
               'channel': 'development' if development else 'release',
               'translation_ready': not development,
               'selected_scopes': catalog.get('selected_scopes'),
@@ -654,12 +704,42 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 fallback_mappings=inheritance_memory,
                 fallback_targets=fallback_targets & native_target_names,
                 progress=progress)
+        optional_native = {}
+        if getattr(installation, 'all_installed', False):
+            pending = [entry for entry in work_entries
+                       if entry['kind'] == 'plugin-records' and entry.get('optional')
+                       and not verified_delta(entry, catalog_dir,
+                                              nskr.contained(installation.mods, f"{entry['provider']}/{entry['path']}"))]
+            batch_number = 0
+            while pending:
+                batch, rest, names = [], [], set()
+                for entry in pending:
+                    key = entry['path'].casefold()
+                    if key in names:
+                        rest.append(entry)
+                    else:
+                        names.add(key)
+                        batch.append(entry)
+                overrides = {entry['path']: nskr.contained(
+                    installation.mods, f"{entry['provider']}/{entry['path']}") for entry in batch}
+                files, stats = nskr_xedit.merge_plugins(
+                    installation, batch, catalog, Path(tmp) / f'InstalledVariants{batch_number}',
+                    source_overrides=overrides, fallback_mappings=inheritance_memory,
+                    fallback_targets=fallback_targets & set(overrides), progress=progress)
+                for entry in batch:
+                    optional_native[(entry['path'].casefold(), entry['provider'])] = (
+                        files / entry['path'], stats[entry['path']])
+                pending = rest
+                batch_number += 1
         delta_engine = None
         for entry in work_entries:
             key = entry['path'].casefold()
             chain = installation.providers.get(key)
             if entry.get('optional'):
-                if entry['kind'] not in {'plugin-copy', 'plugin-records'} or '/' in nskr.virtual_path(entry['provider']):
+                allowed = {'plugin-copy', 'plugin-records'}
+                if getattr(installation, 'all_installed', False):
+                    allowed.update({'json', 'ini'})
+                if entry['kind'] not in allowed or '/' in nskr.virtual_path(entry['provider']):
                     raise ValueError('Invalid optional provider')
                 source = nskr.contained(installation.mods, f"{entry['provider']}/{entry['path']}")
                 chain = [{'provider': entry['provider']}]
@@ -689,7 +769,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             original_hash = nskr.sha256(source)
             if development and entry['kind'] in {'json', 'ini'}:
                 if (original_hash != entry['baseline_sha256']
-                        or chain[-1]['provider'] != entry['provider']):
+                        or chain[-1]['provider'] != entry['provider']) and not getattr(installation, 'all_installed', False):
                     report['skipped'].append({'path': entry['path'],
                                              'reason': 'reviewed_ui_source_or_provider_changed',
                                              'translation_applied': False})
@@ -727,7 +807,9 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                                   'verification': spec.get('verification', 'verified_delta_roundtrip')}
                     result.update(statistics, status=status)
                 else:
-                    if entry.get('optional'):
+                    if (key, entry.get('provider')) in optional_native:
+                        native_source, statistics = optional_native[(key, entry['provider'])]
+                    elif entry.get('optional'):
                         # A same-name inactive variant gets its own copied session.
                         # Never swap a live provider or alter profile activation.
                         emit(f'선택 플러그인 {entry["path"]}을(를) 레코드 단위로 처리합니다.')
@@ -768,7 +850,15 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 shutil.copyfile(payload, target)
                 result['status'] = 'user_completed_copy; record_validation_pending'
             elif entry['kind'] in {'ini', 'json'}:
-                companion = translation_companion(installation, entry['path'])
+                if getattr(installation, 'all_installed', False):
+                    path = Path(entry['path'])
+                    companion_file = source.parent / 'Translations' / (path.stem + '.ini')
+                    companion = (f'MCM/Translations/{path.stem}.ini'
+                                 if path.parent.as_posix().casefold() == 'mcm'
+                                 and path.suffix.casefold() == '.json'
+                                 and companion_file.is_file() else None)
+                else:
+                    companion = translation_companion(installation, entry['path'])
                 if companion:
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(source, target)
