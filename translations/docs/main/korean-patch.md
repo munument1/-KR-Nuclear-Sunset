@@ -10,6 +10,16 @@ Nuclear Sunset 설치와 영어 상태의 정상 실행 확인을 마친 뒤 진
 
 기본 실행과 자동 검증은 완료했지만 전 구간 플레이 테스트는 미완료입니다. 모든 영어 문구와 추가 설치 모드까지 번역한다는 뜻은 아닙니다.
 
+## 필수 선행 작업: tNVSE 설치
+
+한국어 패쳐를 실행하기 전에 **tNVSE Font Plugin**을 별도로 설치하고 활성화해야 합니다.
+
+1. [tNVSE Font Plugin (Nexus Mods)](https://www.nexusmods.com/newvegas/mods/95088?tab=files)에서 **tNVSE 본체**와 **tNVSE Default Config**를 다운로드합니다.
+2. Nuclear Sunset의 **MO2**에 두 파일을 각각 모드로 설치하고, 왼쪽 모드 목록에서 **둘 다 활성화**합니다. 이미 설치·활성화되어 있다면 다시 설치할 필요는 없습니다.
+3. 이후 아래 절차에 따라 한국어 패쳐를 실행합니다. 패쳐가 만든 한국어 폰트·설정 모드는 기존 **tNVSE 및 tNVSE Default Config보다 아래쪽(높은 덮어쓰기 우선순위)**에 배치합니다.
+
+> **중요:** 패쳐의 `폰트·수정 tNVSE` 항목은 기존 tNVSE 본체의 별도 설치·활성화 단계를 생략해도 된다는 뜻이 아닙니다.
+
 ## 1. 다운로드
 
 1. [GitHub 릴리즈 v1.0.0](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.0.0)에서 `NuclearSunset-Korean-Patcher-v1.0.0.zip`을 다운로드합니다.
