@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+from collections import Counter
 
 import nskr
 
@@ -32,7 +33,7 @@ def validate_mapping(row):
         raise ValueError('Plugin translation changes protected tokens')
 
 
-def runtime():
+def runtime(worker_override=None):
     if getattr(sys, 'frozen', False):
         root = Path(getattr(sys, '_MEIPASS', Path(sys.executable).parent)).resolve()
         worker = root / 'NSKRXEditWorker.exe'
@@ -41,6 +42,8 @@ def runtime():
         root = Path(__file__).resolve().parent
         worker = root / '.tools/nskr-xedit-worker/NSKRXEditWorker.exe'
         backend = root / '.tools/xeditlib-native'
+    if worker_override is not None:
+        worker = Path(worker_override).resolve()
     for required in (
         worker,
         backend / 'XEditLib.dll',
@@ -76,8 +79,8 @@ def _xedit_isolation_args(request, job):
     ]
 
 
-def run_worker(request, job, phase):
-    worker, backend = runtime()
+def run_worker(request, job, phase, worker_override=None):
+    worker, backend = runtime(worker_override)
     path = job / f'{phase}.request.json'
     nskr.write_json(path, request)
     env = os.environ.copy()
@@ -156,6 +159,7 @@ def merge_plugins(installation, entries, catalog, job, source_overrides=None,
         'targets': list(maps),
         'fields': catalog['plugin_fields'],
         'mappings': maps,
+        'strictPaths': catalog.get('strict_plugin_paths', False),
         'fallbackMappings': fallback_mappings,
         'fallbackTargets': sorted(fallback_targets),
         'mode': 'apply',
@@ -164,7 +168,7 @@ def merge_plugins(installation, entries, catalog, job, source_overrides=None,
         'output': str(job / 'apply.json'),
     }
 
-    emit('플러그인: SST 번역을 적용하고 있습니다.')
+    emit('플러그인: 원문·경로가 일치하는 번역을 적용하고 있습니다.')
     applied = run_worker(request, job, 'apply')
 
     expected, changes, indexes, stats = {}, {}, {}, {}
@@ -175,15 +179,17 @@ def merge_plugins(installation, entries, catalog, job, source_overrides=None,
         indexes[plugin] = file['recordIndexHash']
         inherited = sum(row.get('mappingOrigin') == 'base_dlc_sst_fallback'
                         for row in file['changed'])
+        origins = Counter(row.get('mappingOrigin', 'sst_direct') for row in file['changed'])
         stats[plugin] = {
             'translated': len(file['changed']),
             'fallback_translated': inherited,
-            'direct_sst_translated': len(file['changed']) - inherited,
+            'direct_sst_translated': origins.get('sst_direct', 0),
+            'translated_by_origin': dict(origins),
             'unmatched': len(file['missing']),
             'unmatched_entries': file['missing'],
             'records_verified': len(file['beforeHashes']),
             'records_indexed': file['recordCount'],
-            'translation_source': 'xTranslator_SST',
+            'translation_source': '+'.join(sorted(origins)) or 'no_changes',
         }
         shutil.copyfile(translated / plugin, data / plugin)
 
@@ -208,7 +214,8 @@ def merge_plugins(installation, entries, catalog, job, source_overrides=None,
 
     for values in stats.values():
         values['verification'] = (
-            'UTF8 fresh readback; master/header/record-index + exact changed-record structure'
+            'Original-byte invariant verification; UTF8 nonmutating fresh readback; '
+            'master/header/record-index + every approved string'
         )
     for source, before in original_hashes.items():
         if nskr.sha256(source) != before:

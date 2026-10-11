@@ -9,7 +9,64 @@ from pathlib import Path
 import re
 
 DISPLAY_KEYS = {'displayName', 'description', 'listTitle', 'pageTitle', 'title', 'mouse', 'strings', 'suffix'}
-TOKEN = re.compile(r'%%|%[a-zA-Z](?:[a-zA-Z])?|\{[^{}]+\}|<[^<>]+>|&[a-zA-Z0-9]+;|#\d+\|')
+TOKEN = re.compile(r'%%|%[rq]|%[-+# 0-9.]*(?:[diuoxXfFeEgGaAcspnzZ])|\$[A-Za-z_]\w*|\{[^{}]+\}|<[^<>]+>|&[a-zA-Z0-9]+;|#\d+\|')
+
+
+def render_json(text, replacements):
+    """Replace selected JSON string values without changing any other bytes."""
+    decoder = json.JSONDecoder()
+    edits = []
+
+    def space(index):
+        while index < len(text) and text[index] in ' \t\r\n':
+            index += 1
+        return index
+
+    def walk(index, pointer):
+        index = space(index)
+        if text[index] == '{':
+            index = space(index + 1)
+            if text[index] == '}':
+                return index + 1
+            while True:
+                key, end = decoder.raw_decode(text, index)
+                index = space(end)
+                if text[index] != ':':
+                    raise ValueError('Missing JSON colon')
+                index = space(walk(index + 1, pointer + (key,)))
+                if text[index] == '}':
+                    return index + 1
+                if text[index] != ',':
+                    raise ValueError('Missing JSON object separator')
+                index = space(index + 1)
+        if text[index] == '[':
+            index = space(index + 1)
+            if text[index] == ']':
+                return index + 1
+            number = 0
+            while True:
+                index = space(walk(index, pointer + (number,)))
+                if text[index] == ']':
+                    return index + 1
+                if text[index] != ',':
+                    raise ValueError('Missing JSON array separator')
+                index = space(index + 1)
+                number += 1
+        value, end = decoder.raw_decode(text, index)
+        if pointer in replacements:
+            if not isinstance(value, str):
+                raise ValueError('JSON replacement must target a string')
+            edits.append((index, end, json.dumps(replacements[pointer], ensure_ascii=False)))
+        return end
+
+    if space(walk(0, ())) != len(text):
+        raise ValueError('Trailing JSON content')
+    if len(edits) != len(replacements):
+        raise ValueError('Missing JSON replacement pointer')
+    for start, end, dest in reversed(edits):
+        text = text[:start] + dest + text[end:]
+    json.loads(text)
+    return text
 
 
 def sha(path):

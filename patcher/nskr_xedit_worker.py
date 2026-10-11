@@ -15,6 +15,7 @@ import re
 import sys
 
 from nskr_xelib import XEditLib
+from nskr_plugin_text import write_plugin, verify_plugin
 
 FLAT_SIGNATURES = {
     'CELL','WRLD','REFR','ACRE','ACTI','ARMO','ARMA','WEAP','MISC','KEYM',
@@ -24,6 +25,25 @@ FLAT_SIGNATURES = {
 }
 DISPLAY_CONTAINERS = {'XMRK','EPFT','RDAT'}
 FIELD_RE = re.compile(r'^([A-Z0-9_]{4})(?: -|$)')
+
+
+def normalize_cp1252_sources(items, candidates):
+    """Restore only explicitly typed, exact CP1252 source-byte views."""
+    for item in items:
+        sources = set()
+        for candidate in candidates:
+            if (candidate.get('source_encoding') != 'cp1252'
+                    or candidate['field'] != item['field']
+                    or candidate['path'] != item['path']
+                    or candidate.get('field_occurrence') != item['field_occurrence']):
+                continue
+            expected = candidate['source'].encode('cp1252').decode('utf-8', errors='replace')
+            if expected == item['source']:
+                sources.add(candidate['source'])
+        if len(sources) > 1:
+            raise ValueError('Ambiguous explicit CP1252 source-byte view')
+        if sources:
+            item['source'] = next(iter(sources))
 
 
 def canonical_json(obj) -> str:
@@ -163,80 +183,33 @@ def header_digest(x: XEditLib, file_handle: int) -> str:
     return sha_obj(obj)
 
 
-def save_preserving_references(x: XEditLib, file_handle: int, target: Path, plugins: list[str]):
-    flag_path = r'Record Header\Record Flags'
-    flag = 'Quest item / Persistent reference'
-    signatures = ['REFR','PGRE','PMIS','ACHR','ACRE','PARW','PBEA','PFLA','PCON','PBAR','PHZD']
-    ranks = {p.lower(): i for i, p in enumerate(plugins)}
-    rank = ranks.get(x.name(file_handle).lower(), len(plugins))
-    suspended = {}
-
-    def suspend(ancestor: int):
-        parent = x.get_element_file(ancestor)
-        try:
-            name = x.name(parent)
-        finally:
-            x.release(parent)
-        if ranks.get(name.lower(), 1 << 30) >= rank:
-            x.release(ancestor)
-            return
-        ident = name.lower() + '|' + str(x.get_form_id(ancestor, True))
-        if ident in suspended or not x.get_flag(ancestor, flag_path, flag):
-            x.release(ancestor)
-            return
-        suspended[ident] = {'handle': ancestor, 'hash': digest(x, ancestor)}
-        x.set_flag(ancestor, flag_path, flag, False)
-
-    try:
-        for signature in signatures:
-            for record in sorted(x.get_records(file_handle, signature, True), reverse=True):
-                try:
-                    if x.is_master(record) or x.get_flag(record, flag_path, flag):
-                        continue
-                    master = x.get_master_record(record)
-                    overrides = x.get_overrides(master)
-                    suspend(master)
-                    for prior in overrides:
-                        suspend(prior)
-                finally:
-                    x.release(record)
-        x.save_file(file_handle, str(target))
-    finally:
-        for saved in suspended.values():
-            x.set_flag(saved['handle'], flag_path, flag, True)
-        failure = None
-        for saved in suspended.values():
-            if digest(x, saved['handle']) != saved['hash']:
-                failure = RuntimeError('Ancestor structure was not restored')
-            x.release(saved['handle'])
-        if failure:
-            raise failure
+def matching_rows(item, candidates, exact_path):
+    return [c for c in candidates
+            if c['field'] == item['field'] and c['source'] == item['source']
+            and (not exact_path or c['path'] == item['path'])]
 
 
-def select_destination(item, direct_candidates, fallback_candidates):
-    def matches(candidates, exact_path):
-        values = {
-            c['dest'] for c in candidates
-            if c['field'] == item['field']
-            and c['source'] == item['source']
-            and (not exact_path or c['path'] == item['path'])
-        }
-        return values
-
+def select_destination(item, direct_candidates, fallback_candidates, strict_path=False):
     # Direct SST always wins. Prefer exact xEdit path; source+field is only a
     # fallback for stable flat records where the SST has no path information.
-    direct = matches(direct_candidates, True)
-    if not direct:
-        direct = matches(direct_candidates, False)
+    direct = matching_rows(item, direct_candidates, True)
+    if not direct and not strict_path:
+        direct = matching_rows(item, direct_candidates, False)
     if direct:
-        return direct, 'sst_direct'
+        origins = {c.get('origin', 'sst_direct') for c in direct}
+        return {c['dest'] for c in direct}, next(iter(origins)) if len(origins) == 1 else 'mixed_direct'
 
     # Base/DLC inheritance is deliberately stricter: an override must retain the
     # exact field path as well as owner/FormID/signature/source.
-    inherited = matches(fallback_candidates, True)
+    inherited = matching_rows(item, fallback_candidates, True)
     if inherited:
-        return inherited, 'base_dlc_sst_fallback'
+        return {c['dest'] for c in inherited}, 'base_dlc_sst_fallback'
     return set(), None
+
+
+def unmatched_candidates(items, candidates, strict_path):
+    return [c for c in candidates
+            if not any(matching_rows(item, [c], strict_path) for item in items)]
 
 
 def run(request: dict):
@@ -256,6 +229,7 @@ def run(request: dict):
 
     result = {'engine': 'Python/ctypes/XEditLib', 'acp': 65001, 'files': []}
     fields_by_sig = {sig: set(fields) for sig, fields in (request.get('fields') or {}).items()}
+    inspect_keys = set(request.get('inspectRecordKeys', []))
 
     x.init()
     try:
@@ -309,6 +283,8 @@ def run(request: dict):
                         needs_items = (
                             mode == 'apply' and (direct_candidates or inherited_candidates)
                         ) or (
+                            mode == 'inspect' and (not inspect_keys or record_key in inspect_keys)
+                        ) or (
                             mode == 'verify' and prior is not None
                         )
                         if not needs_items:
@@ -321,28 +297,39 @@ def run(request: dict):
                         items = (text_fields(x, record, wanted)
                                  if wanted and (signature != 'GMST' or edid.startswith('s'))
                                  else [])
+                        occurrences = {}
+                        for item in items:
+                            occurrence = occurrences.get(item['field'], 0)
+                            occurrences[item['field']] = occurrence + 1
+                            item['field_occurrence'] = occurrence
+                        if mode == 'inspect':
+                            rows.extend({**ident, 'edid': edid, **item} for item in items)
+                            continue
 
                         if mode == 'verify':
                             verified.add(record_key)
+                            actual = {(item['field'], item['path']): item['source'] for item in items}
                             for update in expected_changes.get(record_key, []):
-                                if x.get_value(record, update['path']) != update['dest']:
-                                    raise RuntimeError('Translation readback mismatch ' + record_key)
-                                x.set_value(record, update['path'], update['source'])
-                            if digest(x, record) != prior['hash']:
-                                raise RuntimeError('Record structure readback mismatch ' + record_key)
+                                value = actual.get((update['field'], update['path']))
+                                if value != update['dest']:
+                                    raise RuntimeError(
+                                        f"Translation readback mismatch {record_key} {update['path']}: "
+                                        f"expected {update['dest']!r}, actual {value!r}")
                             continue
 
-                        original_digest = digest(x, record)
+                        normalize_cp1252_sources(items, direct_candidates)
                         updates = []
+                        for candidate in unmatched_candidates(
+                                items, direct_candidates, request.get('strictPaths', False)):
+                            missing.append({**ident, **candidate,
+                                            'reason': 'source_or_path_mismatch',
+                                            'mappingOrigin': candidate.get('origin', 'sst_direct')})
                         for item in items:
                             row = {**ident, 'edid': edid, **item}
-                            values, origin = select_destination(row, direct_candidates, inherited_candidates)
+                            values, origin = select_destination(
+                                row, direct_candidates, inherited_candidates,
+                                strict_path=request.get('strictPaths', False))
                             if not values:
-                                # Only direct SST mismatches are reported. A fallback miss simply
-                                # means the override has diverged from the base/DLC source text.
-                                if direct_candidates:
-                                    missing.append({**row, 'reason': 'direct_sst_no_match',
-                                                    'mappingOrigin': 'sst_direct'})
                                 continue
                             if len(values) != 1:
                                 missing.append({**row, 'reason': 'ambiguous_translation',
@@ -355,17 +342,9 @@ def run(request: dict):
                                 missing.append({**row, 'reason': 'source_encoding_unreadable',
                                                 'mappingOrigin': origin})
                                 continue
-                            x.set_value(record, row['path'], dest)
                             updates.append({**row, 'dest': dest, 'mappingOrigin': origin})
 
                         if updates:
-                            for update in updates:
-                                x.set_value(record, update['path'], update['source'])
-                            if digest(x, record) != original_digest:
-                                raise RuntimeError('Unexpected non-text mutation ' + record_key)
-                            for update in updates:
-                                x.set_value(record, update['path'], update['dest'])
-                            before_hashes.append({**ident, 'hash': original_digest})
                             changed.extend(updates)
                         if request.get('includeRows'):
                             rows.extend({**ident, 'edid': edid, **item} for item in items)
@@ -387,7 +366,10 @@ def run(request: dict):
                     target = out_dir / plugin
                     if target.exists():
                         raise FileExistsError(target)
-                    save_preserving_references(x, file_handle, target, request['plugins'])
+                    write_plugin(game / 'Data' / plugin, target, changed,
+                                 x.get_master_names(file_handle))
+                    before_hashes = verify_plugin(
+                        game / 'Data' / plugin, target, changed, x.get_master_names(file_handle))
 
                 result['files'].append({
                     'plugin': plugin,

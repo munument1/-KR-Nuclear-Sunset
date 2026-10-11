@@ -131,9 +131,9 @@ class Installation:
                 self.archives.append({"provider": provider, "path": relative, "size": path.stat().st_size})
                 continue
             category = "plugin" if suffix in {".esm", ".esp"} and "/" not in relative else (
-                "loose_text_candidate" if suffix in {".xml", ".json", ".ini", ".txt", ".csv"}
+                "loose_text_candidate" if suffix in {".xml", ".json", ".ini", ".txt", ".csv", ".gek"}
                 and relative.casefold().startswith(
-                    ("menus/", "nvse/", "config/", "mcm/", "interface/")) else None)
+                    ("menus/", "nvse/", "config/", "mcm/", "interface/", "scripts/")) else None)
             if category is None:
                 continue
             virtual_path(relative)

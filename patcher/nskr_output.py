@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
+from copy import copy
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -16,7 +17,7 @@ import tempfile
 import nskr
 import nskr_xedit
 import nskr_fonts
-from tools.loose_translation import TOKEN, decode, json_values
+from tools.loose_translation import TOKEN, decode, json_values, render_json
 
 SCHEMA = 1
 
@@ -109,7 +110,9 @@ def plugin_outcomes(report):
     for row in report.get('files', []):
         if Path(row.get('path', '')).suffix.casefold() not in PLUGIN_SUFFIXES:
             continue
-        if row.get('status') == 'already_patched_verified':
+        if row.get('status') == 'runtime_mod_copy':
+            category = 'runtime_manual_activation'
+        elif row.get('status') == 'already_patched_verified':
             category = 'already_patched'
         elif row.get('discovered_plugin'):
             category = 'new_inherited'
@@ -150,6 +153,7 @@ def plugin_outcomes(report):
 
 def format_plugin_report(report):
     labels = [
+        ('runtime_manual_activation', '별도 한국어 UI·라디오 플러그인 - 수동 활성화 필요'),
         ('patched', '정상 패치'),
         ('already_patched', '이미 한글 적용됨 - 검증된 결과 재사용'),
         ('updated_patched', '업데이트 감지 - 번역 전체 적용'),
@@ -168,6 +172,8 @@ def format_plugin_report(report):
         'Nuclear Sunset 한국어 패쳐 결과',
         f"프로필: {report.get('profile', '')}",
         f"생성 시각(UTC): {report.get('created_utc', '')}",
+        ('개발 검수용 출력 · 정식 릴리즈 아님 · 게임 내 검증 필요'
+         if report.get('channel') == 'development' else '정식 카탈로그 출력'),
         '',
     ]
     for category, title in labels:
@@ -187,9 +193,13 @@ def format_plugin_report(report):
             lines.append(f"- {row['path']}{suffix}")
         lines.append('')
     lines.extend([
-        '신규 플러그인 자동 상속은 FalloutNV.esm 및 공식 DLC ESM의 검증된 번역만 사용합니다.',
+        ('개발용 시험에서는 신규 플러그인 자동 상속을 사용하지 않습니다.'
+         if report.get('channel') == 'development' else
+         '신규 플러그인 자동 상속은 FalloutNV.esm 및 공식 DLC ESM의 검증된 번역만 사용합니다.'),
         '원 소유자, FormID, 레코드 타입, 필드 경로, 현재 영문 원문이 모두 일치할 때만 번역합니다.',
         '모드가 원문을 변경한 레코드는 자동 번역하지 않습니다.',
+        '프로필은 읽기 전용이며 modlist.txt·plugins.txt·loadorder.txt를 생성하거나 변경하지 않습니다.',
+        'Output의 번역 파일만 복사하고, 필요한 한국어 모드·플러그인은 MO2에서 직접 활성화하세요.',
         '',
     ])
     return '\n'.join(lines)
@@ -352,6 +362,16 @@ def make_catalog(workspace, work_dir, output, plugin_maps=None, plugin_fields=No
     return {'files': len(files), 'catalog': str(output)}
 
 
+def translation_companion(installation, virtual):
+    """MCM/Name.json is kept original when MCM/Translations/Name.ini exists."""
+    path = Path(nskr.virtual_path(virtual))
+    if path.suffix.casefold() != '.json' or path.parent.as_posix().casefold() != 'mcm':
+        return None
+    companion = f'MCM/Translations/{path.stem}.ini'
+    chain = installation.providers.get(companion.casefold())
+    return chain[-1]['path'] if chain else None
+
+
 def merge_loose(source, entry):
     text, encoding = decode(source)
     matches = defaultdict(set)
@@ -360,6 +380,8 @@ def merge_loose(source, entry):
         identity = row['context'] if entry['kind'] == 'json' else (row['section'], row['key'])
         matches[(identity, row['source'])].add(row['dest'])
     missing, translated, unchanged = [], 0, 0
+    approved_identities = {identity for identity, source in matches}
+    replacements = {}
     if entry['kind'] == 'json':
         obj = json.loads(text)
         items = [{'pointer': list(pointer), 'source': value,
@@ -369,6 +391,9 @@ def merge_loose(source, entry):
         lines = text.splitlines(keepends=True)
     for item in items:
         identity = item['context'] if entry['kind'] == 'json' else (item['section'], item['key'])
+        if entry.get('display_mappings_only') and identity not in approved_identities:
+            unchanged += 1
+            continue
         destinations = matches.get((identity, item['source']), set())
         if len(destinations) != 1:
             missing.append({**item, 'reason': 'ambiguous' if destinations else 'unmatched'})
@@ -379,10 +404,7 @@ def merge_loose(source, entry):
             continue
         translated += 1
         if entry['kind'] == 'json':
-            container = obj
-            for part in item['pointer'][:-1]:
-                container = container[part]
-            container[item['pointer'][-1]] = dest
+            replacements[tuple(item['pointer'])] = dest
         else:
             line = lines[item['line']]
             newline = '\r\n' if line.endswith('\r\n') else ('\n' if line.endswith('\n') else '')
@@ -391,7 +413,7 @@ def merge_loose(source, entry):
             lead, trail = rhs[:len(rhs) - len(rhs.lstrip())], rhs[len(rhs.rstrip()):]
             quoted = rhs.strip().startswith('"') and rhs.strip().endswith('"')
             lines[item['line']] = lhs + '=' + lead + ('"' + dest + '"' if quoted else dest) + trail + newline
-    result = (json.dumps(obj, ensure_ascii=False, indent='\t') + '\n'
+    result = (render_json(text, replacements)
               if entry['kind'] == 'json' else ''.join(lines))
     return result.encode(encoding), {'translated': translated, 'unchanged_by_design': unchanged,
                                    'unmatched': len(missing), 'unmatched_entries': missing}
@@ -469,7 +491,78 @@ def verified_delta(entry, catalog_dir, source):
     return {'mode': 'delta', 'patch': patch, 'spec': spec}
 
 
-def build_output(installation, catalog_dir, output, progress=None):
+def output_catalog(catalog, development=False, scopes=None, only_plugins=None):
+    """Keep release approval separate from explicit, limited development tests."""
+    if catalog.get('schema_version') != SCHEMA or catalog.get('target_modlist') != 'nuclear-sunset-ttw':
+        raise ValueError('Nuclear Sunset용 번역 데이터가 필요합니다.')
+    if not development:
+        if catalog.get('translation_ready') is not True or catalog.get('channel') == 'development':
+            raise ValueError('Nuclear Sunset용 검증된 번역 데이터가 필요합니다. 정식 출력은 아직 차단되어 있습니다.')
+        if scopes is not None or only_plugins:
+            raise ValueError('범위 선택은 개발용 출력에서만 지원합니다.')
+        return catalog
+    if catalog.get('channel') != 'development' or catalog.get('translation_ready') is not False:
+        raise ValueError('명시적인 미배포 개발용 카탈로그가 필요합니다.')
+    selected = set(scopes if scopes is not None else ('ui', 'fonts'))
+    if not selected or selected - {'ui', 'fonts', 'plugins'}:
+        raise ValueError('번역 범위를 하나 이상 올바르게 선택해주세요.')
+    result = dict(catalog)
+    result['selected_scopes'] = sorted(selected)
+    result.pop('asset_bundle', None)
+    if 'ui' not in selected:
+        result.pop('runtime_mods', None)
+    elif any(spec.get('review_status') not in {
+                 'validated_gmst_only_candidate', 'snapshot_verified_caption_candidate',
+                 'validated_runtime_dictionary_candidate'}
+             for spec in result.get('runtime_mods', [])):
+        raise ValueError('출처가 확인되지 않은 UI·라디오 시험 데이터입니다.')
+    if 'fonts' not in selected:
+        result.pop('font_bundle', None)
+    files = []
+    for entry in catalog.get('files', []):
+        kind = entry.get('kind')
+        if kind in {'json', 'ini'} and 'ui' in selected:
+            if entry.get('review_status') != 'ui_reviewed':
+                raise ValueError('검수되지 않은 MCM/INI 데이터입니다.')
+            files.append(entry)
+        elif kind == 'plugin-records' and 'plugins' in selected:
+            full = catalog.get('full_translation_catalog') is True
+            allowed_origins = ({'sst_direct', 'gemini_candidate', 'ttw_donor',
+                                'base_translation_inherited'} if full else {'sst_direct'})
+            expected_review = 'source_matched_candidate' if full else 'existing_sst_candidate'
+            if (entry.get('review_status') != expected_review
+                    or catalog.get('strict_plugin_paths') is not True
+                    or any(not row.get('path') or row.get('origin') not in allowed_origins
+                           for row in entry.get('mappings', []))):
+                raise ValueError('번역 시험은 현재 원문과 정확한 레코드 경로로 대응된 데이터만 허용합니다.')
+            files.append(entry)
+        elif kind not in {'json', 'ini', 'plugin-records'}:
+            raise ValueError('개발용 출력에 허용되지 않는 데이터 종류입니다.')
+    if only_plugins:
+        wanted = {name.casefold() for name in only_plugins}
+        available = {entry['path'].casefold() for entry in files if entry['kind'] == 'plugin-records'}
+        if 'plugins' not in selected or wanted - available:
+            raise ValueError('요청한 SST 시험 플러그인이 카탈로그에 없습니다.')
+        files = [entry for entry in files if entry['kind'] != 'plugin-records'
+                 or entry['path'].casefold() in wanted]
+    result['files'] = files
+    if not files and not result.get('font_bundle'):
+        raise ValueError('선택한 범위에 출력할 번역 데이터가 없습니다.')
+    return result
+
+
+def original_installation(installation, excluded):
+    """Ignore explicitly named test overlays in memory, never change a profile."""
+    result = copy(installation)
+    excluded = set(excluded)
+    result.mods_enabled = [x for x in installation.mods_enabled if x not in excluded]
+    result.providers = {key: filtered for key, chain in installation.providers.items()
+                        if (filtered := [x for x in chain if x["provider"] not in excluded])}
+    return result
+
+
+def build_output(installation, catalog_dir, output, progress=None, *,
+                 development=False, scopes=None, only_plugins=None):
     output = output.resolve()
     installation.guard_output(output)
     # This interface prepares manual overwrite files outside MO2, never a live mod.
@@ -481,11 +574,12 @@ def build_output(installation, catalog_dir, output, progress=None):
         raise FileExistsError(report_path)
     if report_text_path.exists():
         raise FileExistsError(report_text_path)
-    catalog = nskr.read_json(catalog_dir / 'catalog.json')
-    if catalog.get('schema_version') != SCHEMA:
-        raise ValueError('Unsupported catalog format')
-    if catalog.get('target_modlist') != 'nuclear-sunset-ttw' or catalog.get('translation_ready') is not True:
-        raise ValueError('Nuclear Sunset용 검증된 번역 데이터가 필요합니다. 기존 VNV 데이터 사용 불가.')
+    catalog = output_catalog(nskr.read_json(catalog_dir / 'catalog.json'),
+                             development, scopes, only_plugins)
+    if development and catalog.get('full_translation_catalog'):
+        installation = original_installation(installation, catalog.get('excluded_test_providers', []))
+    if development and not {'fallout3.esm', 'taleoftwowastelands.esm'}.issubset(installation.active_keys):
+        raise ValueError('선택한 프로필에서 Fallout 3 및 TTW 마스터를 확인할 수 없습니다.')
     # Optional providers may deliberately contain the same virtual plugin name.
     if catalog['files'] or not (catalog.get('font_bundle') or catalog.get('asset_bundle')):
         nskr.validate_entries([{'path': (f"optional/{nskr.virtual_path(e['provider'])}/{e['path']}"
@@ -496,8 +590,8 @@ def build_output(installation, catalog_dir, output, progress=None):
         if progress:
             progress(message)
 
-    emit('VNV 프로필과 현재 플러그인을 확인하고 있습니다.')
-    inheritance_memory = base_translation_memory(catalog)
+    emit(f'Nuclear Sunset 프로필 "{installation.profile}"의 현재 원본을 확인하고 있습니다.')
+    inheritance_memory = [] if development else base_translation_memory(catalog)
     if inheritance_memory:
         inherited_entries, discovery_skipped = discover_new_plugin_entries(installation, catalog)
     else:
@@ -512,6 +606,9 @@ def build_output(installation, catalog_dir, output, progress=None):
     }
 
     report = {'mo2_root': str(installation.root), 'profile': installation.profile,
+              'channel': 'development' if development else 'release',
+              'translation_ready': not development,
+              'selected_scopes': catalog.get('selected_scopes'),
               'output': str(output), 'created_utc': datetime.now(timezone.utc).isoformat(),
               'files': [], 'skipped': list(discovery_skipped), 'warnings': installation.warnings,
               'install_state': 'manual_copy_required', 'game_validation': 'not_run',
@@ -590,6 +687,13 @@ def build_output(installation, catalog_dir, output, progress=None):
                     else:
                         source = installation.source(entry['path'])
             original_hash = nskr.sha256(source)
+            if development and entry['kind'] in {'json', 'ini'}:
+                if (original_hash != entry['baseline_sha256']
+                        or chain[-1]['provider'] != entry['provider']):
+                    report['skipped'].append({'path': entry['path'],
+                                             'reason': 'reviewed_ui_source_or_provider_changed',
+                                             'translation_applied': False})
+                    continue
             relative = destination(installation, source, entry['path'])
             if relative.casefold() in seen:
                 raise ValueError(f'Duplicate physical output: {relative}')
@@ -664,7 +768,23 @@ def build_output(installation, catalog_dir, output, progress=None):
                 shutil.copyfile(payload, target)
                 result['status'] = 'user_completed_copy; record_validation_pending'
             elif entry['kind'] in {'ini', 'json'}:
+                companion = translation_companion(installation, entry['path'])
+                if companion:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, target)
+                    result.update(translated=0, unmatched=0,
+                                  status='original_json_preserved_translation_companion',
+                                  translation_companion=companion)
+                    if nskr.sha256(source) != original_hash:
+                        raise ValueError(f'Source changed during generation: {source}')
+                    result['output_sha256'] = nskr.sha256(target)
+                    report['files'].append(result)
+                    continue
                 raw, stats = merge_loose(source, entry)
+                if (development and stats['unmatched']
+                        and not (catalog.get('full_translation_catalog')
+                                 and entry.get('updated_source_exact_matches_only'))):
+                    raise ValueError(f'검수된 UI 번역 대응 실패: {entry["path"]}')
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(raw)
                 result.update(stats, status='merged_into_current_source')
