@@ -39,6 +39,9 @@ patch('src/pages/index.js',[
   ['Click Here to Learn About Nuclear Sunset','뉴클리어 선셋 소개 및 설치 안내'],
   ['description="A Hardcore TTW Modlist"','description="Nuclear Sunset 하드코어 TTW 모드 목록 비공식 한국어 번역"']
 ]);
+patch('sidebars.js',[
+  ["'main/setup',", "'main/setup',\n    'main/korean-patch',"],
+]);
 const srcDocs=path.join(root,'docs');
 const translatedDocs=path.join(process.cwd(),'korean','translations','docs');
 function visit(folder){

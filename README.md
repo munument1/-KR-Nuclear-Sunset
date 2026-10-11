@@ -10,6 +10,14 @@
 
 ## 번역 및 빌드 구조
 
+### 게임 한국어 패치 — 시험 배포판
+
+- [패쳐 v0.1.0-beta.1 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v0.1.0-beta.1)
+- [설치 및 복구 안내](https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch)
+- [패쳐 소스와 검증 범위](patcher/README.md)
+
+원본 모드와 프로필을 직접 수정하지 않고 별도 Output을 생성합니다. 전체 출력 자동 검사는 통과했지만 전 구간 문맥·게임 안정성 검수는 미완료입니다. 배포 패키지는 게임 원본과 전체 번역 Output을 포함하지 않습니다.
+
 - `translations/docs/`: 영어 원본 경로를 그대로 따른 한국어 Markdown 문서
 - `scripts/configure-site.cjs`: 원본 Docusaurus의 언어, 제목, URL, 탐색 메뉴 현지화
 - `.github/workflows/build-korean-site.yml`: 원본 GitHub 소스를 체크아웃해 한국어 문서를 덮어쓰고 사이트를 빌드하는 배포 작업

@@ -15,6 +15,10 @@ sidebar_label: 설치 안내
 
 ## 설치 전 확인할 사항
 
+:::tip 게임 한국어 패치
+Nuclear Sunset 설치와 영어 상태의 정상 실행 확인을 마친 뒤 [한국어 패치 설치 안내](./korean-patch)를 진행하세요. [시험 배포판 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v0.1.0-beta.1)를 제공합니다. 가이드 사이트의 한국어 번역과 게임 한국어 패치는 별개입니다.
+:::
+
 이 페이지는 **Windows용 Nuclear Sunset 전체 설치 안내**입니다. 필요한 소프트웨어를 설치한 뒤 게임을 실행하는 마지막 단계까지 위에서 아래로 진행하세요. Linux를 사용한다면 이어지는 **Linux 설치 안내**를 따르세요.
 
 - **게임 준비:** 원본 가이드의 [설치 요구 사항](https://nuclearsunset.com/docs/main/requirements)에서 지원하는 Fallout: New Vegas, Fallout 3 및 **두 게임의 DLC** 보유 여부를 먼저 확인하세요.
