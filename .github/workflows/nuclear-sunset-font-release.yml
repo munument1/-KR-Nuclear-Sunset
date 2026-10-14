@@ -35,6 +35,9 @@ jobs:
         shell: pwsh
         run: |
           Set-Location patcher
+          New-Item -ItemType Directory -Force .ci-temp | Out-Null
+          $env:TEMP = (Resolve-Path .ci-temp).Path
+          $env:TMP = $env:TEMP
           python -m unittest discover -s tests -v
           if ($LASTEXITCODE) { throw 'Regression tests failed' }
       - name: Build standalone NuclearSunsetKoreanPatcher.exe
