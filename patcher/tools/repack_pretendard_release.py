@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 import shutil
 import xml.etree.ElementTree as ET
@@ -16,6 +17,7 @@ import zipfile
 
 from PyInstaller.archive.readers import CArchiveReader
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import nskr
 
 SLOTS = {"1", "2", "3", "6", "7", "42"}
