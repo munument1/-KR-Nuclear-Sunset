@@ -1,0 +1,79 @@
+name: Build Nuclear Sunset terminal hacking font fix
+on:
+  push:
+    branches: [fix/hacking-font-grid]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 50
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build dependency
+        run: python -m pip install pyinstaller==6.22.3 fonttools==4.60.1
+      - name: Download published v1.0.1 assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .base-release | Out-Null
+          gh release download v1.0.1 -p 'NuclearSunset-Korean-Patcher-v1.0.1.zip' -p 'NuclearSunset-TranslationData-v1.0.1.zip' -p 'SHA256SUMS.txt' --dir .base-release
+          if ($LASTEXITCODE) { throw 'Base release download failed' }
+      - name: Recover resources and align terminal ASCII
+        shell: pwsh
+        run: |
+          Set-Location patcher
+          python tools/repack_hacking_release.py prepare --release ../.base-release --work ../.release-work
+          if ($LASTEXITCODE) { throw 'Release recovery or font replacement failed' }
+      - name: Run original patcher unit tests
+        shell: pwsh
+        run: |
+          Set-Location patcher
+          New-Item -ItemType Directory -Force .ci-temp | Out-Null
+          $env:TEMP = (Resolve-Path .ci-temp).Path
+          $env:TMP = $env:TEMP
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE) { throw 'Regression tests failed' }
+      - name: Build standalone NuclearSunsetKoreanPatcher.exe
+        shell: pwsh
+        run: |
+          Set-Location patcher
+          New-Item -ItemType Directory -Force dist/hacking,dist/hacking-work,dist/hacking-spec | Out-Null
+          $resourceRoot = (Resolve-Path '../.release-work').Path
+          $buildArgs = @(
+            '-m','PyInstaller','--noconfirm','--onefile','--windowed',
+            '--name','NuclearSunsetKoreanPatcher',
+            '--distpath','dist/hacking',
+            '--workpath','dist/hacking-work',
+            '--specpath','dist/hacking-spec',
+            '--add-data',"$resourceRoot/TranslationData;TranslationData",
+            '--add-binary',"$resourceRoot/NSKRXEditWorker.exe;.",
+            '--add-binary',"$resourceRoot/Backend/XEditLib.dll;Backend",
+            '--add-data',"$resourceRoot/Backend/FalloutNV.Hardcoded.dat;Backend",
+            '--add-data',"$resourceRoot/Backend/icudtl.dat;Backend",
+            '--add-data',"$resourceRoot/Backend/LICENSE;Backend",
+            'nskr_gui.py'
+          )
+          python @buildArgs
+          if ($LASTEXITCODE) { throw 'Standalone EXE build failed' }
+      - name: Verify only XML/catalog changed and package release
+        shell: pwsh
+        run: |
+          Set-Location patcher
+          python tools/repack_hacking_release.py package --release ../.base-release --work ../.release-work --exe dist/hacking/NuclearSunsetKoreanPatcher.exe --output ../.release-assets
+          if ($LASTEXITCODE) { throw 'Unexpected resource changes detected' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NuclearSunset-Hacking-v1.0.2
+          path: |
+            .release-assets/NuclearSunset-Korean-Patcher-v1.0.2.zip
+            .release-assets/NuclearSunset-TranslationData-v1.0.2.zip
+            .release-assets/SHA256SUMS.txt
+          if-no-files-found: error
+
