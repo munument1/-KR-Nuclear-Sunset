@@ -10,6 +10,7 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 50
     env:
+      PYTHONPATH: ${{ github.workspace }}/patcher
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
