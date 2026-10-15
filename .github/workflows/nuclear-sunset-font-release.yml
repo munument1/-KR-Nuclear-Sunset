@@ -1,7 +1,7 @@
 name: Build and release Nuclear Sunset Pretendard font fix
 on:
   push:
-    branches: [main, fix/pretendard-glyph-v1.0.1]
+    branches: [fix/pretendard-glyph-v1.0.1]
   workflow_dispatch:
 permissions:
   contents: write
