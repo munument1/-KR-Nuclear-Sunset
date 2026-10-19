@@ -12,11 +12,11 @@
 
 ### 게임 한국어 패치
 
-- [패쳐 v1.0.0 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.0.0)
+- [최신 패쳐 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/latest)
 - [설치 및 복구 안내](https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch)
 - [패쳐 소스와 검증 범위](patcher/README.md)
 
-원본 모드와 프로필을 직접 수정하지 않고 별도 Output을 생성합니다. 전체 출력 자동 검사는 통과했지만 전 구간 문맥·게임 안정성 검수는 미완료입니다. 배포 패키지는 게임 원본과 전체 번역 Output을 포함하지 않습니다.
+원본 모드와 프로필을 직접 수정하지 않고 별도 Output을 생성합니다. 전체 출력 자동 검사는 통과했지만 전 구간 문맥·게임 안정성 검수는 미완료입니다. 일반 모드는 설치된 원본에 번역 데이터를 적용합니다. 한국어 UI 지원용 `NSKR UI Strings.esp` 1개는 완성 플러그인으로 동봉되어 Output에 복사됩니다. 배포 구성과 업데이트 주의사항은 설치 안내를 확인하세요.
 
 - `translations/docs/`: 영어 원본 경로를 그대로 따른 한국어 Markdown 문서
 - `scripts/configure-site.cjs`: 원본 Docusaurus의 언어, 제목, URL, 탐색 메뉴 현지화
