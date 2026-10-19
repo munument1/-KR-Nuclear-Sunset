@@ -375,11 +375,19 @@ def translation_companion(installation, virtual):
 def merge_loose(source, entry):
     text, encoding = decode(source)
     matches = defaultdict(set)
+    previous = defaultdict(set)
+    already_applied = defaultdict(set)
     for row in entry['mappings']:
         check_pair(row['source'], row['dest'])
         identity = row['context'] if entry['kind'] == 'json' else (row['section'], row['key'])
         matches[(identity, row['source'])].add(row['dest'])
-    missing, translated, unchanged = [], 0, 0
+        already_applied[(identity, row['dest'])].add(row['dest'])
+        for old in row.get('previous_dests', ()):
+            if not isinstance(old, str) or not old:
+                raise ValueError('Invalid previous translation text')
+            check_pair(row['source'], old)
+            previous[(identity, old)].add(row['dest'])
+    missing, translated, unchanged, already_translated = [], 0, 0, 0
     approved_identities = {identity for identity, source in matches}
     replacements = {}
     if entry['kind'] == 'json':
@@ -394,7 +402,18 @@ def merge_loose(source, entry):
         if entry.get('display_mappings_only') and identity not in approved_identities:
             unchanged += 1
             continue
-        destinations = matches.get((identity, item['source']), set())
+        key = (identity, item['source'])
+        # Prefer exact source, then reviewed older translations. Unknown custom
+        # strings remain unmatched rather than silently being overwritten.
+        destinations = matches.get(key, set())
+        if not destinations:
+            destinations = previous.get(key, set())
+        if not destinations:
+            applied = already_applied.get(key, set())
+            if len(applied) == 1:
+                already_translated += 1
+                continue
+            destinations = applied
         if len(destinations) != 1:
             missing.append({**item, 'reason': 'ambiguous' if destinations else 'unmatched'})
             continue
@@ -415,8 +434,9 @@ def merge_loose(source, entry):
             lines[item['line']] = lhs + '=' + lead + ('"' + dest + '"' if quoted else dest) + trail + newline
     result = (render_json(text, replacements)
               if entry['kind'] == 'json' else ''.join(lines))
-    return result.encode(encoding), {'translated': translated, 'unchanged_by_design': unchanged,
-                                   'unmatched': len(missing), 'unmatched_entries': missing}
+    return result.encode(encoding), {'translated': translated, 'already_translated': already_translated,
+                                    'unchanged_by_design': unchanged,
+                                    'unmatched': len(missing), 'unmatched_entries': missing}
 
 
 def fixed_esm_mod(installation):
