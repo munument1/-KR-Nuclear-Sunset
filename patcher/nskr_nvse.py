@@ -23,6 +23,15 @@ REGEX_REWRITE = re.compile(
     r'\(GetFormDescription\s+(?P<form>rRef|rR|AVPerception)\)\s*'
     r'"Bullet Time\|VATS(?P<pattern>(?:\|[^"\r\n]*)?)"[ \t]*(?:\r\n|\n|\r|)$', re.IGNORECASE)
 ASCII_GUARD = 'if eval Sv_RegexMatch (GetFormDescription {form}) "^[\\x00-\\x7F]*$"'
+# Vanilla FalloutNV.esm PERK 044CAF, Concentrated Fire. The installed Korean
+# description is correct, so its bytes must never enter JIP's string functions,
+# even if GetFormDescription would first reduce non-ASCII characters to '?'.
+CONCENTRATED_FIRE_GUARD = 'if eval {form} != "44CAF"'
+EXPECTED_BULLET_REWRITES = (
+    ('rref', r'|V\.A\.T\.S\.(?!\s[A-Z])|V\.A\.T\.S'),
+    ('rr', r'|V\.A\.T\.S\.(?!\s[A-Z])|V\.A\.T\.S'),
+    ('avperception', ''),
+)
 
 
 def validate_entry(entry):
@@ -143,9 +152,10 @@ def merge_script(source: Path, entry):
 def _guard_bullet_time(text, original, encoding, bom):
     """Prevent a third-party VATS regex rewrite from re-encoding Korean PERKs.
 
-    This guard only lets entirely ASCII descriptions enter the original
-    replacement. It leaves all three original commands byte-identical and
-    adds a conditional wrapper. A different revision must be inspected first.
+    The known Concentrated Fire form is excluded before GetFormDescription,
+    even when an API already returns corrupted ASCII '?' for the description.
+    Other non-ASCII strings are protected by an ASCII condition. All original
+    replacement and setter commands remain unchanged.
     """
     lines = text.splitlines(keepends=True)
     pairs = []
@@ -160,27 +170,60 @@ def _guard_bullet_time(text, original, encoding, bom):
             lines[index + 1], re.IGNORECASE)
         if setter is None:
             raise ValueError('Unexpected Bullet Time description setter')
-        pairs.append((index, form, match['indent']))
-    if (len(pairs) != 3 or {form.casefold() for _, form, _ in pairs}
-            != {'rref', 'rr', 'avperception'}
-            or 'aForms = GLTA 86' not in text or 'aForms = GLTA 98' not in text):
+        pairs.append((index, form, match['indent'], match['pattern']))
+    # The upstream commands have a specific replacement|pattern, ordering,
+    # and target. Do not rewrite an unfamiliar revision merely because it
+    # contains three visually similar GetFormDescription calls.
+    if ([(form.casefold(), pattern) for _, form, _, pattern in pairs]
+            != list(EXPECTED_BULLET_REWRITES)
+            or text.count('aForms = GLTA 86') != 1
+            or text.count('aForms = GLTA 98') != 1):
         return original, {'translated': 0, 'already_translated': 0, 'unmatched': 1,
                           'unmatched_entries': [{'reason': 'unexpected_bullet_time_script_structure'}],
                           'encoding': encoding}
     newline = '\r\n' if '\r\n' in text else '\n'
-    already = 0
-    for index, form, indent in reversed(pairs):
-        guard = indent + ASCII_GUARD.format(form=form) + newline
+    states = []
+    # Identify precisely three permitted revisions: original, previous
+    # ASCII-only output, and current full output. Reject partial edits.
+    for index, form, indent, _ in pairs:
+        ascii_guard = indent + ASCII_GUARD.format(form=form) + newline
         tail = indent + 'endif' + newline
-        if index > 0 and lines[index - 1] == guard and (
-                index + 2 < len(lines) and lines[index + 2] == tail):
-            already += 1
+        has_ascii_start = index > 0 and lines[index - 1] == ascii_guard
+        has_ascii_end = index + 2 < len(lines) and lines[index + 2] == tail
+        if has_ascii_start != has_ascii_end:
+            raise ValueError('Partially guarded Bullet Time script requires manual inspection')
+        if form.casefold() == 'avperception':
+            states.append('ascii' if has_ascii_start else 'original')
             continue
-        lines.insert(index + 2, tail)
-        lines.insert(index, guard)
-    if already not in (0, 3):
+        known_guard = indent + CONCENTRATED_FIRE_GUARD.format(form=form) + newline
+        has_known_start = index > 1 and lines[index - 2] == known_guard
+        has_known_end = index + 3 < len(lines) and lines[index + 3] == tail
+        if has_known_start != has_known_end or (has_known_start and not has_ascii_start):
+            raise ValueError('Partially guarded Bullet Time script requires manual inspection')
+        states.append('full' if has_known_start else
+                      'ascii' if has_ascii_start else 'original')
+    if tuple(states) not in (('original',) * 3,
+                             ('ascii',) * 3,
+                             ('full', 'full', 'ascii')):
         raise ValueError('Partially guarded Bullet Time script requires manual inspection')
-    if already == 0:
+    for (index, form, indent, _), state in reversed(list(zip(pairs, states))):
+        ascii_guard = indent + ASCII_GUARD.format(form=form) + newline
+        tail = indent + 'endif' + newline
+        if state == 'full' or form.casefold() == 'avperception' and state == 'ascii':
+            continue
+        if state == 'ascii':
+            # An already installed v1.0.5 candidate receives only the two
+            # additional known-form guards, preserving its existing text.
+            lines.insert(index + 3, tail)
+            lines.insert(index - 1, indent + CONCENTRATED_FIRE_GUARD.format(form=form)
+                         + newline)
+        else:
+            replacement = [ascii_guard, lines[index], lines[index + 1], tail]
+            if form.casefold() != 'avperception':
+                known_guard = indent + CONCENTRATED_FIRE_GUARD.format(form=form) + newline
+                replacement = [known_guard, *replacement, tail]
+            lines[index:index + 2] = replacement
+    if states[0] != 'full':
         # xNVSE's inline Script Runner lambda has a strict 512 character
         # limit. The upstream CallAfter lambda is already 511 characters.
         # The added Unicode guard must fit without changing its commands,
@@ -198,12 +241,34 @@ def _guard_bullet_time(text, original, encoding, bom):
             lines[start + 1:end] = compact
             end = start + len(compact) + 1
         if len(''.join(lines[start:end + 1])) > 512:
-            raise ValueError('Bullet Time lambda would exceed the NVSE 512-character limit')
+            # The original tutorial-skip condition remains intact, but moving
+            # its explanatory comment outside the UDF is necessary to fit
+            # both guards inside JIP's documented 512-character lambda cap.
+            comment = ';; Skip the tutorial messages'
+            indices = [i for i in range(start + 1, end)
+                       if lines[i].strip() == comment]
+            if len(indices) != 1:
+                raise ValueError('Unexpected Bullet Time lambda comment/structure')
+            moved = lines.pop(indices[0]).lstrip(' \t')
+            lines.insert(start, moved)
+    # Validate also on a second pass: an already patched but invalid lambda
+    # must not silently pass the idempotence check.
+    start = next((i for i, line in enumerate(lines)
+                  if line.startswith('CallAfter 0 (begin function')), None)
+    end = next((i for i, line in enumerate(lines)
+                if line.startswith('end) 1 aForms iCount')), None)
+    if start is None or end is None or end <= start:
+        raise ValueError('Cannot verify Bullet Time CallAfter lambda')
+    if len(''.join(lines[start:end + 1])) > 512:
+        raise ValueError('Bullet Time lambda would exceed the NVSE 512-character limit')
     result = bom + ''.join(lines).encode('utf-8' if encoding == 'utf-8-sig' else encoding)
-    return result, {'translated': 0 if already == 3 else 3,
+    already = sum(state == 'full' or form.casefold() == 'avperception' and
+                  state == 'ascii' for (_, form, _, _), state in zip(pairs, states))
+    return result, {'translated': 3 - already,
                     'already_translated': already, 'unmatched': 0,
                     'unmatched_entries': [], 'encoding': encoding,
-                    'status_note': 'ASCII-only guard; JIP runtime behavior requires game validation'}
+                    'status_note': ('Concentrated Fire excluded before GetFormDescription; '
+                                    'ASCII-only other descriptions; game validation required')}
 
 
 def builtin_perk_scripts():
@@ -216,8 +281,12 @@ def builtin_perk_scripts():
             'command': 'SetFormDescription', 'form': 'Tag',
             'source': ('The Tag! perk allows you to select a fourth skill to be a tag skill, '
                        'which will double the rate at which that skill advances.'),
-            'dest': ('태그! 특전을 선택하면 네 번째 태그 기술을 지정할 수 있으며, '
-                     '지정한 기술의 성장 속도가 두 배로 증가합니다.'),
+            'dest': ('태그! 퍽을 선택하면 네 번째 주력 기술을 지정할 수 있으며, '
+                     '해당 기술의 숙련도 상승 속도가 두 배가 됩니다.'),
+            'previous_dests': [
+                ('태그! 특전을 선택하면 네 번째 태그 기술을 지정할 수 있으며, '
+                 '지정한 기술의 성장 속도가 두 배로 증가합니다.'),
+            ],
         }],
     }
     return [

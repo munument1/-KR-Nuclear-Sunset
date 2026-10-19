@@ -293,7 +293,8 @@ def embed_python_sources(package: Path) -> dict[str, str]:
     source_paths += [PATCHER / "ns_inventory.py"]
     source_paths += [PATCHER / "tools" / name for name in (
         "loose_translation.py", "merge_previous_catalogs.py",
-        "normalize_place_names.py", "build_v1_0_5_folder_release.py")]
+        "normalize_place_names.py", "build_v1_0_5_folder_release.py",
+        "audit_issue11_compiled_scripts.py", "tes4_text_scan.py")]
     destination = package / "Licenses-and-Source/NuclearSunset-Patcher-v1.0.5"
     checksums = {}
     for source in source_paths:

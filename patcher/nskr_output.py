@@ -18,6 +18,7 @@ import nskr
 import nskr_xedit
 import nskr_fonts
 import nskr_nvse
+import nskr_perk_dictionary
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
 SCHEMA = 1
@@ -970,6 +971,15 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             runtime_files, runtime_status = build_runtime_mods(installation, catalog_dir, catalog['runtime_mods'], stage, seen)
             report['files'].extend(runtime_files)
             report['runtime_mods'] = runtime_status
+        # Compiled SCPTs in NS.esp and Sweet Consumables.esp inject English
+        # descriptions at runtime. Never edit their SCDA bytes or the user's
+        # plugins: emit a separate, source-checked tNVSE UI dictionary overlay.
+        # The same safety/atomic publication rules apply as to other files.
+        if not development or 'plugins' in catalog.get('selected_scopes', []):
+            perk_files, perk_status = nskr_perk_dictionary.build_perk_dictionary(
+                installation, stage, seen)
+            report['files'].extend(perk_files)
+            report['perk_runtime_dictionary'] = perk_status
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(
