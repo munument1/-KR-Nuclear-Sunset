@@ -38,6 +38,65 @@ FO3_TTW_MASTERS = {
 BASE_TRANSLATION_MASTERS = FIXED_ESM_MASTERS | STARTER_PACK_MASTERS | FO3_TTW_MASTERS
 PLUGIN_SUFFIXES = {'.esm', '.esp'}
 
+# Issue #11: this particular PERK description is rewritten at runtime by
+# Bullet Time/JIP and has been observed as '?' after Korean was injected.
+# Preserve *only* its DESC in English while keeping the localized FULL name
+# and all other perks. A previous Korean source is upgraded back to English.
+CONCENTRATED_FIRE_ENGLISH_SOURCE = {
+    'falloutnv.esm': (
+        'With Concentrated Fire, your accuracy to hit any body part in V.A.T.S. '
+        'increases slightly with each subsequent hit on that body part.'),
+    's6s base game perks redux.esp': (
+        'With Concentrated Fire, your accuracy when targeting any body part in '
+        'V.A.T.S. increases slightly with each subsequent attack on that body '
+        'part, and your spread is decreased by 20% when using an automatic weapon.'),
+}
+
+
+def preserve_english_concentrated_fire(catalog):
+    """Fail-closed, narrowly scoped English fallback for a broken PERK tooltip.
+
+    Never mutate the packaged catalog: the output worker receives an adjusted
+    copy, allowing exact matching of both the original English and previously
+    installed Korean text. Other PERK fields and translations are untouched.
+    """
+    affected = []
+    output_files = []
+    for entry in catalog.get('files', []):
+        plugin = entry.get('path', '').casefold()
+        if (entry.get('kind') != 'plugin-records'
+                or plugin not in CONCENTRATED_FIRE_ENGLISH_SOURCE):
+            output_files.append(entry)
+            continue
+        replacement = []
+        for mapping in entry['mappings']:
+            identity = (mapping.get('owner', '').casefold() == 'falloutnv.esm'
+                        and mapping.get('id', '').casefold() == '044caf'
+                        and mapping.get('signature') == 'PERK'
+                        and mapping.get('field') == 'DESC'
+                        and mapping.get('path') == 'DESC'
+                        and mapping.get('field_occurrence') == 0)
+            if not identity:
+                replacement.append(mapping)
+                continue
+            expected = CONCENTRATED_FIRE_ENGLISH_SOURCE[plugin]
+            if mapping.get('source') != expected:
+                raise ValueError('Concentrated Fire source changed; English fallback not reviewed')
+            revised = dict(mapping)
+            prior = set(revised.get('previous_dests') or ())
+            if revised['dest'] != expected:
+                prior.add(revised['dest'])
+            revised['dest'] = expected
+            if prior:
+                revised['previous_dests'] = sorted(prior)
+            nskr_xedit.validate_mapping(revised)
+            replacement.append(revised)
+            affected.append({'plugin': entry['path'], 'formid': '044CAF',
+                             'field': 'PERK/DESC', 'language': 'english',
+                             'reason': 'runtime_encoding_corruption_workaround'})
+        output_files.append({**entry, 'mappings': replacement})
+    return {**catalog, 'files': output_files}, affected
+
 
 def base_translation_memory(catalog):
     """Return conflict-free translations taken only from the official master entries.
@@ -661,6 +720,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         raise FileExistsError(report_text_path)
     catalog = output_catalog(nskr.read_json(catalog_dir / 'catalog.json'),
                              development, scopes, only_plugins)
+    catalog, english_exceptions = preserve_english_concentrated_fire(catalog)
     if not development or 'plugins' in catalog.get('selected_scopes', []):
         defaults = nskr_nvse.builtin_perk_scripts()
         existing = {(e['path'].casefold(), e.get('provider', '').casefold())
@@ -710,6 +770,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
               'selected_scopes': catalog.get('selected_scopes'),
               'output': str(output), 'created_utc': datetime.now(timezone.utc).isoformat(),
               'files': [], 'skipped': list(discovery_skipped), 'warnings': installation.warnings,
+              'english_only_exceptions': english_exceptions,
               'install_state': 'manual_copy_required', 'game_validation': 'not_run',
               'updated_plugin_backend': catalog.get('updated_plugin_backend', 'not_available'),
               'auto_inheritance': {

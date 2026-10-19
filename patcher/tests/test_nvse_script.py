@@ -120,11 +120,11 @@ class NVSEScriptTests(unittest.TestCase):
         self.assertEqual(report['translated'], 3)
         self.assertEqual(report['unmatched'], 0)
         self.assertEqual(output.count(b'Sv_RegexMatch'), 3)
-        self.assertEqual(output.count(b'if eval rRef != "44CAF"'), 1)
-        self.assertEqual(output.count(b'if eval rR != "44CAF"'), 1)
+        self.assertEqual(output.count(b'if eval rRef != "44CAF"'), 0)
+        self.assertEqual(output.count(b'if eval rR != "44CAF"'), 0)
         self.assertEqual(output.count(b'Sv_RegexReplace'), 3)
         self.assertEqual(output.count(b'SetFormDescription'), 3)
-        self.assertEqual(output.count(b'\r\n'), original.count(b'\r\n') + 10)
+        self.assertEqual(output.count(b'\r\n'), original.count(b'\r\n') + 6)
         for statement in original.split(b'\r\n'):
             if b'Sv_RegexReplace' in statement or b'SetFormDescription' in statement:
                 self.assertIn(statement + b'\r\n', output + b'\r\n')
@@ -162,25 +162,23 @@ class NVSEScriptTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Partially guarded'):
                 merge_script(self.source, self.bullet)
 
-    def test_previous_ascii_only_overlay_upgrades_to_known_form_exclusion(self):
-        original = ISSUE11_FIXTURES / 'Bullet-PerkDesc.txt'
-        if not original.is_file():
-            self.skipTest('Audited local Nuclear Sunset fixture unavailable')
-        full, _ = merge_script(original, self.bullet)
-        lines = full.decode('ascii').splitlines(keepends=True)
+    def test_previous_known_form_exclusion_is_removed_for_english_perk(self):
+        self.source.write_bytes(bullet_time_source().encode('ascii'))
+        intended, _ = merge_script(self.source, self.bullet)
+        lines = intended.decode('ascii').splitlines(keepends=True)
         for form in ('rRef', 'rR'):
-            guard = f'if eval {form} != "44CAF"'
-            index = next(i for i, line in enumerate(lines) if line.strip() == guard)
-            self.assertIn('Sv_RegexMatch', lines[index + 1])
-            self.assertEqual(lines[index + 5].strip(), 'endif')
-            del lines[index + 5]
-            del lines[index]
+            index = next(i for i, line in enumerate(lines)
+                         if line.strip().startswith(f'if eval Sv_RegexMatch (GetFormDescription {form})'))
+            indent = lines[index][:len(lines[index]) - len(lines[index].lstrip(' \t'))]
+            newline = '\r\n'
+            lines.insert(index, indent + f'if eval {form} != "44CAF"' + newline)
+            lines.insert(index + 5, indent + 'endif' + newline)
         previous = ''.join(lines).encode('ascii')
         self.source.write_bytes(previous)
         upgraded, report = merge_script(self.source, self.bullet)
         self.assertEqual(report['translated'], 2)
         self.assertEqual(report['already_translated'], 1)
-        self.assertEqual(upgraded, full)
+        self.assertEqual(upgraded, intended)
         self.assertEqual(self.source.read_bytes(), previous)
 
     def test_already_guarded_oversized_lambda_is_rejected(self):
@@ -203,12 +201,12 @@ class NVSEScriptTests(unittest.TestCase):
         self.assertEqual(stats['translated'], 3)
         self.assertEqual(stats['unmatched'], 0)
         self.assertEqual(output.count(b'if eval Sv_RegexMatch'), 3)
-        self.assertEqual(output.count(b'if eval rRef != "44CAF"'), 1)
-        self.assertEqual(output.count(b'if eval rR != "44CAF"'), 1)
+        self.assertEqual(output.count(b'if eval rRef != "44CAF"'), 0)
+        self.assertEqual(output.count(b'if eval rR != "44CAF"'), 0)
         self.assertEqual(output.count(b'Sv_RegexReplace'), 3)
         self.assertEqual(output.count(b'SetFormDescription'), 3)
-        # Ten guard lines are added and four blank lambda lines compacted.
-        self.assertEqual(output.count(b'\r\n'), original.count(b'\r\n') + 6)
+        # Six guard lines are added and four blank lambda lines compacted.
+        self.assertEqual(output.count(b'\r\n'), original.count(b'\r\n') + 2)
         self.assertFalse(output.endswith(b'\r\n'))
         self.assertNotIn(b'\n', output.replace(b'\r\n', b''))
         for statement in original.split(b'\r\n'):
@@ -224,12 +222,7 @@ class NVSEScriptTests(unittest.TestCase):
             if line.startswith('if eval Sv_RegexMatch'):
                 self.assertEqual(new_lines[index + 3], 'endif')
                 added_line_indices.update((index, index + 3))
-            if line.startswith('if eval rRef != "44CAF"') or line.startswith(
-                    'if eval rR != "44CAF"'):
-                self.assertTrue(new_lines[index + 1].startswith('if eval Sv_RegexMatch'))
-                self.assertEqual(new_lines[index + 5], 'endif')
-                added_line_indices.update((index, index + 5))
-        self.assertEqual(len(added_line_indices), 10)
+        self.assertEqual(len(added_line_indices), 6)
         new_surviving = [line for i, line in enumerate(new_lines)
                          if i not in added_line_indices]
         tutorial_comment = ';; Skip the tutorial messages'
@@ -242,7 +235,7 @@ class NVSEScriptTests(unittest.TestCase):
         start = output.index(b'CallAfter 0 (begin function')
         stop = output.index(b'end) 1 aForms iCount') + len(b'end) 1 aForms iCount')
         self.assertLessEqual(stop - start, 512)
-        self.assertEqual(stop - start, 505)
+        self.assertEqual(stop - start, 506)
         pattern = re.search(rb'Sv_RegexMatch .*? "([^"]+)"', output).group(1).decode('ascii')
         self.assertTrue(re.fullmatch(pattern, 'Perk VATS description'))
         self.assertFalse(re.fullmatch(pattern, '집중 사격 V.A.T.S.'))

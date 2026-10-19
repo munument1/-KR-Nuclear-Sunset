@@ -23,9 +23,9 @@ REGEX_REWRITE = re.compile(
     r'\(GetFormDescription\s+(?P<form>rRef|rR|AVPerception)\)\s*'
     r'"Bullet Time\|VATS(?P<pattern>(?:\|[^"\r\n]*)?)"[ \t]*(?:\r\n|\n|\r|)$', re.IGNORECASE)
 ASCII_GUARD = 'if eval Sv_RegexMatch (GetFormDescription {form}) "^[\\x00-\\x7F]*$"'
-# Vanilla FalloutNV.esm PERK 044CAF, Concentrated Fire. The installed Korean
-# description is correct, so its bytes must never enter JIP's string functions,
-# even if GetFormDescription would first reduce non-ASCII characters to '?'.
+# Older v1.0.5 candidates excluded FormID 044CAF with this condition.
+# Keep it for safe detection/removal when upgrading to the English-only
+# Concentrated Fire description; ASCII input can use the upstream rewrite.
 CONCENTRATED_FIRE_GUARD = 'if eval {form} != "44CAF"'
 EXPECTED_BULLET_REWRITES = (
     ('rref', r'|V\.A\.T\.S\.(?!\s[A-Z])|V\.A\.T\.S'),
@@ -152,10 +152,10 @@ def merge_script(source: Path, entry):
 def _guard_bullet_time(text, original, encoding, bom):
     """Prevent a third-party VATS regex rewrite from re-encoding Korean PERKs.
 
-    The known Concentrated Fire form is excluded before GetFormDescription,
-    even when an API already returns corrupted ASCII '?' for the description.
-    Other non-ASCII strings are protected by an ASCII condition. All original
-    replacement and setter commands remain unchanged.
+    All non-ASCII descriptions are protected by an ASCII condition. Since
+    Concentrated Fire's DESC deliberately remains English, do not exclude
+    FormID 044CAF: it needs the original V.A.T.S. -> Bullet Time replacement.
+    Safely remove that extra outer guard from previous v1.0.5 candidates.
     """
     lines = text.splitlines(keepends=True)
     pairs = []
@@ -209,24 +209,19 @@ def _guard_bullet_time(text, original, encoding, bom):
     for (index, form, indent, _), state in reversed(list(zip(pairs, states))):
         ascii_guard = indent + ASCII_GUARD.format(form=form) + newline
         tail = indent + 'endif' + newline
-        if state == 'full' or form.casefold() == 'avperception' and state == 'ascii':
+        if state == 'full':
+            # Migrate the earlier known-form exclusion back to the guarded
+            # English text path, keeping the original replacement command.
+            del lines[index + 3]
+            del lines[index - 2]
             continue
         if state == 'ascii':
-            # An already installed v1.0.5 candidate receives only the two
-            # additional known-form guards, preserving its existing text.
-            lines.insert(index + 3, tail)
-            lines.insert(index - 1, indent + CONCENTRATED_FIRE_GUARD.format(form=form)
-                         + newline)
-        else:
-            replacement = [ascii_guard, lines[index], lines[index + 1], tail]
-            if form.casefold() != 'avperception':
-                known_guard = indent + CONCENTRATED_FIRE_GUARD.format(form=form) + newline
-                replacement = [known_guard, *replacement, tail]
-            lines[index:index + 2] = replacement
+            continue
+        lines[index:index + 2] = [ascii_guard, lines[index], lines[index + 1], tail]
     if states[0] != 'full':
         # xNVSE's inline Script Runner lambda has a strict 512 character
         # limit. The upstream CallAfter lambda is already 511 characters.
-        # The added Unicode guard must fit without changing its commands,
+        # The Unicode guard must fit without changing its commands,
         # token order, strings, comments or block delimiters. Indentation and
         # empty lines are cosmetic in this language.
         start = next((i for i, line in enumerate(lines)
@@ -242,13 +237,13 @@ def _guard_bullet_time(text, original, encoding, bom):
             end = start + len(compact) + 1
         if len(''.join(lines[start:end + 1])) > 512:
             # The original tutorial-skip condition remains intact, but moving
-            # its explanatory comment outside the UDF is necessary to fit
-            # both guards inside JIP's documented 512-character lambda cap.
+            # its explanatory comment outside the UDF may be necessary to fit
+            # the guard inside JIP's documented 512-character lambda cap.
             comment = ';; Skip the tutorial messages'
             indices = [i for i in range(start + 1, end)
                        if lines[i].strip() == comment]
             if len(indices) != 1:
-                raise ValueError('Unexpected Bullet Time lambda comment/structure')
+                raise ValueError('Bullet Time lambda would exceed the NVSE 512-character limit')
             moved = lines.pop(indices[0]).lstrip(' \t')
             lines.insert(start, moved)
     # Validate also on a second pass: an already patched but invalid lambda
@@ -262,13 +257,13 @@ def _guard_bullet_time(text, original, encoding, bom):
     if len(''.join(lines[start:end + 1])) > 512:
         raise ValueError('Bullet Time lambda would exceed the NVSE 512-character limit')
     result = bom + ''.join(lines).encode('utf-8' if encoding == 'utf-8-sig' else encoding)
-    already = sum(state == 'full' or form.casefold() == 'avperception' and
-                  state == 'ascii' for (_, form, _, _), state in zip(pairs, states))
+    already = sum(state == 'ascii' for state in states)
     return result, {'translated': 3 - already,
                     'already_translated': already, 'unmatched': 0,
                     'unmatched_entries': [], 'encoding': encoding,
-                    'status_note': ('Concentrated Fire excluded before GetFormDescription; '
-                                    'ASCII-only other descriptions; game validation required')}
+                    'status_note': ('Concentrated Fire preserved in English with the '
+                                    'original Bullet Time rewrite; non-ASCII descriptions '
+                                    'are never rewritten; game validation required')}
 
 
 def builtin_perk_scripts():

@@ -6,7 +6,9 @@ Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 �
 
 ## 이슈 #11 — NVSE 런타임 특전 설명
 
-실제 게임 모드가 실행될 때 변경하는 특전 설명을 위해 `Tag Perk Description Adjustment`, `SSS - Sweets Simple Settings`, `Bullet Time - Perk Consistency Patch`의 `NVSE/plugins/scripts/gr_*.txt`에 대한 대응을 추가했습니다. 앞의 두 모드에서는 `SetFormDescription Tag`의 **영문 상수를 실제 게임 효과에 맞는 한국어로 교체**합니다. Bullet Time 스크립트에서는 `Concentrated Fire`(FormID `044CAF`)를 문자열 읽기·정규식·재기록 이전에 제외하고, 다른 ASCII 설명에 대해서는 원래의 명칭 치환을 유지합니다. 두 모드에 같은 Tag 스크립트가 있으므로 각각의 MO2 모드 폴더에 출력합니다.
+실제 게임 모드가 실행될 때 변경하는 특전 설명을 위해 `Tag Perk Description Adjustment`, `SSS - Sweets Simple Settings`, `Bullet Time - Perk Consistency Patch`의 `NVSE/plugins/scripts/gr_*.txt`에 대한 대응을 추가했습니다. 앞의 두 모드에서는 `SetFormDescription Tag`의 **영문 상수를 실제 게임 효과에 맞는 한국어로 교체**합니다. Bullet Time 스크립트에서는 한글처럼 비ASCII 문자가 들어간 설명의 재기록을 피하고, 영어로 유지한 `Concentrated Fire`(FormID `044CAF`)에는 본래의 `V.A.T.S.` → `Bullet Time` 치환이 작동하도록 합니다. 두 모드에 같은 Tag 스크립트가 있으므로 각각의 MO2 모드 폴더에 출력합니다.
+
+**집중 사격의 퍽 효과 설명은 예외적으로 영어 원문을 유지합니다.** 일부 환경에서 JIP/Bullet Time 문자열 처리 중 한국어가 `??`로 표시된 사례가 있어, 원인 미확정 상태에서 깨진 번역을 강행하지 않는 선택입니다. `FalloutNV.esm`과 `S6S Base Game Perks Redux.esp`의 동일 퍽 설명만 대상이며 이름과 다른 퍽의 한국어 번역은 유지합니다. 이미 해당 항목을 한국어로 설치한 경우에도 이전 번역이 정확히 일치하면 영어로 안전하게 되돌립니다.
 
 원본 파일 경로·모드 공급자·스크립트 명령 또는 영문 원문이 변경되면 보수적으로 보류합니다. 인코딩(BOM 포함)과 개행(CRLF/LF)은 유지하고 원본 모드에는 쓰지 않습니다. Bullet Time의 인라인 람다는 512자 제한이 있으므로 주석·공백만 필요한 만큼 재배치하고 검사합니다. 새 Output을 MO2 mods에 복사할 때 해당 스크립트 원본을 백업하세요. NVSE에서 UTF-8 한글 문자열이 정상 처리되는지는 실제 플레이 확인이 필요합니다.
 
