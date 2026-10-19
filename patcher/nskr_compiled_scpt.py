@@ -26,6 +26,8 @@ import re
 import struct
 import zlib
 
+from tools.audit_issue11_compiled_scripts import CASES as _REVIEWED_CASES
+
 _COMPRESSED = 0x00040000
 _U16 = struct.Struct('<H')
 _U32 = struct.Struct('<I')
@@ -315,6 +317,13 @@ def translate_compiled_scpt(source: Path, target: Path, spec: dict) -> dict:
     idempotent.  No operation writes the source or any installed MO2 directory.
     """
     source, target = Path(source).resolve(), Path(target).resolve()
+    reviewed = {case['editor_id']: case for case in _REVIEWED_CASES}.get(
+        spec.get('editor_id'))
+    if reviewed is None or any(
+            spec.get(key) != reviewed[key] for key in
+            ('record_formid', 'record_owner', 'editor_id', 'target',
+             'source_en', 'filename')):
+        raise ValueError('Compiled script spec differs from reviewed source identity')
     if source == target or source.suffix.lower() != '.esp' or target.suffix.lower() != '.esp':
         raise ValueError('Source and separate target must be distinct .esp paths')
     if target.exists():
