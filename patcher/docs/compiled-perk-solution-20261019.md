@@ -10,6 +10,8 @@
 
 설치 원본은 수정하지 않는다. Output 디렉터리에 생성된 독립 모드를 MO2에 추가·활성화해야 하며, **기존 tNVSE, tNVSE Default Config, 한국어 폰트/사전 모드보다 우선순위가 높아야 한다**. `build_perk_dictionary(installation, stage, seen)` 인터페이스는 다른 Output 생성기와 같은 `(files, status)`를 반환한다.
 
+GUI의 `Installation(root, all_installed=True)`는 전체 설치 모드를 알파벳순으로 조사하므로 실제 활성 프로필의 INI/XML 우선순위를 재현하지 않는다. 이 오버레이 생성기는 해당 입력을 받으면 `ModOrganizer.ini`에 기록된 **현재 선택 프로필**을 별도 `Installation(root)`로 읽어 검증·INI/XML/JSON 공급자를 고른다. 다른 번역 파일 생성에 사용되는 전체 설치 모드 목록과 원본 `installation` 객체는 유지한다. `source_profile`을 결과에 기록한다. 선택 프로필을 읽을 수 없으면 잘못된 전체 설치 모드 공급자로 대체하지 않고 해당 오버레이만 건너뛴다.
+
 ## SCPT 출처와 문장 일치 조건
 
 | 특전 | 확인된 원본 스크립트 | 게임 중 덮어쓰는 설명 | 번역 방식 |
@@ -41,6 +43,8 @@ python -m py_compile nskr_perk_dictionary.py
 ```
 
 테스트는 이슈 #11 영문 리터럴·한국어 수치 보존, 한국어 전체 정확 키 배제, 엄격한 와일드카드, 변경된 INI 한 옵션/기존 XML 보존/반복 안전성, 기존 와일드카드/정규식 거부, 새로운 한국어 폰트 출력 우선순위, 원본 XML 없는 경우의 생성 경로를 검증한다. 실제 프로필에서 원본 두 ESP 검증 및 새 오버레이 3파일 생성도 실행했다.
+
+추가 회귀 테스트는 비활성 `tNVSE Default Config`가 알파벳순으로 마지막 공급자가 되는 `all_installed=True` 상황을 재현한다. 이때 선택된 `KR Test` 프로필의 올바른 XML/JSON을 사용해 3파일을 생성하는지 검증한다. 실제 Nuclear Sunset 설치에서도 `Installation(root, all_installed=True)`로 호출하여 **3파일 생성 성공**, `source_profile=KR Test - h8at5ar1`, `source_literals_verified`를 확인했다.
 
 게임 테스트는 **미실시**. MO2에서 새 모드를 기존 tNVSE와 한국어 UI 관련 모드보다 높은 우선순위로 활성화한 뒤 (1) HeadHunter 첫 단계 및 2단계 문구에 `25/50/25/15%` 수치와 한국어 전체 문장 표시, (2) Fast Metabolism에 기존 한국어 스팀팩 `20%` 문장과 술/방사능 `2배` 문장 표시, (3) 시작·로드·재로드 때 영어 또는 중복 문장 유무, (4) 다른 UI 사전 영향 없음을 확인해야 한다. 활성화를 해제하면 오버레이 효과는 사라진다.
 
