@@ -4,6 +4,20 @@
 
 Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 패쳐입니다. 설치된 모드를 읽어 별도 `Output/mods`를 생성하며 원본 모드와 프로필은 직접 수정하지 않습니다.
 
+## 이슈 #11 — NVSE 런타임 특전 설명
+
+실제 게임 모드가 실행될 때 변경하는 특전 설명을 위해 `Tag Perk Description Adjustment`, `SSS - Sweets Simple Settings`, `Bullet Time - Perk Consistency Patch`의 `NVSE/plugins/scripts/gr_*.txt`에 대한 검증된 대응을 추가했습니다. 앞의 두 모드에서는 `SetFormDescription Tag`의 **영문 상수 한 개만** 한국어로 치환합니다. Bullet Time 스크립트에서는 원래의 `Sv_RegexReplace`·`SetFormDescription` 명령 세 쌍을 유지하면서 **ASCII 설명일 때만 실행하도록 조건을 추가**해, 한국어 설명의 재기록을 방지합니다. 두 모드에 같은 Tag 스크립트가 있으므로 모두 각각의 MO2 모드 폴더에 출력합니다.
+
+원본 파일 경로·모드 공급자·스크립트 명령 또는 영문 원문이 변경되면 보수적으로 보류합니다. 인코딩(BOM 포함)과 개행(CRLF/LF)은 유지하고 원본 모드에는 쓰지 않습니다. Bullet Time의 인라인 람다는 원래부터 길이 제한(512자)에 가깝기 때문에, 동작에 영향 없는 빈 줄과 들여쓰기만 필요한 만큼 줄입니다. 새 Output을 MO2 mods에 복사할 때 해당 모드의 원본 스크립트를 백업하세요. NVSE가 UTF-8 한국어 리터럴을 게임에서 제대로 읽는지, `Sv_RegexMatch` 조건이 정상 작동하는지는 실제 플레이에서 확인해야 합니다. Sweet Consumables의 Fast Metabolism 후속 영어 문장은 컴파일된 `SCPT/SCDA`에서 발생하므로 해당 스크립트 텍스트만 수정하는 방법으로 해결되지 않습니다.
+
+## 이미 한국어 패치를 설치한 경우 (v1.0.5 변경 예정)
+
+GUI에서 다시 `Output 생성`을 누르면 기존 Output/보고서가 있을 경우 새로운 날짜별 Output 폴더를 만듭니다. 이미 번역된 ESM/ESP가 입력으로 발견되면 같은 레코드·필드·경로에서 **현재 카탈로그와 완전히 일치하는 한국어 문구**를 보존합니다. 이 동작은 해당 모드 전체가 최신 번역임을 뜻하지 않습니다.
+
+이전 릴리즈와 바뀐 번역도 안전하게 갱신하려면 새 릴리즈를 빌드할 때 기존 배포본의 `TranslationData/catalog.json`을 사용해 `previous_dests` 이력을 포함해야 합니다. 예를 들어 `python tools/merge_previous_catalogs.py --current NEW/TranslationData/catalog.json --previous OLD/TranslationData/catalog.json --output NEXT/TranslationData/catalog.json`으로 **별도 복사본**을 생성한 다음 NEXT 디렉터리에서 나머지 번들 파일도 보존해 패키징합니다. `previous_dests`는 플러그인/모드 공급자, 원래 영어 문장, FormID, 필드 경로가 모두 같은 과거 번역에만 적용됩니다. 다른 원문이나 출처를 알 수 없는 옛 한글 내용은 경고 대상으로 남습니다.
+
+오래된 패치를 원본 모드 폴더에 직접 덮어쓴 경우 원본 영어 파일을 자동 복원할 수는 없습니다. 업데이트 전 백업을 권장하며, MO2에서 기존 패치와 새 결과물의 우선순위가 충돌하지 않도록 확인하세요. 새 Output을 기존 MO2 `mods` 폴더에 설치할 때 파일 이름·경로가 겹친다면 해당 파일에 대한 기존 백업을 먼저 확보하세요.
+
 ## v1.0.4 폴더형 배포
 
 ZIP 전체를 새 폴더에 압축 해제하여 실행합니다. 메인 EXE와 작업용 EXE, `_internal`, `worker-runtime`, `TranslationData`, `Backend`를 함께 유지하세요. 실행 시 자체 압축을 푸는 단일 EXE 배포를 폴더형으로 바꿨습니다. 수정 tNVSE의 대응 소스는 `Licenses-and-Source`에 일반 파일로 제공합니다. 번역 사전·UI ESP·폰트·수정 DLL은 v1.0.3과 동일합니다. 넥서스의 검사 통과를 보장하는 변경은 아닙니다.

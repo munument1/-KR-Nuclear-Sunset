@@ -183,10 +183,13 @@ def header_digest(x: XEditLib, file_handle: int) -> str:
     return sha_obj(obj)
 
 
-def matching_rows(item, candidates, exact_path):
+def matching_rows(item, candidates, exact_path, *, accept_translated=False):
     return [c for c in candidates
-            if c['field'] == item['field'] and c['source'] == item['source']
-            and (not exact_path or c['path'] == item['path'])]
+            if c['field'] == item['field']
+            and (not exact_path or c['path'] == item['path'])
+            and (c['source'] == item['source'] or (
+                accept_translated and c['path'] == item['path']
+                and item['source'] in (c['dest'], *(c.get('previous_dests') or ()))))]
 
 
 def select_destination(item, direct_candidates, fallback_candidates, strict_path=False):
@@ -195,6 +198,12 @@ def select_destination(item, direct_candidates, fallback_candidates, strict_path
     direct = matching_rows(item, direct_candidates, True)
     if not direct and not strict_path:
         direct = matching_rows(item, direct_candidates, False)
+    if not direct:
+        # Previously generated Korean plugins can be a source provider after a
+        # manual MO2 copy. A known previous translation is an exact source too,
+        # but it must match the same record, field and xEdit path. This lets a
+        # later release replace old Korean text with its revised translation.
+        direct = matching_rows(item, direct_candidates, True, accept_translated=True)
     if direct:
         origins = {c.get('origin', 'sst_direct') for c in direct}
         return {c['dest'] for c in direct}, next(iter(origins)) if len(origins) == 1 else 'mixed_direct'
@@ -202,6 +211,8 @@ def select_destination(item, direct_candidates, fallback_candidates, strict_path
     # Base/DLC inheritance is deliberately stricter: an override must retain the
     # exact field path as well as owner/FormID/signature/source.
     inherited = matching_rows(item, fallback_candidates, True)
+    if not inherited:
+        inherited = matching_rows(item, fallback_candidates, True, accept_translated=True)
     if inherited:
         return {c['dest'] for c in inherited}, 'base_dlc_sst_fallback'
     return set(), None
@@ -209,7 +220,9 @@ def select_destination(item, direct_candidates, fallback_candidates, strict_path
 
 def unmatched_candidates(items, candidates, strict_path):
     return [c for c in candidates
-            if not any(matching_rows(item, [c], strict_path) for item in items)]
+            if not any(matching_rows(item, [c], strict_path)
+                       or matching_rows(item, [c], True, accept_translated=True)
+                       for item in items)]
 
 
 def run(request: dict):
@@ -246,6 +259,7 @@ def run(request: dict):
             identities = IdentityCache(x)
             file_handle = x.file_by_name(plugin)
             rows, changed, missing, before_hashes = [], [], [], []
+            already_translated_count = 0
             try:
                 head_hash = header_digest(x, file_handle)
                 expected_header = request.get('expectedHeaders', {}).get(plugin)
@@ -319,10 +333,17 @@ def run(request: dict):
 
                         normalize_cp1252_sources(items, direct_candidates)
                         updates = []
+                        already_translated = 0
                         for candidate in unmatched_candidates(
                                 items, direct_candidates, request.get('strictPaths', False)):
+                            possible_legacy = any(
+                                item['field'] == candidate['field']
+                                and item['path'] == candidate['path']
+                                and any('\uac00' <= ch <= '\ud7a3' for ch in item['source'])
+                                for item in items)
                             missing.append({**ident, **candidate,
-                                            'reason': 'source_or_path_mismatch',
+                                            'reason': ('unknown_previous_korean_or_changed_source'
+                                                       if possible_legacy else 'source_or_path_mismatch'),
                                             'mappingOrigin': candidate.get('origin', 'sst_direct')})
                         for item in items:
                             row = {**ident, 'edid': edid, **item}
@@ -337,6 +358,10 @@ def run(request: dict):
                                 continue
                             dest = next(iter(values))
                             if dest == row['source']:
+                                if any(c['field'] == row['field'] and c['path'] == row['path']
+                                       and c['dest'] == row['source']
+                                       for c in direct_candidates + inherited_candidates):
+                                    already_translated += 1
                                 continue
                             if '\ufffd' in row['source']:
                                 missing.append({**row, 'reason': 'source_encoding_unreadable',
@@ -344,6 +369,7 @@ def run(request: dict):
                                 continue
                             updates.append({**row, 'dest': dest, 'mappingOrigin': origin})
 
+                        already_translated_count += already_translated
                         if updates:
                             changed.extend(updates)
                         if request.get('includeRows'):
@@ -379,6 +405,7 @@ def run(request: dict):
                     'recordCount': len(record_index_keys),
                     'rows': rows,
                     'changed': changed,
+                    'alreadyTranslated': already_translated_count,
                     'missing': missing,
                     'beforeHashes': before_hashes,
                 })

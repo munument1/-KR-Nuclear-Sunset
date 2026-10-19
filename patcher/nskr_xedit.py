@@ -31,6 +31,12 @@ def validate_mapping(row):
         raise ValueError('Unresolved plugin text encoding')
     if Counter(FORMAT.findall(row['source'])) != Counter(FORMAT.findall(row['dest'])):
         raise ValueError('Plugin translation changes protected tokens')
+    previous = row.get('previous_dests', [])
+    if (not isinstance(previous, list)
+            or any(not isinstance(value, str) or not value or '\ufffd' in value
+                   or Counter(FORMAT.findall(row['source'])) != Counter(FORMAT.findall(value))
+                   for value in previous)):
+        raise ValueError('Invalid previous translation text')
 
 
 def runtime(worker_override=None):
@@ -206,6 +212,7 @@ def merge_plugins(installation, entries, catalog, job, source_overrides=None,
         origins = Counter(row.get('mappingOrigin', 'sst_direct') for row in file['changed'])
         stats[plugin] = {
             'translated': len(file['changed']),
+            'already_translated': file.get('alreadyTranslated', 0),
             'fallback_translated': inherited,
             'direct_sst_translated': origins.get('sst_direct', 0),
             'translated_by_origin': dict(origins),

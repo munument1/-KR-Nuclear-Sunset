@@ -5,8 +5,11 @@ import tempfile
 import unittest
 
 import nskr
-from nskr_output import build_output, output_catalog, stable_context
-from nskr_xedit_worker import select_destination
+from nskr_output import build_output, output_catalog, stable_context, base_translation_memory
+from nskr_xedit_worker import select_destination, unmatched_candidates
+from nskr_plugin_text import replace_record
+from nskr_xedit import validate_mapping
+from tools.merge_previous_catalogs import merge as merge_previous_catalogs
 
 
 class DevelopmentPolicyTests(unittest.TestCase):
@@ -72,6 +75,63 @@ class DevelopmentPolicyTests(unittest.TestCase):
         self.assertEqual(select_destination(item, [candidate], [], True)[0], {'설정'})
         item['source'] = 'Changed'
         self.assertEqual(select_destination(item, [candidate], [], True), (set(), None))
+
+    def test_existing_korean_record_can_be_upgraded_with_verified_history(self):
+        mapping = {'owner': 'test.esp', 'id': '001234', 'signature': 'PERK',
+                   'field': 'DESC', 'path': 'DESC - Description',
+                   'source': 'Improved accuracy in Bullet Time.',
+                   'dest': '불릿 타임에서 명중률이 증가합니다.',
+                   'previous_dests': ['불릿 타임에서 정확도가 상승합니다.']}
+        validate_mapping(mapping)
+        for current in (mapping['dest'], mapping['previous_dests'][0]):
+            item = {'field': 'DESC', 'path': mapping['path'], 'source': current}
+            self.assertEqual(select_destination(item, [mapping], [], True)[0], {mapping['dest']})
+            self.assertEqual(unmatched_candidates([item], [mapping], True), [])
+        old = mapping['previous_dests'][0]
+        update = {**mapping, 'source': old, 'field_occurrence': 0}
+        data = b'DESC' + (len(old.encode('utf-8')) + 1).to_bytes(2, 'little') + old.encode('utf-8') + b'\0'
+        translated = replace_record(data, [update])
+        self.assertIn(mapping['dest'].encode('utf-8'), translated)
+        self.assertNotIn(old.encode('utf-8'), translated)
+        changed = {'field': 'DESC', 'path': 'OTHER', 'source': old}
+        self.assertEqual(select_destination(changed, [mapping], [], True), (set(), None))
+        unknown = {'field': 'DESC', 'path': mapping['path'], 'source': '출처를 확인할 수 없는 과거 번역'}
+        self.assertEqual(select_destination(unknown, [mapping], [], True), (set(), None))
+        self.assertEqual(len(unmatched_candidates([unknown], [mapping], True)), 1)
+        invalid = {**mapping, 'previous_dests': ['값에 없는 %s 변수']}
+        with self.assertRaises(ValueError):
+            validate_mapping(invalid)
+
+    def test_previous_catalogs_require_matching_original_and_provider(self):
+        original = {'owner': 'test.esp', 'id': '001234', 'signature': 'PERK',
+                    'field': 'DESC', 'path': 'DESC', 'source': 'Headshot chance +25%',
+                    'dest': '머리 명중률 +25%'}
+        current = {'schema_version': 1, 'target_modlist': 'nuclear-sunset-ttw',
+                   'files': [{'path': 'Perks.esp', 'kind': 'plugin-records',
+                              'provider': 'A', 'mappings': [original]}]}
+        old = {'schema_version': 1, 'target_modlist': 'nuclear-sunset-ttw',
+               'files': [{'path': 'Perks.esp', 'kind': 'plugin-records',
+                          'provider': 'A', 'mappings': [{**original, 'dest': '머리 적중률 +25%'}]},
+                         {'path': 'Perks.esp', 'kind': 'plugin-records',
+                          'provider': 'B', 'mappings': [{**original, 'dest': '다른 모드의 과거 번역'}]},
+                         {'path': 'Perks.esp', 'kind': 'plugin-records',
+                          'provider': 'A', 'mappings': [{**original, 'source': 'Changed',
+                                                        'dest': '다른 영어 원문의 번역'}]}]}
+        stats = merge_previous_catalogs(current, [old])
+        self.assertEqual(stats['new_previous_destinations'], 1)
+        self.assertEqual(original['previous_dests'], ['머리 적중률 +25%'])
+        self.assertEqual(merge_previous_catalogs(current, [old])['new_previous_destinations'], 0)
+
+    def test_inherited_base_translation_preserves_provenanced_korean_history(self):
+        row = {'owner': 'falloutnv.esm', 'id': '001234', 'signature': 'PERK',
+               'field': 'DESC', 'path': 'DESC', 'source': 'Old English',
+               'dest': '개정 한글', 'previous_dests': ['옛 한글']}
+        memory = base_translation_memory({'files': [{
+            'kind': 'plugin-records', 'path': 'FalloutNV.esm', 'mappings': [row]}]})
+        self.assertEqual(len(memory), 1)
+        self.assertEqual(memory[0]['previous_dests'], ['옛 한글'])
+        self.assertEqual(select_destination({'field': 'DESC', 'path': 'DESC', 'source': '옛 한글'},
+                                            [], memory, True)[0], {'개정 한글'})
 
     def test_runtime_ui_bundle_is_scoped_and_requires_known_source(self):
         catalog = self.catalog()

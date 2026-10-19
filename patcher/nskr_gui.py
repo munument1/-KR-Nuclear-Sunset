@@ -158,6 +158,7 @@ class App:
                 else:
                     _, self.output, report = event
                     translated = sum(row.get('translated', 0) for row in report['files'])
+                    already = sum(row.get('already_translated', 0) for row in report['files'])
                     unmatched = sum(row.get('unmatched', 0) for row in report['files'])
                     fonts = report.get('fonts', {})
                     activation = (f'\n폰트 사용 시 MO2에서 "{fonts["mod"]}"를 활성화하고 기존 tNVSE 설정보다 높은 우선순위로 배치하세요.'
@@ -173,7 +174,7 @@ class App:
                         activation += '\n번역 ESP 활성화 필요: ' + ', '.join(runtime['plugins_requiring_activation'])
                     self.status.set(
                         f"프로필: {report['profile']}\n"
-                        f"{len(report['files'])}개 파일 생성 · 번역 {translated}곳 · 미대응 {unmatched}곳 · "
+                        f"{len(report['files'])}개 파일 생성 · 새 번역 {translated}곳 · 이미 최신 한국어 {already}곳 · 미대응 {unmatched}곳 · "
                         f"제외 {len(report['skipped'])}개\n{self.output}\n"
                         f"결과 보고서를 확인하세요. 설치·프로필 변경은 자동으로 수행하지 않습니다.{activation}")
                     self.open_button.configure(state='normal')

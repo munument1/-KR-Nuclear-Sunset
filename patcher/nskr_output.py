@@ -17,6 +17,7 @@ import tempfile
 import nskr
 import nskr_xedit
 import nskr_fonts
+import nskr_nvse
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
 SCHEMA = 1
@@ -43,6 +44,7 @@ def base_translation_memory(catalog):
     still requires the original owner/FormID/signature/field/path/source to match.
     """
     destinations = defaultdict(set)
+    previous_destinations = defaultdict(set)
     templates = {}
     for entry in catalog.get('files', []):
         if entry.get('kind') != 'plugin-records' or entry.get('path', '').casefold() not in BASE_TRANSLATION_MASTERS:
@@ -55,14 +57,18 @@ def base_translation_memory(catalog):
             identity = (row['owner'].casefold(), row['id'], row['signature'],
                         row['field'], row['path'], row['source'])
             destinations[identity].add(row['dest'])
+            previous_destinations[identity].update(row.get('previous_dests') or ())
             templates.setdefault(identity, row)
     memory = []
     for identity, values in destinations.items():
         if len(values) != 1:
             continue
         row = templates[identity]
-        memory.append({key: row[key] for key in ('owner', 'id', 'signature', 'field', 'path', 'source')} |
-                      {'dest': next(iter(values))})
+        inherited = {key: row[key] for key in ('owner', 'id', 'signature', 'field', 'path', 'source')}
+        inherited['dest'] = next(iter(values))
+        if previous_destinations[identity]:
+            inherited['previous_dests'] = sorted(previous_destinations[identity])
+        memory.append(inherited)
     return memory
 
 
@@ -112,7 +118,8 @@ def plugin_outcomes(report):
             continue
         if row.get('status') == 'runtime_mod_copy':
             category = 'runtime_manual_activation'
-        elif row.get('status') == 'already_patched_verified':
+        elif row.get('status') == 'already_patched_verified' or (
+                row.get('already_translated', 0) and not row.get('translated', 0)):
             category = 'already_patched'
         elif row.get('discovered_plugin'):
             category = 'new_inherited'
@@ -155,7 +162,7 @@ def format_plugin_report(report):
     labels = [
         ('runtime_manual_activation', '별도 한국어 UI·라디오 플러그인 - 수동 활성화 필요'),
         ('patched', '정상 패치'),
-        ('already_patched', '이미 한글 적용됨 - 검증된 결과 재사용'),
+        ('already_patched', '이미 최신 한글 적용됨 - 현재 번역 그대로 보존'),
         ('updated_patched', '업데이트 감지 - 번역 전체 적용'),
         ('updated_partial', '업데이트 감지 - 일부 문구 미적용'),
         ('updated_untranslated', '업데이트 감지 - 한글 적용 없음'),
@@ -185,12 +192,32 @@ def format_plugin_report(report):
             details = []
             if row.get('translated'):
                 details.append(f"번역 {row['translated']}개")
+            if row.get('already_translated'):
+                details.append(f"이미 최신 번역 {row['already_translated']}개")
             if row.get('unmatched'):
                 details.append(f"미대응 {row['unmatched']}개")
             if row.get('provider'):
                 details.append(f"원본 모드: {row['provider']}")
             suffix = ' · ' + ' · '.join(details) if details else ''
             lines.append(f"- {row['path']}{suffix}")
+        lines.append('')
+    runtime_scripts = [row for row in report.get('files', [])
+                       if row.get('status') == 'nvse_runtime_description_literal_verified']
+    skipped_scripts = [row for row in report.get('skipped', [])
+                       if row.get('reason') == 'script_source_or_command_mismatch']
+    if runtime_scripts or skipped_scripts:
+        lines.append('[NVSE 특전 설명 런타임 스크립트]')
+        for row in runtime_scripts:
+            lines.append(f"- {row['provider']}/{row['path']} · 적용 {row.get('translated', 0)}곳 · "
+                         f"이미 최신 {row.get('already_translated', 0)}곳")
+        for row in skipped_scripts:
+            lines.append(f"- 원문/코드 변경으로 건너뜀: {row['provider']}/{row['path']}")
+        lines.append('NVSE 스크립트의 UTF-8 한국어 처리 및 비ASCII 보호 분기는 게임 내 확인이 필요합니다.')
+        lines.append('')
+    if report.get('unresolved_previous_translations'):
+        lines.append('[이전 한국어 번역 확인 필요]')
+        lines.append(f"기존 한글 또는 변경된 원문과 일치하지 않는 항목: {report['unresolved_previous_translations']}개")
+        lines.append('이전 버전 TranslationData로 출처가 확인되기 전에는 변경하지 않았습니다.')
         lines.append('')
     lines.extend([
         ('개발용 시험에서는 신규 플러그인 자동 상속을 사용하지 않습니다.'
@@ -521,7 +548,14 @@ def output_catalog(catalog, development=False, scopes=None, only_plugins=None):
     files = []
     for entry in catalog.get('files', []):
         kind = entry.get('kind')
-        if kind in {'json', 'ini'} and 'ui' in selected:
+        if kind == 'nvse-script' and 'plugins' in selected:
+            nskr_nvse.validate_entry(entry)
+            if entry.get('review_status') != 'runtime_script_reviewed':
+                raise ValueError('미검수 NVSE 스크립트 번역 데이터입니다.')
+            files.append(entry)
+        elif kind == 'nvse-script':
+            continue
+        elif kind in {'json', 'ini'} and 'ui' in selected:
             if entry.get('review_status') != 'ui_reviewed':
                 raise ValueError('검수되지 않은 MCM/INI 데이터입니다.')
             files.append(entry)
@@ -574,6 +608,11 @@ def installed_catalog(installation, catalog):
     variants = {(entry['path'].casefold(), entry['provider']): entry
                 for entry in catalog['files'] if entry.get('optional')}
     for entry in catalog['files']:
+        if entry['kind'] == 'nvse-script':
+            # Every physical script matters. When several MO2 mods have the
+            # same virtual path, patch each at its original provider location.
+            entries.append(entry)
+            continue
         key = entry['path'].casefold()
         chain = result.providers.get(key, [])
         if entry.get('optional'):
@@ -620,6 +659,13 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         raise FileExistsError(report_text_path)
     catalog = output_catalog(nskr.read_json(catalog_dir / 'catalog.json'),
                              development, scopes, only_plugins)
+    if not development or 'plugins' in catalog.get('selected_scopes', []):
+        defaults = nskr_nvse.builtin_perk_scripts()
+        existing = {(e['path'].casefold(), e.get('provider', '').casefold())
+                    for e in catalog['files'] if e.get('kind') == 'nvse-script'}
+        catalog = {**catalog, 'files': [*catalog['files'],
+                   *(e for e in defaults if (e['path'].casefold(), e['provider'].casefold())
+                     not in existing)]}
     if development and catalog.get('full_translation_catalog'):
         installation = original_installation(installation, catalog.get('excluded_test_providers', []))
     if getattr(installation, 'all_installed', False):
@@ -629,7 +675,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
     # Optional providers may deliberately contain the same virtual plugin name.
     if catalog['files'] or not (catalog.get('font_bundle') or catalog.get('asset_bundle')):
         nskr.validate_entries([{'path': (f"optional/{nskr.virtual_path(e['provider'])}/{e['path']}"
-                                         if e.get('optional') else f"active/{e['path']}")}
+                                         if e.get('optional') or e['kind'] == 'nvse-script'
+                                         else f"active/{e['path']}")}
                                for e in catalog['files']])
 
     def emit(message):
@@ -735,7 +782,21 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         for entry in work_entries:
             key = entry['path'].casefold()
             chain = installation.providers.get(key)
-            if entry.get('optional'):
+            if entry['kind'] == 'nvse-script':
+                nskr_nvse.validate_entry(entry)
+                provider = entry['provider']
+                if (not getattr(installation, 'all_installed', False)
+                        and provider not in installation.mods_enabled):
+                    report['skipped'].append({'path': entry['path'], 'provider': provider,
+                                              'reason': 'not_enabled'})
+                    continue
+                source = nskr.contained(installation.mods, f"{provider}/{entry['path']}")
+                chain = [{'provider': provider}]
+                if not source.is_file():
+                    report['skipped'].append({'path': entry['path'], 'provider': provider,
+                                              'reason': 'not_installed'})
+                    continue
+            elif entry.get('optional'):
                 allowed = {'plugin-copy', 'plugin-records'}
                 if getattr(installation, 'all_installed', False):
                     allowed.update({'json', 'ini'})
@@ -781,7 +842,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             target = nskr.contained(stage, relative)
             result = {'path': entry['path'], 'output_path': relative,
                       'provider': chain[-1]['provider'], 'source_sha256': original_hash,
-                      'source_updated': original_hash != entry['baseline_sha256']}
+                      'source_updated': bool(entry.get('baseline_sha256'))
+                      and original_hash != entry['baseline_sha256']}
             if entry.get('auto_inherited'):
                 result.update(discovered_plugin=True, translation_source='base_dlc_sst_fallback')
             if entry['kind'] == 'plugin-records':
@@ -849,6 +911,16 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(payload, target)
                 result['status'] = 'user_completed_copy; record_validation_pending'
+            elif entry['kind'] == 'nvse-script':
+                raw, stats = nskr_nvse.merge_script(source, entry)
+                if stats['translated'] == 0 and stats['already_translated'] == 0:
+                    report['skipped'].append({**result, **stats,
+                                              'reason': 'script_source_or_command_mismatch',
+                                              'translation_applied': False})
+                    continue
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(raw)
+                result.update(stats, status='nvse_runtime_description_literal_verified')
             elif entry['kind'] in {'ini', 'json'}:
                 if getattr(installation, 'all_installed', False):
                     path = Path(entry['path'])
@@ -900,6 +972,10 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             report['runtime_mods'] = runtime_status
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
+        report['unresolved_previous_translations'] = sum(
+            row.get('reason') == 'unknown_previous_korean_or_changed_source'
+            for item in report['files']
+            for row in item.get('unmatched_entries', []))
         report['plugin_outcomes'] = plugin_outcomes(report)
         report['report_json'] = str(report_path)
         report['report_text'] = str(report_text_path)
