@@ -21,7 +21,7 @@ class AllInstalledTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         game = self.root / 'Game'
         plugin(game / 'Data/FalloutNV.esm')
         plugin(self.root / 'mods/Variant A/Shared.esp', 'FalloutNV.esm')
