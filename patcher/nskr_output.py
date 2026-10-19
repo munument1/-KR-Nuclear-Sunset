@@ -18,7 +18,8 @@ import nskr
 import nskr_xedit
 import nskr_fonts
 import nskr_nvse
-import nskr_perk_dictionary
+import nskr_compiled_scpt
+from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
 SCHEMA = 1
@@ -953,6 +954,29 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 result.update(stats, status='merged_into_current_source')
             else:
                 raise ValueError(f'Unsupported translation kind: {entry["kind"]}')
+            if entry['kind'] in {'plugin-records', 'plugin-copy'} and key in {
+                    'ns.esp', 'sweet consumables.esp'}:
+                # These two original ESPs contain startup SCPTs that overwrite
+                # PERK descriptions in English. Patch only the reviewed string
+                # operand in the already staged translated ESP, *not* the live
+                # mod and not a new ESP or tNVSE dictionary provider.
+                known = {spec['filename'].casefold(): spec for spec in COMPILED_PERK_CASES}
+                case = known[key]
+                scripted = {**case, 'expected_sha256': nskr.sha256(target)}
+                separate = target.with_name(target.stem + '.verified-scpt.esp')
+                try:
+                    details = nskr_compiled_scpt.translate_compiled_scpt(
+                        target, separate, scripted)
+                    separate.replace(target)
+                finally:
+                    if separate.is_file():
+                        separate.unlink()
+                result['compiled_perk_script'] = details
+                result['status'] += '; compiled_SCPT_literal_readback_verified'
+                if details['status'] == 'translated':
+                    result['translated'] = result.get('translated', 0) + 1
+                elif details['status'] == 'already_translated':
+                    result['already_translated'] = result.get('already_translated', 0) + 1
             if nskr.sha256(source) != original_hash:
                 raise ValueError(f'Source changed during generation: {source}')
             result['output_sha256'] = nskr.sha256(target)
@@ -971,15 +995,6 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             runtime_files, runtime_status = build_runtime_mods(installation, catalog_dir, catalog['runtime_mods'], stage, seen)
             report['files'].extend(runtime_files)
             report['runtime_mods'] = runtime_status
-        # Compiled SCPTs in NS.esp and Sweet Consumables.esp inject English
-        # descriptions at runtime. Never edit their SCDA bytes or the user's
-        # plugins: emit a separate, source-checked tNVSE UI dictionary overlay.
-        # The same safety/atomic publication rules apply as to other files.
-        if not development or 'plugins' in catalog.get('selected_scopes', []):
-            perk_files, perk_status = nskr_perk_dictionary.build_perk_dictionary(
-                installation, stage, seen)
-            report['files'].extend(perk_files)
-            report['perk_runtime_dictionary'] = perk_status
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(

@@ -166,8 +166,6 @@ class App:
                     extra = set(report.get('assets', {}).get('mods_requiring_activation', []))
                     runtime = report.get('runtime_mods', {})
                     extra.update(runtime.get('mods_requiring_activation', []))
-                    perk_dict = report.get('perk_runtime_dictionary', {})
-                    extra.update(perk_dict.get('mods_requiring_activation', []))
                     if fonts.get('requires_activation'):
                         extra.discard(fonts['mod'])
                     if extra:
