@@ -35,7 +35,9 @@ def validate_mapping(row):
 
 def runtime(worker_override=None):
     if getattr(sys, 'frozen', False):
-        root = Path(getattr(sys, '_MEIPASS', Path(sys.executable).parent)).resolve()
+        folder = Path(sys.executable).resolve().parent
+        root = (folder if (folder / 'Backend/XEditLib.dll').is_file()
+                else Path(getattr(sys, '_MEIPASS', folder)).resolve())
         worker = root / 'NSKRXEditWorker.exe'
         backend = root / 'Backend'
     else:

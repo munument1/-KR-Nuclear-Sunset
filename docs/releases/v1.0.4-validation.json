@@ -1,0 +1,40 @@
+{
+  "version": "1.0.4",
+  "packaging": "folder",
+  "base_sha256": "960730db44f03e626bee68f57c7c2929893d5844948de398782d4c1e8a92b324",
+  "corresponding_source_files": 1917,
+  "changed_resources": [
+    "TranslationData/catalog.json",
+    "TranslationData/nskr-tNVSE-korean-fonts/tNVSE-71-KR-UI-source.zip"
+  ],
+  "package_check": true,
+  "extracted_zip_package_check": true,
+  "assets": [
+    {
+      "name": "NuclearSunset-Korean-Patcher-v1.0.4.zip",
+      "bytes": 60737325,
+      "sha256": "9f3768491cb7abf9de911f23a68273cb187136c106e672995f5e607a78645345"
+    },
+    {
+      "name": "NuclearSunset-TranslationData-v1.0.4.zip",
+      "bytes": 32547287,
+      "sha256": "ffa78eec3126a886efe216bcc89e0f8af6f326fa9189397e79ca8f1f9cc5bcbc"
+    }
+  ],
+  "ci_run": "https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39184273164",
+  "tests_passed": 54,
+  "tests_skipped": 0,
+  "nested_archive_count": 0,
+  "embedded_exe_dll_data_count": 0,
+  "installed_validation": {
+    "exit_code": 0,
+    "seconds": 336.24,
+    "source_files_checked": 288,
+    "source_hashes_preserved": true,
+    "files": 314,
+    "translated": 297844,
+    "unmatched": 0,
+    "warnings": [],
+    "skipped": []
+  }
+}
