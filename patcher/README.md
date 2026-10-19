@@ -1,6 +1,6 @@
-# Nuclear Sunset 한국어 패쳐 v1.0.1
+# Nuclear Sunset 한국어 패쳐
 
-[다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.0.1) · [설치 안내](https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch)
+[최신 다운로드](https://github.com/munument1/-KR-Nuclear-Sunset/releases/latest) · [설치 안내](https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch)
 
 Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 패쳐입니다. 설치된 모드를 읽어 별도 `Output/mods`를 생성하며 원본 모드와 프로필은 직접 수정하지 않습니다.
 
@@ -10,13 +10,13 @@ Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 �
 
 ## 배포 상태
 
-`v1.0.1`은 프로필 선택 없이 설치된 기존 번역 대상 전체를 처리합니다. 같은 파일명의 모드별 변형도 각각 검증하며, 프로필 활성화·우선순위는 변경하지 않습니다. 기본 실행 및 자동 검증은 완료했지만 전 구간 플레이·문맥 검수는 미완료이므로 데이터의 `translation_ready=false`는 유지합니다.
+`v1.0.1`부터 프로필 선택 없이 설치된 기존 번역 대상 전체를 처리합니다. 같은 파일명의 모드별 변형도 각각 검증하며, 프로필 활성화·우선순위는 변경하지 않습니다. 기본 실행 및 자동 검증은 완료했지만 전 구간 플레이·문맥 검수는 미완료이므로 데이터의 `translation_ready=false`는 유지합니다.
 
 - 이전 버전의 생성 시험: 298.1초, 307개 파일, 플러그인 표시 문자열 275,665곳 적용. 새 버전의 전체 대상 생성 결과는 릴리즈 설명을 참조하세요.
 - 대응 Translation 파일이 있는 JSON 11개는 원본 유지.
 - 사용자 환경에서 새 게임 및 Fallout 3 구역 시험. 전 구간 안정성은 미검증.
 
-다운로드 ZIP에는 실행파일과 구성요소의 이용 허락·수정 tNVSE 대응 소스를 포함합니다. `TranslationData` 별도 ZIP은 같은 실행파일에 포함된 번역 자료의 재현용 사본입니다. 게임·모드 ESM/ESP 전체나 생성 Output은 배포하지 않습니다. 생성되는 `NSKR UI Strings.esp`는 GMST 전용 별도 구성입니다.
+다운로드 ZIP에는 실행파일과 구성요소의 이용 허락·수정 tNVSE 대응 소스를 포함합니다. `TranslationData` 별도 ZIP은 같은 실행파일에 포함된 번역 자료의 재현용 사본입니다. 일반 모드는 설치된 ESP/ESM에 번역 매핑을 적용하며, 모드별 완성 번역 파일이나 전체 Output을 배포하지 않습니다. 한국어 UI용 `NSKR UI Strings.esp` 1개는 문자열 GMST로 구성된 완성 플러그인으로 동봉되며, 실행 시 Output에 복사됩니다. 별도 번역자료 ZIP에도 같은 UI ESP가 포함됩니다. 따라서 현재 배포를 플러그인 없는 배포로 설명하지 않습니다.
 
 ## 개발 및 재현
 
