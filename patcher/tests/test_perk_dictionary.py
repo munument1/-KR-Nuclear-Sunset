@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+import nskr
 import nskr_perk_dictionary as perk
 
 
@@ -112,6 +113,54 @@ class CompiledPerkDictionaryTests(unittest.TestCase):
             self.assertEqual(status['status'], 'generated')
             xml = (root / 'stage/mods' / perk.MOD_NAME / 'NVSE/plugins/tnvse_dictionary.xml').read_text()
             self.assertIn('NSKR_Perk_Descriptions.json', xml)
+
+    def test_gui_all_installed_resolves_selected_profile_not_alphabetical_provider(self):
+        """A disabled tNVSE config sorts last in all-installed inventory."""
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'game/Data').mkdir(parents=True)
+            (root / 'game/Data/FalloutNV.esm').write_bytes(b'TES4')
+            good = root / 'mods/Good Korean UI/NVSE/plugins'
+            bad = root / 'mods/tNVSE Default Config/NVSE/plugins'
+            good.mkdir(parents=True)
+            bad.mkdir(parents=True)
+            for path in (good, bad):
+                (path / 'tnvse.ini').write_bytes(INI)
+            (good / 'tnvse_dictionary.xml').write_bytes(XML)
+            (good / 'NSKR_UI_Translations.json').write_bytes(EMPTY)
+            (bad / 'tnvse_dictionary.xml').write_bytes(
+                b'<tNVSE><dictionary><json path="Data/nvse/plugins/first.json"/>'
+                b'<json path="Data/nvse/plugins/second.json"/></dictionary></tNVSE>')
+            profile = root / 'profiles/KR Test'
+            profile.mkdir(parents=True)
+            (profile / 'modlist.txt').write_text(
+                '-tNVSE Default Config\n+Good Korean UI\n', encoding='utf-8')
+            (profile / 'plugins.txt').write_text('', encoding='utf-8')
+            (root / 'ModOrganizer.ini').write_text(
+                f'[General]\ngameName=Fallout New Vegas\n'
+                f'gamePath={root / "game"}\nselected_profile=KR Test\n'
+                f'[Settings]\nbase_directory={root}\n', encoding='utf-8')
+
+            all_installation = nskr.Installation(root, all_installed=True)
+            self.assertTrue(all_installation.all_installed)
+            self.assertEqual(all_installation.source('NVSE/plugins/tnvse_dictionary.xml'),
+                             bad / 'tnvse_dictionary.xml')
+            selected_installation = nskr.Installation(root)
+            self.assertEqual(selected_installation.source('NVSE/plugins/tnvse_dictionary.xml'),
+                             good / 'tnvse_dictionary.xml')
+
+            with patch.object(perk, '_source_matches', return_value=(True, 'source_literals_verified')):
+                files, status = perk.build_perk_dictionary(all_installation, root / 'stage', set())
+            self.assertEqual(len(files), 3)
+            self.assertEqual(status['status'], 'generated')
+            self.assertEqual(status['source_profile'], 'KR Test')
+            result_dir = root / 'stage/mods' / perk.MOD_NAME / 'NVSE/plugins'
+            xml = (result_dir / 'tnvse_dictionary.xml').read_text(encoding='utf-8')
+            self.assertIn('NSKR_UI_Translations.json', xml)
+            self.assertNotIn('first.json', xml)
+            self.assertNotIn('second.json', xml)
+            self.assertEqual(all_installation.source('NVSE/plugins/tnvse_dictionary.xml'),
+                             bad / 'tnvse_dictionary.xml')
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
+import nskr
 from tools.audit_issue11_compiled_scripts import CASES, inspect_record
 
 
@@ -171,7 +172,20 @@ def build_perk_dictionary(installation, stage: Path, seen: set[str]):
     stage = Path(stage).resolve()
     if stage.is_relative_to(installation.mods.resolve()) or stage.is_relative_to(installation.game.resolve()):
         raise ValueError('Output stage overlaps MO2 or game files')
-    valid, reason = _source_matches(installation)
+    # GUI inventory mode deliberately scans *all* installed mods and its
+    # alphabetical provider order is not the selected profile's VFS order.
+    # Only this runtime overlay must resolve original files via the selected
+    # MO2 profile. Keep the caller's full-install inventory untouched.
+    runtime_installation = installation
+    if getattr(installation, 'all_installed', False):
+        try:
+            runtime_installation = nskr.Installation(
+                installation.root, game_dir=installation.game)
+        except (OSError, ValueError, KeyError, configparser.Error) as exc:
+            return [], {'status': 'skipped',
+                        'reason': f'selected_profile_unavailable:{exc}',
+                        'game_validation': 'not_run'}
+    valid, reason = _source_matches(runtime_installation)
     if not valid:
         return [], {'status': 'skipped', 'reason': reason, 'game_validation': 'not_run'}
 
@@ -186,7 +200,7 @@ def build_perk_dictionary(installation, stage: Path, seen: set[str]):
             source = staged_ini[0] if name == 'tnvse.ini' and staged_ini else None
             if source is None:
                 try:
-                    source = installation.source(f'{PLUGIN_DIR}/{name}')
+                    source = runtime_installation.source(f'{PLUGIN_DIR}/{name}')
                 except ValueError:
                     if name != 'tnvse_dictionary.xml':
                         raise
@@ -216,7 +230,7 @@ def build_perk_dictionary(installation, stage: Path, seen: set[str]):
             if len(staged_json) > 1:
                 raise ValueError('Ambiguous staged tNVSE dictionary JSON provider')
             existing_json_source = (staged_json[0] if staged_json
-                                    else installation.source(json_relative))
+                                    else runtime_installation.source(json_relative))
             existing_json = existing_json_source.read_bytes()
         payloads = render_dictionary_overlay(source_ini, source_xml, existing_json,
                                              allow_empty=xml_absent)
@@ -246,14 +260,15 @@ def build_perk_dictionary(installation, stage: Path, seen: set[str]):
                      'status': 'perk_compiled_dictionary_exact_overlay'})
     priorities = ['tNVSE', 'tNVSE Default Config']
     for name in ('tnvse.ini', 'tnvse_dictionary.xml'):
-        chain = installation.providers.get(f'{PLUGIN_DIR}/{name}'.casefold(), [])
+        chain = runtime_installation.providers.get(f'{PLUGIN_DIR}/{name}'.casefold(), [])
         if chain:
             priorities.append(chain[-1]['provider'])
     for staged_ini in stage.glob('mods/*/NVSE/plugins/tnvse.ini'):
         priorities.append(staged_ini.relative_to(stage).parts[1])
     return rows, {'status': 'generated', 'mod': MOD_NAME,
-                  'mods_requiring_activation': ([] if MOD_NAME in installation.mods_enabled else [MOD_NAME]),
+                  'mods_requiring_activation': ([] if MOD_NAME in runtime_installation.mods_enabled else [MOD_NAME]),
                   'requires_priority_above': sorted(set(priorities) - {MOD_NAME}),
+                  'source_profile': getattr(runtime_installation, 'profile', ''),
                   'dictionary_entries': len(dictionary_entries()),
                   'enabled_global_mixed_source_matching': True,
                   'existing_wildcard_entries': 0,
