@@ -4,6 +4,12 @@
 
 Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 패쳐입니다. 설치된 모드를 읽어 별도 `Output/mods`를 생성하며 원본 모드와 프로필은 직접 수정하지 않습니다.
 
+## v1.0.4 폴더형 배포
+
+ZIP 전체를 새 폴더에 압축 해제하여 실행합니다. 메인 EXE와 작업용 EXE, `_internal`, `worker-runtime`, `TranslationData`, `Backend`를 함께 유지하세요. 실행 시 자체 압축을 푸는 단일 EXE 배포를 폴더형으로 바꿨습니다. 수정 tNVSE의 대응 소스는 `Licenses-and-Source`에 일반 파일로 제공합니다. 번역 사전·UI ESP·폰트·수정 DLL은 v1.0.3과 동일합니다. 넥서스의 검사 통과를 보장하는 변경은 아닙니다.
+
+재현 빌드는 `.github/workflows/folder-patcher-build.yml`과 `tools/build_folder_release.py`를 사용합니다. 이전 버전 전용 폰트·키 안내 재패키징 도구는 당시 단일 EXE를 다루는 역사적 도구입니다.
+
 ## v1.0.1 폰트 수정
 
 나눔스퀘어 ExtraBold에서 실제 글리프 외곽선이 비어 있는 CP949 확장 한글(예: 겍·걕·괙)의 누락을 방지하기 위해 6개 tNVSE 폰트 슬롯을 Pretendard Bold로 변경했습니다. 기존 수정 tNVSE.dll 및 번역 자료는 바이너리 단위로 그대로 유지했습니다. 실제 게임 검증은 별도입니다.

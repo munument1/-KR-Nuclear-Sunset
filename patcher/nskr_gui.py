@@ -19,8 +19,12 @@ def program_folder():
 
 
 def resource_folder():
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        return Path(sys._MEIPASS).resolve()
+    if getattr(sys, 'frozen', False):
+        folder = program_folder()
+        if (folder / 'TranslationData/catalog.json').is_file():
+            return folder
+        if hasattr(sys, '_MEIPASS'):
+            return Path(sys._MEIPASS).resolve()
     return Path(__file__).resolve().parent
 
 
