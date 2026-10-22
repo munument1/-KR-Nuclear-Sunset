@@ -310,7 +310,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import json,zipfile
-          d=Path("dist")
+          d=Path(".")
           manifest=json.loads((d/"BUILD-MANIFEST.json").read_text(encoding="utf-8"))
           assert manifest["release_tag"]=="v1.0.6", manifest
           assert manifest["status"]=="OFFICIAL_RELEASE_GAMEPLAY_VERIFICATION_NEEDED"
