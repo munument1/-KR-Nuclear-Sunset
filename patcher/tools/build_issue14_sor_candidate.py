@@ -197,8 +197,14 @@ def build(previous_zip: Path, current_zip: Path, output_dir: Path) -> dict:
     with zipfile.ZipFile(previous_zip) as old_zip, zipfile.ZipFile(current_zip) as current:
         old_catalog, old_path, baseline = released_ui(old_zip)
         catalog, target_path, source = released_ui(current)
-        if old_catalog.get("version") != "1.0.2" or catalog.get("version") != "1.0.5":
-            raise ValueError("Unexpected release version")
+        # Early TranslationData catalogs need not stamp the release tag in
+        # metadata. The caller pins the official archive filenames, and repair
+        # validates the exact source bytes + original game record identities.
+        if (previous_zip.name != "NuclearSunset-TranslationData-v1.0.2.zip"
+                or current_zip.name != "NuclearSunset-TranslationData-v1.0.5.zip"
+                or old_catalog.get("target_modlist") != "nuclear-sunset-ttw"
+                or catalog.get("target_modlist") != "nuclear-sunset-ttw"):
+            raise ValueError("Unexpected target or official release filenames")
         if old_path != target_path:
             raise ValueError("Unexpected UI Strings catalog path change")
         changed = repair(source, baseline)
