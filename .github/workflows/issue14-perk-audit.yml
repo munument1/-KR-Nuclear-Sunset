@@ -5,7 +5,7 @@ on:
       - audit/issue14-perk-regression-20261022
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   unit:
     runs-on: ubuntu-latest
@@ -243,7 +243,7 @@ jobs:
         run: |
           gh release download v1.0.5 --repo "${GITHUB_REPOSITORY}" \
             --pattern 'NuclearSunset-Korean-Patcher-v1.0.5.zip' --dir release-input/v1.0.5
-      - name: Package full v1.0.6-rc.1 preview compatible with v1.0.5
+      - name: Package full v1.0.6 official data hotfix compatible with v1.0.5
         env:
           PYTHONPATH: patcher
         run: |
@@ -252,10 +252,10 @@ jobs:
             --translation-data release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
             --candidate audit-results/sor-candidate/NuclearSunset-TranslationData-v1.0.5-issue14-CANDIDATE.zip \
             --output audit-results/release-preview
-      - name: Upload full installer and translation pack preview
+      - name: Upload verified full installer and translation data
         uses: actions/upload-artifact@v4
         with:
-          name: NuclearSunset-v1.0.6-rc.1-UNVERIFIED-PREVIEW
+          name: NuclearSunset-v1.0.6-OFFICIAL-DATA-HOTFIX
           path: audit-results/release-preview/*
           if-no-files-found: error
       - name: Upload unverified sOr candidate
@@ -286,3 +286,57 @@ jobs:
           name: issue14-capture-evidence
           path: issue14-attachments/
           if-no-files-found: ignore
+
+  publish_official:
+    needs: unit
+    if: github.ref == 'refs/heads/audit/issue14-perk-regression-20261022'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: NuclearSunset-v1.0.6-OFFICIAL-DATA-HOTFIX
+          path: dist
+      - name: Verify official release files and hashes
+        run: |
+          cd dist
+          test -f NuclearSunset-Korean-Patcher-v1.0.6.zip
+          test -f NuclearSunset-TranslationData-v1.0.6.zip
+          test -f SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          python - <<'PY'
+          from pathlib import Path
+          import json,zipfile
+          d=Path("dist")
+          manifest=json.loads((d/"BUILD-MANIFEST.json").read_text(encoding="utf-8"))
+          assert manifest["release_tag"]=="v1.0.6", manifest
+          assert manifest["status"]=="OFFICIAL_RELEASE_GAMEPLAY_VERIFICATION_NEEDED"
+          assert manifest["changed_zip_members"] and len(manifest["changed_zip_members"])==2
+          for name in ("NuclearSunset-Korean-Patcher-v1.0.6.zip",
+                       "NuclearSunset-TranslationData-v1.0.6.zip"):
+              with zipfile.ZipFile(d/name) as z:
+                  assert z.testzip() is None
+          print("OFFICIAL_ASSET_VALIDATION_PASS", manifest["changed_zip_members"])
+          PY
+      - name: Create official v1.0.6 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.6 --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release v1.0.6 already exists; refusing to overwrite published assets."
+            exit 1
+          fi
+          gh release create v1.0.6 \
+            dist/NuclearSunset-Korean-Patcher-v1.0.6.zip \
+            dist/NuclearSunset-TranslationData-v1.0.6.zip \
+            dist/SHA256SUMS.txt \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Nuclear Sunset Korean Patcher v1.0.6" \
+            --notes-file patcher/docs/releases/v1.0.6.md \
+            --latest
+          gh release view v1.0.6 --repo "${GITHUB_REPOSITORY}" \
+            --json tagName,isPrerelease,isDraft,url,assets
