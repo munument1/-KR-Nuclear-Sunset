@@ -1,11 +1,6 @@
 name: Publish patcher to Nexus Mods
 
 on:
-  # One-time GitHub App push bootstrap for the v1.0.6 release made by GITHUB_TOKEN.
-  # Remove this push trigger after the v1.0.6 Nexus upload is verified.
-  push:
-    branches: [main]
-    paths: ['.github/workflows/nexus-publish.yml']
   release:
     types: [published]
   workflow_run:
