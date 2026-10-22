@@ -1,5 +1,22 @@
 # Nuclear Sunset #14 — 42 screenshot evidence classification (2026-10-22)
 
+> **Latest source-only status (2026-10-22):** The user explicitly confirmed
+> v1.0.2 was correct and the issue occurs only in the v1.0.5 PERK selection
+> window. Do not ask the user to repeat that comparison or use their game PC.
+> We proved the v1.0.3 key-prompt fix intentionally converted `sOr` from UTF-8
+> to CP949 and added the CP949 `sPCControlsTextPrefix`; this carries into
+> v1.0.5. The underlying source is `tools/prepare_key_prompt_test.py`.
+> An offline correction **candidate** was built from official released ZIPs,
+> restoring only `GMST sOr` to v1.0.2 UTF-8. It preserves all other ESP
+> records (including the key-prompt field), rebuilds correct TES4/GRUP sizes,
+> updates the TranslationData catalog payload SHA and checks all other archive
+> member bytes unchanged. GitHub CI: [run 39784544298](https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39784544298),
+> 15 isolated tests PASS; artifact `issue14-one-gmst-sOr-UTF8-candidate-NOT-RELEASED`.
+> **This does not establish that sOr is read for all 42 affected PERKs.**
+> It cannot yet be called a proven runtime fix. Prior A/B-package directions
+> in this file are superseded, and no user-side game test is being requested.
+> Do not release or merge based on this source-only evidence.
+
 Original issue: https://github.com/munument1/-KR-Nuclear-Sunset/issues/14
 
 Evidence collection: [GitHub Actions run 39775199812](https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39775199812) successfully fetched **42/42 original images**. The analyst inspected all 42 panels visually (not OCR). Names were independently checked against the actual published v1.0.5 TranslationData `PERK/FULL` records.
