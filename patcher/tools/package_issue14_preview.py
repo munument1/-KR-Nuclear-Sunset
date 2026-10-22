@@ -1,4 +1,4 @@
-"""Package a clearly labeled issue #14 preview from checked official releases.
+"""Package a v1.0.6 issue #14 data hotfix from checked official releases.
 
 Copies v1.0.5 installer executables unchanged; updates only the two
 TranslationData ZIP members already independently audited in the one-GMST
@@ -15,7 +15,7 @@ import zipfile
 from pathlib import Path
 
 CATALOG="TranslationData/catalog.json"
-VERSION="v1.0.6-rc.1"
+VERSION="v1.0.6"
 
 
 def digest_bytes(value: bytes) -> str:
@@ -136,7 +136,7 @@ def build(installer_zip: Path, data_zip: Path, candidate_zip: Path,
             raise ValueError("Archive CRC failure")
     checksums=(f"{digest_file(p)}  {p.name}\n" for p in (new_installer,new_data))
     (output/"SHA256SUMS.txt").write_text("".join(checksums),encoding="ascii")
-    result=dict(status="PREVIEW_UNVERIFIED_IN_GAME",release_tag=VERSION,
+    result=dict(status="OFFICIAL_RELEASE_GAMEPLAY_VERIFICATION_NEEDED",release_tag=VERSION,
                 internal_installer_version="v1.0.5",
                 changed_zip_members=sorted(changes),
                 installer_sha256=digest_file(new_installer),
