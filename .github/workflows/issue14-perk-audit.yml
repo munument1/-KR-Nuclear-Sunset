@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile audit sources
-        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tools/audit_issue14_mo2_winners.py patcher/tests/test_issue14_perk_regression.py patcher/tests/test_issue14_mo2_winners.py
+        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tools/audit_issue14_mo2_winners.py patcher/tests/test_issue14_perk_regression.py patcher/tests/test_issue14_mo2_winners.py patcher/tools/build_issue14_sor_candidate.py patcher/tests/test_issue14_sor_candidate.py
       - name: Run isolated audit tests
         working-directory: patcher
         run: python -m unittest discover -s tests -p 'test_issue14*.py' -v
@@ -283,6 +283,18 @@ jobs:
         with:
           name: issue14-ui-strings-controlled-ab
           path: audit-results/ui-strings-ab/*
+          if-no-files-found: error
+      - name: Build one-field sOr restoration candidate from published releases
+        run: |
+          python patcher/tools/build_issue14_sor_candidate.py \
+            --previous release-input/v1.0.2/NuclearSunset-TranslationData-v1.0.2.zip \
+            --current release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
+            --output-dir audit-results/sor-candidate
+      - name: Upload unverified sOr candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-one-gmst-sOr-UTF8-candidate-NOT-RELEASED
+          path: audit-results/sor-candidate/*
           if-no-files-found: error
       - name: Upload catalog comparison
         uses: actions/upload-artifact@v4
