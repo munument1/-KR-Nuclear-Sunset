@@ -1,6 +1,11 @@
 name: Publish patcher to Nexus Mods
 
 on:
+  # One-time GitHub App push bootstrap for the v1.0.6 release made by GITHUB_TOKEN.
+  # Remove this push trigger after the v1.0.6 Nexus upload is verified.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/nexus-publish.yml']
   release:
     types: [published]
   workflow_run:
@@ -180,6 +185,8 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
+            [b]v1.0.6 update (2026-10-22):[/b] Restored UTF-8 for the sOr ("or") game setting used by the perk selection UI. Issue #14: the change was validated with source/packaging tests, but the in-game result and key-prompt display still need confirmation. Please report whether text is now readable.
+            [b]v1.0.6 업데이트:[/b] 퍽 선택창 한글 깨짐 수정 후보를 적용했습니다. 자동 검증은 통과했지만 인게임 확인은 아직 필요합니다. 퍽 설명/요구 조건과 키 안내 출력 결과를 제보해 주세요.
             [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main
