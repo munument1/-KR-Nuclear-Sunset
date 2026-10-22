@@ -130,6 +130,62 @@ jobs:
                   if isinstance(entry,dict):
                       print("PERK_MENU_DICTIONARY",version,name,entry.get("payload"))
           PY
+      - name: Inspect changed UI Strings ESP records from actual archives
+        env:
+          PYTHONPATH: patcher
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import collections, hashlib, json, sys
+          from pathlib import Path
+          from tools.tes4_text_scan import plugin_records, field_occurrences, clean_text
+          def find_runtime(catalog_file):
+              catalog=json.loads(Path(catalog_file).read_text(encoding="utf-8-sig"))
+              for mod in catalog.get("runtime_mods",[]):
+                  if mod.get("mod")!="Nuclear Sunset - Korean UI Strings":
+                      continue
+                  for item in mod.get("files",[]):
+                      if str(item.get("path","")).casefold().endswith("nskr ui strings.esp"):
+                          return (Path(catalog_file).parent / item["payload"]).resolve()
+              raise RuntimeError("NSKR UI Strings.esp not found")
+          def scan(path):
+              if not path.is_file():
+                  raise FileNotFoundError(path)
+              recs={}
+              duplicates=collections.Counter()
+              for fid,sig,fields in plugin_records(path):
+                  if sig=="TES4":continue
+                  edid=next((clean_text(raw,"cp1252") for key,raw in fields
+                             if key=="EDID"),None)
+                  recid=(sig,fid,edid or "")
+                  duplicates[recid]+=1
+                  identity=(*recid,duplicates[recid])
+                  recs[identity]={(key,order):raw for key,order,raw in field_occurrences(fields)}
+              return recs
+          old,new=(scan(find_runtime(x)) for x in sys.argv[1:])
+          changed=[]
+          for rid in sorted(set(old)|set(new)):
+              before,after=old.get(rid,{}),new.get(rid,{})
+              for key in sorted(set(before)|set(after)):
+                  b,a=before.get(key),after.get(key)
+                  if b==a:continue
+                  def readable(raw):
+                      if raw is None:return "[absent]"
+                      for enc in ("utf-8","cp1252"):
+                          t=clean_text(raw,enc)
+                          if t is not None:return t[:400]
+                      return "binary sha256:"+hashlib.sha256(raw).hexdigest()[:16]
+                  changed.append({"sig":rid[0],"formid":f"{rid[1]:08X}",
+                                  "edid":rid[2],"field":key[0],
+                                  "occurrence":key[1],"before":readable(b),
+                                  "after":readable(a)})
+          print("UI_STRINGS_RECORD_DIFF",json.dumps({
+                "old_records":len(old),"new_records":len(new),
+                "changed_subrecords":len(changed),
+                "changed":changed[:120]},ensure_ascii=False))
+          assert len(changed)<2000,"Refusing huge unexpectedly changed record set"
+          PY
       - name: Upload catalog comparison
         uses: actions/upload-artifact@v4
         with:
