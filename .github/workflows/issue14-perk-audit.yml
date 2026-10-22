@@ -237,6 +237,27 @@ jobs:
             --previous release-input/v1.0.2/NuclearSunset-TranslationData-v1.0.2.zip \
             --current release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
             --output-dir audit-results/sor-candidate
+      - name: Download original v1.0.5 installer archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v1.0.5 --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'NuclearSunset-Korean-Patcher-v1.0.5.zip' --dir release-input/v1.0.5
+      - name: Package full v1.0.6-rc.1 preview compatible with v1.0.5
+        env:
+          PYTHONPATH: patcher
+        run: |
+          python patcher/tools/package_issue14_preview.py \
+            --installer release-input/v1.0.5/NuclearSunset-Korean-Patcher-v1.0.5.zip \
+            --translation-data release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
+            --candidate audit-results/sor-candidate/NuclearSunset-TranslationData-v1.0.5-issue14-CANDIDATE.zip \
+            --output audit-results/release-preview
+      - name: Upload full installer and translation pack preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: NuclearSunset-v1.0.6-rc.1-UNVERIFIED-PREVIEW
+          path: audit-results/release-preview/*
+          if-no-files-found: error
       - name: Upload unverified sOr candidate
         uses: actions/upload-artifact@v4
         with:
