@@ -92,6 +92,44 @@ jobs:
                   if af.get(path)!=bf.get(path):
                       print("RUNTIME_CHANGED_FILE",mod,path,str(af.get(path))[:12],str(bf.get(path))[:12])
           PY
+      - name: Audit released perk menu dictionary switches
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys,re,xml.etree.ElementTree as ET
+          from pathlib import Path
+          watched={"benabledictionarytranslation",
+                   "benabledictionaryperkdescriptiontranslation",
+                   "benabledictionarymixedsourcetranslation",
+                   "benabledictionarytranslationlog",
+                   "butf8", "uiencoding"}
+          for version,path in zip(("v102","v105"),sys.argv[1:]):
+              catalog_path=Path(path)
+              data=json.loads(catalog_path.read_text(encoding="utf-8-sig"))
+              font=data.get("font_bundle") or {}
+              ini=font.get("ini") or {}
+              payload=ini.get("payload")
+              print("PERK_MENU_CONFIG",version,"ini_payload",payload,"overrides",json.dumps(
+                    {name:{k:v for k,v in values.items() if k.casefold() in watched}
+                     for name,values in (font.get("ini_overrides") or {}).items()
+                     if isinstance(values,dict)},ensure_ascii=False))
+              if payload:
+                  target=(catalog_path.parent/payload).resolve()
+                  print("PERK_MENU_CONFIG",version,"ini_exists",target.is_file())
+                  if target.is_file():
+                      section=""
+                      for line in target.read_text(encoding="utf-8-sig").splitlines():
+                          if line.lstrip().startswith("["):
+                              section=line.strip()
+                          match=re.match(r"\s*([^;#=]+?)\s*=\s*([^;#]*)(?:[;#].*)?$",line)
+                          if match and match.group(1).strip().casefold() in watched:
+                              print("PERK_MENU_KEY",version,section,match.group(1).strip(),match.group(2).strip())
+              for name in ("dictionary","dictionary_xml"):
+                  entry=font.get(name)
+                  if isinstance(entry,dict):
+                      print("PERK_MENU_DICTIONARY",version,name,entry.get("payload"))
+          PY
       - name: Upload catalog comparison
         uses: actions/upload-artifact@v4
         with:
