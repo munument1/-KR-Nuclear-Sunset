@@ -4,7 +4,7 @@ Issue: https://github.com/munument1/-KR-Nuclear-Sunset/issues/14
 
 ## Evidence and limits
 
-The issue body links 42 distinct 3440 × 1440 screenshots and reports that some perks displayed properly in v1.0.2 but not v1.0.5. The image payloads were inaccessible during this source audit. **No screenshot has been individually identified by PERK name here.**
+The issue body links 42 distinct 3440 × 1440 screenshots and reports that some perks displayed properly in v1.0.2 but not v1.0.5. All 42 original PNG assets were subsequently downloaded in GitHub Actions run 39775199812 and inspected; each selected name was matched to the v1.0.5 PERK/FULL catalog. See [the complete 42-capture findings](issue14-42-capture-findings-20261022.md). 41/42 requirement strings and 39/42 descriptions show damaged Korean; this suggests a common detail-display string path.
 
 The v1.0.5 tag points at commit d1593dc5. The comparison from v1.0.2 totals 15 commits. Important changed source files: nskr_xedit_worker.py (previous Korean destinations), nskr_nvse.py (Tag! and Bullet Time), nskr_compiled_scpt.py (Head Hunter and Fast Metabolism), and nskr_output.py (output integration and reporting).
 
@@ -40,7 +40,7 @@ Rows are keyed by physical plugin/provider, master owner, lower FormID, field, e
 - Fast Metabolism: Sweet Consumables.esp startup script appends new text.
 - Concentrated Fire: PERK/DESC at lower FormID 044CAF is intentionally English in v1.0.5 because Korean previously appeared as question marks after runtime processing; FULL remains translated.
 
-These four are source-proven older examples, **not claims that the unread issue #14 screenshots depict the same perks**.
+These four are source-proven older examples; #14 now has a separate image-by-image classification. The broad requirement corruption cannot be explained by those four description writers alone.
 
 ## Gates before any release
 
