@@ -44,6 +44,7 @@ jobs:
           path: audit-results/issue14-perk-comparison.csv
           if-no-files-found: error
       - name: Obtain 42 issue screenshots
+        if: github.event_name == 'workflow_dispatch'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -52,7 +53,7 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/issues/14" --jq '.body' > issue14-attachments/issue-body.md
           python patcher/tools/download_issue14_images.py --issue-body issue14-attachments/issue-body.md --output-dir issue14-attachments/captures
       - name: Upload downloaded issue screenshots
-        if: always()
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: issue14-capture-evidence
