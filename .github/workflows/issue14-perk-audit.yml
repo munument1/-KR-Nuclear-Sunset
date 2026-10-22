@@ -57,6 +57,41 @@ jobs:
                   if "tnvse.dll" in str(asset.get("path","")).casefold():
                       print("BUNDLED_TNVSE",label,asset.get("path"),asset.get("payload_sha256"))
           PY
+      - name: Name changed bundled runtime payloads
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys
+          from pathlib import Path
+          old,new=[json.loads(Path(p).read_text(encoding="utf-8-sig")) for p in sys.argv[1:]]
+          for key in ("font_bundle",):
+              lhs,rhs=old.get(key) or {},new.get(key) or {}
+              for subkey in sorted(set(lhs)|set(rhs)):
+                  if lhs.get(subkey)!=rhs.get(subkey):
+                      print("FONT_BUNDLE_CHANGED",subkey)
+              a={str(x.get("path","")):x.get("payload_sha256") for x in lhs.get("assets",[])}
+              b={str(x.get("path","")):x.get("payload_sha256") for x in rhs.get("assets",[])}
+              for path in sorted(set(a)|set(b)):
+                  if a.get(path)!=b.get(path):
+                      print("FONT_ASSET_CHANGED",path,str(a.get(path))[:12],str(b.get(path))[:12])
+          for label,catalog in (("v102",old),("v105",new)):
+              mods=catalog.get("runtime_mods") or []
+              print("RUNTIME_MOD_COUNT",label,len(mods))
+              for mod in mods:
+                  print("RUNTIME_MOD",label,mod.get("mod"),len(mod.get("files",[])))
+          om={str(x.get("mod","")):x for x in old.get("runtime_mods",[])}
+          nm={str(x.get("mod","")):x for x in new.get("runtime_mods",[])}
+          for mod in sorted(set(om)|set(nm)):
+              a,b=om.get(mod) or {},nm.get(mod) or {}
+              if a==b:continue
+              print("RUNTIME_CHANGED_MOD",mod)
+              af={str(x.get("path","")):x.get("payload_sha256") for x in a.get("files",[])}
+              bf={str(x.get("path","")):x.get("payload_sha256") for x in b.get("files",[])}
+              for path in sorted(set(af)|set(bf)):
+                  if af.get(path)!=bf.get(path):
+                      print("RUNTIME_CHANGED_FILE",mod,path,str(af.get(path))[:12],str(bf.get(path))[:12])
+          PY
       - name: Upload catalog comparison
         uses: actions/upload-artifact@v4
         with:
