@@ -186,6 +186,49 @@ jobs:
                 "changed":changed[:120]},ensure_ascii=False))
           assert len(changed)<2000,"Refusing huge unexpectedly changed record set"
           PY
+      - name: Verify source and destination encoding of changed UI GMST fields
+        env:
+          PYTHONPATH: patcher
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from tools.tes4_text_scan import plugin_records
+          def get_values(catalog_file):
+              catalogue=json.loads(Path(catalog_file).read_text(encoding="utf-8-sig"))
+              mod=next(x for x in catalogue["runtime_mods"] if x.get("mod")=="Nuclear Sunset - Korean UI Strings")
+              entry=next(x for x in mod["files"] if str(x["path"]).casefold().endswith("nskr ui strings.esp"))
+              p=(Path(catalog_file).parent / entry["payload"]).resolve()
+              out={}
+              for _,sig,fields in plugin_records(p):
+                  if sig!="GMST":continue
+                  data={k:v for k,v in fields}
+                  if data.get("EDID",b"").rstrip(b"\x00") in (b"sOr",b"sPCControlsTextPrefix"):
+                      name=data["EDID"].rstrip(b"\x00").decode("ascii")
+                      out[name]=data.get("DATA",b"").rstrip(b"\x00")
+              return out
+          old,new=map(get_values,sys.argv[1:])
+          for key in ("sOr","sPCControlsTextPrefix"):
+              for label,v in (("v102",old.get(key)),("v105",new.get(key))):
+                  assert v is not None, f"Missing {key} {label}"
+                  dec={}
+                  for enc in ("utf-8","cp949"):
+                      try:dec[enc]=v.decode(enc)
+                      except UnicodeDecodeError:dec[enc]="[invalid]"
+                  print("UI_GMST_ENCODING",json.dumps({"key":key,"version":label,
+                    "hex":v.hex(),"bytes":len(v),"decoded":dec},ensure_ascii=False))
+          assert old["sOr"].decode("utf-8")=="또는"
+          assert new["sOr"].decode("cp949")=="또는"
+          assert old["sOr"]!=new["sOr"]
+          sample_utf8="요구: ".encode("utf-8") + "또는".encode("utf-8") + " 설명: 저격수".encode("utf-8")
+          sample_mixed="요구: ".encode("utf-8") + new["sOr"] + " 설명: 저격수".encode("utf-8")
+          for label,b in (("utf8_only",sample_utf8),("mixed_source",sample_mixed)):
+              try:b.decode("utf-8"); valid=True
+              except UnicodeDecodeError:valid=False
+              print("UI_GMST_MIXED_BUFFER",label,"valid_utf8="+str(valid),"hex="+b.hex())
+          PY
       - name: Upload catalog comparison
         uses: actions/upload-artifact@v4
         with:
