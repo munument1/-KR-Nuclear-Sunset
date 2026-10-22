@@ -9,14 +9,52 @@ permissions:
 jobs:
   unit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Compile audit source
-        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tests/test_issue14_perk_regression.py
+      - name: Compile audit sources
+        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tests/test_issue14_perk_regression.py
       - name: Run isolated audit tests
         working-directory: patcher
         run: python -m unittest discover -s tests -p 'test_issue14_perk_regression.py' -v
+      - name: Download released TranslationData archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release-input/v1.0.2 release-input/v1.0.5
+          gh release download v1.0.2 --repo "${GITHUB_REPOSITORY}" --pattern 'NuclearSunset-TranslationData-v1.0.2.zip' --dir release-input/v1.0.2
+          gh release download v1.0.5 --repo "${GITHUB_REPOSITORY}" --pattern 'NuclearSunset-TranslationData-v1.0.5.zip' --dir release-input/v1.0.5
+          python -m zipfile -e release-input/v1.0.2/NuclearSunset-TranslationData-v1.0.2.zip release-input/v1.0.2/extracted
+          python -m zipfile -e release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip release-input/v1.0.5/extracted
+      - name: Compare real v1.0.2 to v1.0.5 catalogs
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          test -n "$PREV" && test -n "$CURR"
+          mkdir -p audit-results
+          python patcher/tools/audit_issue14_perk_regression.py --previous "$PREV" --current "$CURR" --output audit-results/issue14-perk-comparison.csv
+          python -c 'import csv,collections,json; rows=list(csv.DictReader(open("audit-results/issue14-perk-comparison.csv",encoding="utf-8-sig"))); kinds=collections.Counter(x["change"] for x in rows); fields=collections.Counter(x["field"] for x in rows); print("PERK audit rows:", len(rows)); print("Changes:",json.dumps(kinds,sort_keys=True)); print("Fields:",json.dumps(fields,sort_keys=True)); print("Changed examples:",json.dumps([{"plugin":x["plugin"],"formid":x["formid"],"field":x["field"],"change":x["change"]} for x in rows if x["change"]!="unchanged"][:40],ensure_ascii=False))'
+      - name: Upload catalog comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-perk-catalog-diff
+          path: audit-results/issue14-perk-comparison.csv
+          if-no-files-found: error
+      - name: Obtain 42 issue screenshots
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p issue14-attachments
+          gh api "repos/${GITHUB_REPOSITORY}/issues/14" --jq '.body' > issue14-attachments/issue-body.md
+          python patcher/tools/download_issue14_images.py --issue-body issue14-attachments/issue-body.md --output-dir issue14-attachments/captures
+      - name: Upload downloaded issue screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-capture-evidence
+          path: issue14-attachments/
+          if-no-files-found: ignore
