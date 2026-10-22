@@ -14,6 +14,7 @@ from pathlib import Path
 import nskr
 
 WATCHED = (
+    "Menus/levelup_menu.xml",
     "NVSE/plugins/tnvse.dll",
     "NVSE/plugins/tnvse.ini",
     "NVSE/plugins/tnvse_fonts.xml",
