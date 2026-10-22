@@ -93,3 +93,29 @@ The translated list labels render normally while the same menu's details/require
 Compare static ESP record bytes, runtime GetFormDescription results, and the level-up UI rendering independently. Compare identical perks in Pip-Boy versus level-up screen using one cloned MO2 profile. Check actual loaded tNVSE.dll/INI and JIP versions, and the active provider for each override. A screenshot alone does not locate the first irreversible character loss. Do not modify the user's original modlist or release until the A/B test identifies the responsible path.
 
 No change to translation strings or game files is proposed by this report.
+
+
+## Safe read-only MO2 provider evidence when an actual game PC is connected
+
+The attached screenshots alone do **not** reveal the physical winners for the current selected MO2 profile. The new helper \`tools/audit_issue14_mo2_winners.py\` reads the selected profile's ModOrganizer.ini, modlist.txt, plugins.txt and loose provider files without changing them.
+
+From the \`patcher\` directory:
+
+\`\`\`powershell
+python tools/audit_issue14_mo2_winners.py --mo2-root "C:\Modlists\NuclearSunset" --output "C:\NSKR-Issue14-Diagnostics\mo2-provider-snapshot.json"
+\`\`\`
+
+The output destination must be outside the MO2 and game directory. Save separately from the already-patched Output report. It records SHA-256 and low-to-high provider order for the exact DLL, INI, font XML, dictionary XML, two NVSE description scripts, and relevant plugin files. It also flags possible prior experimental "Korean Perk Runtime" / "NSKR Test" providers for manual inspection.
+
+**Important:** This is an *offline VFS precedence inference*, not proof of which DLL a running process loaded or which plugin record won across the full load order. No game execution, Pip-Boy/level-up comparison, or xNVSE instrumentation has run. Do not mark issue #14 fixed on this evidence alone.
+
+### In-game A/B matrix for the cloned test profile
+
+| Check | Keep fixed | Change | Required evidence |
+|---|---|---|---|
+| A (baseline) | DLL, font XML, INI, save, plugin order | No changes | Same selected perk in level-up screen and Pip-Boy; note UI context |
+| B (Script Runner) | Same as A | Disable only Bullet Time perk *description script* provider in cloned MO2 profile | Note change in each string, and verify game effects are unchanged |
+| C (static translations) | Same as A | Verify generated ESP's original Korean PERK/DESC bytes read-only | Exact owner/FormID/field readback |
+| D (DLL/renderer) | Same as A | Only after A-C, switch one controlled tNVSE/JIP configuration at a time | Identify first step that changes damaged to readable Korean |
+
+Suggested representative screenshots are #1 (base-game perk), #3 (modded perk), #7 (all-English description), #31 (mixed Korean-English but readable), and #40 (Concentrated Fire English exception with damaged requirements).
