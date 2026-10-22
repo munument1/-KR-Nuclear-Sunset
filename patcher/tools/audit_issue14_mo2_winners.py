@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import nskr
@@ -37,6 +38,41 @@ def digest(path: Path) -> str:
     return sha.hexdigest()
 
 
+
+def selection_text_tile(path: Path) -> dict:
+    """Extract only bounded display metadata; the game may use BSA fallbacks."""
+    if path.stat().st_size > 2_000_000:
+        return {"status": "too_large"}
+    text = path.read_bytes().decode("utf-8-sig", errors="replace")
+    matches = re.findall(
+        r'<text\b[^>]*\bname\s*=\s*["\']LUM_SelectionText["\'][^>]*>(.*?)</text\s*>',
+        text, re.IGNORECASE | re.DOTALL,
+    )
+    if len(matches) != 1:
+        return {"status": "not_found" if not matches else "ambiguous_multiple_tiles",
+                "match_count": len(matches)}
+    tile = matches[0]
+    def trait(name: str) -> str | None:
+        match = re.search(
+            r'<' + name + r'\b[^>]*>(.*?)</' + name + r'\s*>',
+            tile, re.IGNORECASE | re.DOTALL,
+        )
+        if not match:
+            return None
+        return " ".join(match.group(1).split())[:180]
+    font_expr = trait("font")
+    return {
+        "status": "found",
+        "font_expression": font_expr,
+        "font_id_literal": (int(font_expr)
+                            if font_expr and re.fullmatch(r"\d+", font_expr) else None),
+        "tile_id": trait("id"),
+        "zoom": trait("zoom"),
+        "tile_fragment_sha256": hashlib.sha256(tile.encode("utf-8")).hexdigest(),
+    }
+
+
+
 def summarize(installation) -> dict:
     if getattr(installation, "all_installed", False):
         raise ValueError("A selected profile is required, not all_installed")
@@ -53,6 +89,8 @@ def summarize(installation) -> dict:
                 "physical_path": str(source),
                 "sha256": digest(source),
                 "bytes": source.stat().st_size,
+                **({"selection_text_tile": selection_text_tile(source)}
+                   if wanted.casefold() == "menus/levelup_menu.xml" else {}),
             })
         paths.append({
             "virtual_path": wanted,
