@@ -110,6 +110,26 @@ The older recommendation to establish whether Pip-Boy also corrupts was supersed
 
 Do not merge/publish on static evidence alone; a real running game comparison is still absent.
 
+
+### Targeted upstream tNVSE font/render pipeline source review (2026-10-22)
+
+Upstream **tNVSE** sources identify a specific, testable encoding boundary:
+
+1. `tnvse/Src/font/font_manager.cpp`: `FontManagerEx::PrepText` calls `TryPrepareRichTextInput` / `TryConvertRichTextInput`; `HasRichTextExtraGlyphs` checks whether **any** extra glyphs are available, not strictly the current XML text tile's font ID. The tile's font ID is useful rendering context but not, by itself, proof of why multibyte conversion did/didn't run.
+2. `tnvse/Src/font/encoding.h`: `ConvertToMultiByte` runs only if `bUTF8`, East Asian UI mode and extra glyphs are enabled **and** `IsValidUTF8With3ByteMin(source)` is true for the **entire** supplied C-string. Otherwise the input is passed through without UTF-8-to-CP949 conversion.
+3. `tnvse/Src/font/encoding.cpp`: `IsValidUTF8With3ByteMin` rejects invalid UTF-8 byte sequences. A level-up UI buffer constructed from a mix of UTF-8 PERK/DESC and legacy-encoded requirement/label pieces may fail that whole-string check, but this remains only a **hypothesis** until the actual pre-render byte sequence is dumped.
+4. `tnvse/Src/game/game_hooks.cpp`: the general font preparation and rich-text parsing hooks include no obvious `LevelUpMenu` / `LUM_SelectionText`-specific call site. The first loss could occur in the game's own concatenation, a conflicting UI plugin, or another hook before tNVSE.
+5. `Menus/levelup_menu.xml` differs between actual published UI mods: sample MUX has `LUM_SelectionText/font = 3`, a DarN UI example has `font = 1`. **These are reference examples, not evidence of the reporter's active XML.**
+
+References: [tNVSE encoding.h](https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/font/encoding.h),
+[tNVSE font_manager.cpp](https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/font/font_manager.cpp),
+[tNVSE encoding.cpp](https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/font/encoding.cpp),
+[tNVSE game_hooks.cpp](https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/game/game_hooks.cpp).
+
+The MO2 selected-profile inspector now includes the winning and overridden `Menus/levelup_menu.xml` providers' `LUM_SelectionText` literal font slot / expression, tile ID and fragment digest. It **does not** patch XML, force font substitution, touch VFS state or prove any game-time failure.
+
+**Test priorities after offline profile snapshot:** compare unchanged game state on cloned UI XML providers, then identify the raw pre-render selection text bytes (before C-string conversion). Specifically distinguish (a) actual ASCII 0x3F substitution before font handling, (b) mixed UTF-8/CP949 input rejected by the whole-buffer validator, and (c) intact CP949 output that the chosen font slot cannot render. Seeing literal question marks alone does not distinguish these paths.
+
 ## Root-cause implications
 
 The translated list labels render normally while the same menu's details/requirements are damaged. This strongly prioritizes the **level-up UI's detail string construction, encoding boundary and renderer path** over rewriting 42 individual PERK translation mappings. `PERK/DESC` translation mappings do not independently explain dynamically composed requirements.
