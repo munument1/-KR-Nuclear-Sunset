@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 import nskr
-from tools.audit_issue14_mo2_winners import WATCHED, main, summarize
+from tools.audit_issue14_mo2_winners import WATCHED, main, summarize, selection_text_tile
 
 
 class ProviderSnapshotTests(unittest.TestCase):
@@ -35,7 +35,10 @@ class ProviderSnapshotTests(unittest.TestCase):
             target.write_bytes(data)
         levelup = self.root / "mods/Preferred Korean/Menus/levelup_menu.xml"
         levelup.parent.mkdir(parents=True)
-        levelup.write_text('<text name="LUM_SelectionText" />', encoding="utf-8")
+        levelup.write_text('<text name="LUM_SelectionText"><id>4</id><font>3</font></text>', encoding="utf-8")
+        backup = self.root / "mods/Original Config/Menus/levelup_menu.xml"
+        backup.parent.mkdir(parents=True)
+        backup.write_text('<text name="LUM_SelectionText"><id>4</id><font>1</font></text>', encoding="utf-8")
         src = self.root / "mods/Preferred Korean/NVSE/plugins/scripts/gr_BulletTimePerkDesc.txt"
         src.parent.mkdir(parents=True)
         src.write_bytes(b"guarded source")
@@ -52,9 +55,29 @@ class ProviderSnapshotTests(unittest.TestCase):
         ui = next(e for e in result["watched_paths"]
                   if e["virtual_path"] == "Menus/levelup_menu.xml")
         self.assertEqual(ui["winning_provider_by_offline_priority"], "Preferred Korean")
+        self.assertEqual([r["selection_text_tile"]["font_id_literal"]
+                          for r in ui["providers_low_to_high"]], [1, 3])
+        self.assertEqual(ui["providers_low_to_high"][-1]["selection_text_tile"]["tile_id"], "4")
         self.assertEqual(len(result["watched_paths"]), len(WATCHED))
         self.assertIn("offline_loose_file_provider_precedence_only", result["evidence_scope"])
         self.assertEqual(result["possible_previous_test_mods"], [])
+
+    def test_dynamic_and_ambiguous_selection_tile_reports(self):
+        dynamic = self.base / "dynamic.xml"
+        dynamic.write_text(
+            '<text name="LUM_SelectionText"><font><copy src="parent" trait="font"/></font></text>',
+            encoding="utf-8")
+        found = selection_text_tile(dynamic)
+        self.assertEqual(found["status"], "found")
+        self.assertIsNone(found["font_id_literal"])
+        self.assertIn("copy", found["font_expression"])
+        missing = self.base / "missing.xml"
+        missing.write_text("<text name='Other'></text>", encoding="utf-8")
+        self.assertEqual(selection_text_tile(missing)["status"], "not_found")
+        duplicate = self.base / "duplicate.xml"
+        duplicate.write_text(
+            '<text name="LUM_SelectionText"></text>' * 2, encoding="utf-8")
+        self.assertEqual(selection_text_tile(duplicate)["status"], "ambiguous_multiple_tiles")
 
     def test_rejects_aggregate_all_installed_without_selected_profile(self):
         with self.assertRaisesRegex(ValueError, "selected profile"):
