@@ -10,6 +10,7 @@ Only a cloned-profile game test can confirm the causal link.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import io
 import json
@@ -232,7 +233,9 @@ def build(previous_zip: Path, current_zip: Path, output_dir: Path) -> dict:
                 data = (changed if name == target_path else
                         (json.dumps(catalog, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
                         if name == RELEASE_ITEM else current.read(name))
-                patched.writestr(member, data)
+                # writestr mutates ZipInfo.header_offset; never pass the live
+                # source ZipInfo when the original archive is still in use.
+                patched.writestr(copy.copy(member), data)
         with zipfile.ZipFile(output_dir / "NuclearSunset-TranslationData-v1.0.5-issue14-CANDIDATE.zip") as check:
             cat, path, data = released_ui(check)
             if path != target_path or data != changed:
