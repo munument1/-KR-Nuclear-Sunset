@@ -33,6 +33,9 @@ class ProviderSnapshotTests(unittest.TestCase):
             target = self.root / "mods" / mod / "NVSE/plugins/tnvse.ini"
             target.parent.mkdir(parents=True)
             target.write_bytes(data)
+        levelup = self.root / "mods/Preferred Korean/Menus/levelup_menu.xml"
+        levelup.parent.mkdir(parents=True)
+        levelup.write_text('<text name="LUM_SelectionText" />', encoding="utf-8")
         src = self.root / "mods/Preferred Korean/NVSE/plugins/scripts/gr_BulletTimePerkDesc.txt"
         src.parent.mkdir(parents=True)
         src.write_bytes(b"guarded source")
@@ -46,6 +49,9 @@ class ProviderSnapshotTests(unittest.TestCase):
         self.assertEqual([r["provider"] for r in ini["providers_low_to_high"]],
                          ["Original Config", "Preferred Korean"])
         self.assertEqual(ini["winning_sha256"], hashlib.sha256(b"korean").hexdigest())
+        ui = next(e for e in result["watched_paths"]
+                  if e["virtual_path"] == "Menus/levelup_menu.xml")
+        self.assertEqual(ui["winning_provider_by_offline_priority"], "Preferred Korean")
         self.assertEqual(len(result["watched_paths"]), len(WATCHED))
         self.assertIn("offline_loose_file_provider_precedence_only", result["evidence_scope"])
         self.assertEqual(result["possible_previous_test_mods"], [])
