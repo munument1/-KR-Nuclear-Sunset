@@ -86,6 +86,30 @@ Evidence: [GitHub Actions comparison run](https://github.com/munument1/-KR-Nucle
 - **#40:** v1.0.5 의도적 영어 PERK/DESC, 요구 조건 깨짐. Concentrated Fire.
 - **#42:** FalloutNV.esm:165446 우선 후보; Vegas Elysium.esp:00df9f도 동명 FULL.
 
+
+## Additional confirmed constraint: only the perk selection screen (2026-10-22)
+
+The reporter clarified that the corruption happens **only inside the perk-selection screen**. Other menus render Korean normally. Update the working hypothesis accordingly: do **not** assume general ESP corruption, a global FreeType font bug, or systemic loss of UTF-8 in every game UI.
+
+### Relevant upstream implementation
+
+- Fallout: New Vegas UI contributor Axonis explained that `Menus/levelup_menu.xml` / `LUM_SelectionText` receives **one engine-composed text string containing requirements, ranks and description**. Source: https://www.moddb.com/mods/vanilla-ui-plus/forum/thread/ui-bug-question
+- Upstream tNVSE `tnvse/Src/dictionary/dictionary_perk.cpp` has a dedicated `TryTranslatePerkDescription` parser that splits `Req:`, `Ranks:`, `Source:` and the body. The related `dictionary_translate.cpp` route is conditional on dictionary configuration. Source: https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/dictionary/dictionary_perk.cpp and https://github.com/TIAIMM/tNVSE/blob/main/tnvse/Src/dictionary/dictionary_translate.cpp
+- The **published** v1.0.2 and v1.0.5 bundles both contain the **same** tNVSE INI flags: `uiEncoding=4`, `bUTF8=1`, `bEnableDictionaryTranslation=0`, `bEnableDictionaryPerkDescriptionTranslation=0`, and `bEnableDictionaryMixedSourceTranslation=0`. Therefore the upstream *dictionary PERK translation parser is disabled by default* in the shipped Korean package. It must not be blamed without evidence that a different active MO2 `tnvse.ini` overrides this.
+- Source evidence and released flags: https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39779348457
+
+### Updated priority order
+
+1. **P0**: Verify the *active MO2 providers* of `Menus/levelup_menu.xml`, `NVSE/plugins/tnvse.ini`, `tnvse.dll` and `tnvse_fonts.xml`. The read-only provider snapshot now explicitly watches the level-up XML. Note that a packed BSA fallback may not show up as a loose provider.
+2. **P0**: On a **cloned** MO2 profile, display the same game-state PERK selection with the winning custom `levelup_menu.xml` versus a known-good UI provider, changing only that provider. Keep fonts, DLLs, plugins, save and game mechanics unchanged. Do not randomly toggle the entire localization stack.
+3. **P1**: If both XML variants fail, compare the engine-composed `LUM_SelectionText` value before tNVSE's multibyte conversion to the string it actually renders. Identify whether `?` were already substituted in the input string or appear only after conversion.
+4. **P1**: Check active `tnvse.ini`; if dictionary translation is *actually* enabled by an overriding mod, additionally disable only the perk-description dictionary route for one controlled A/B (cloned profile). Do **not** assume this applies to released defaults.
+5. **P2**: Only for #7, #11, #28, #31 and #37, independently inspect dynamic text-appending scripts. These cannot explain 41/42 corrupted requirement strings on their own.
+
+The older recommendation to establish whether Pip-Boy also corrupts was superseded by the report that the issue is **selection-window-specific**. A normally rendered Pip-Boy can still serve as the fixed control; there is no need to request the same fact again.
+
+Do not merge/publish on static evidence alone; a real running game comparison is still absent.
+
 ## Root-cause implications
 
 The translated list labels render normally while the same menu's details/requirements are damaged. This strongly prioritizes the **level-up UI's detail string construction, encoding boundary and renderer path** over rewriting 42 individual PERK translation mappings. `PERK/DESC` translation mappings do not independently explain dynamically composed requirements.
