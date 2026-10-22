@@ -16,10 +16,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile audit sources
-        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tests/test_issue14_perk_regression.py
+        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tools/audit_issue14_mo2_winners.py patcher/tests/test_issue14_perk_regression.py patcher/tests/test_issue14_mo2_winners.py
       - name: Run isolated audit tests
         working-directory: patcher
-        run: python -m unittest discover -s tests -p 'test_issue14_perk_regression.py' -v
+        run: python -m unittest discover -s tests -p 'test_issue14*.py' -v
       - name: Download released TranslationData archives
         env:
           GH_TOKEN: ${{ github.token }}
