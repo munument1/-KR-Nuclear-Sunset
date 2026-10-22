@@ -61,14 +61,15 @@ def _iter_records(raw: bytes):
                 raise ValueError("Truncated record/group header")
             kind = data[pos:pos + 4]
             size = U32.unpack_from(data, pos + 4)[0]
-            if size < 24 or pos + size > len(data):
+            full_size = size if kind == b"GRUP" else 24 + size
+            if full_size < 24 or pos + full_size > len(data):
                 raise ValueError("Invalid plugin group/record size")
-            block = data[pos:pos + size]
+            block = data[pos:pos + full_size]
             if kind == b"GRUP":
                 yield from walk(block[24:])
             else:
                 yield block
-            pos += size
+            pos += full_size
         if pos != len(data):
             raise ValueError("Plugin record traversal ended incorrectly")
     return list(walk(raw))
@@ -124,9 +125,10 @@ def repair(source: bytes, baseline: bytes) -> bytes:
             header = bytearray(data[pos:pos + 24])
             typ = header[:4]
             size = U32.unpack_from(header, 4)[0]
-            if size < 24 or pos + size > len(data):
+            full_size = size if typ == b"GRUP" else 24 + size
+            if full_size < 24 or pos + full_size > len(data):
                 raise ValueError("Invalid group/record size")
-            body = data[pos + 24:pos + size]
+            body = data[pos + 24:pos + full_size]
             if typ == b"GRUP":
                 new_body = walk(body)
                 U32.pack_into(header, 4, 24 + len(new_body))
@@ -151,8 +153,8 @@ def repair(source: bytes, baseline: bytes) -> bytes:
                 result.extend(header + new_body)
                 hits += 1
             else:
-                result.extend(data[pos:pos + size])
-            pos += size
+                result.extend(data[pos:pos + full_size])
+            pos += full_size
         if pos != len(data):
             raise ValueError("Traversal mismatch")
         return bytes(result)
