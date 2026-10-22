@@ -130,6 +130,32 @@ The MO2 selected-profile inspector now includes the winning and overridden `Menu
 
 **Test priorities after offline profile snapshot:** compare unchanged game state on cloned UI XML providers, then identify the raw pre-render selection text bytes (before C-string conversion). Specifically distinguish (a) actual ASCII 0x3F substitution before font handling, (b) mixed UTF-8/CP949 input rejected by the whole-buffer validator, and (c) intact CP949 output that the chosen font slot cannot render. Seeing literal question marks alone does not distinguish these paths.
 
+## New: released UI Strings ESP record-by-record verification and A/B package
+
+The actual v1.0.2 and v1.0.5 published `NSKR UI Strings.esp` were parsed with the existing read-only TES4 record scanner. Each file contains **1,464 records**, with precisely **two changed GMST/DATA values**:
+
+| EDID | v1.0.2 raw bytes | v1.0.5 raw bytes | Decoded text |
+|---|---|---|---|
+| `sOr` | `EB 98 90 EB 8A 94` (UTF-8) | `B6 C7 B4 C2` (CP949) | `또는` |
+| `sPCControlsTextPrefix` | empty value | `B4 A9 B8 A3 B1 E2` (CP949) | `누르기` |
+
+`sOr` is a plausible requirement-string separator. tNVSE `ConvertToMultiByte` checks **the entire buffer** via `IsValidUTF8With3ByteMin`; a synthetic buffer containing UTF-8 Korean pieces mixed with v1.0.5's CP949 `sOr` fails a strict UTF-8 check, whereas the same buffer using v1.0.2's `sOr` passes.
+
+**This proves the two packaged bytes differ and demonstrates a possible encoding-boundary failure. It does not prove that every perk-selection buffer contains `sOr`, or that the engine actually constructs that exact mixed buffer.** The change cannot be assumed to explain all 41 broken requirement strings. An unchanged UI DLL and dictionary are not enough to establish causation.
+
+### Reversible test material
+
+An isolated GitHub Actions artifact is produced from the original release archives, containing two temporary MO2 overlay ZIPs:
+
+- `Issue14-UI-Strings-v1.0.5-CloneProfileOnly.zip` (**A**, control)
+- `Issue14-UI-Strings-v1.0.2-CloneProfileOnly.zip` (**B**, prior behavior)
+
+Actions evidence and A/B artifact: https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39781940465
+
+Each ZIP holds the untouched official `NSKR UI Strings.esp` and explanatory text; both source SHA-256 hashes are verified against the corresponding release catalog before archiving. **Never install into or overwrite the original mod.** Install only one ZIP as a *new* temporary MO2 mod in a **cloned profile**, activate it above the existing UI Strings mod, ensure the virtual `NSKR UI Strings.esp` winner changes, compare the identical save and same perk-selection UI, then disable the test mod. Keep every other mod, DLL, font and setting identical. The tested variable is the entire UI Strings ESP; it changes both listed GMST fields, not only `sOr`.
+
+If B alone restores Korean, create a *subsequent* single-`sOr` candidate before attributing the result to that GMST. If B does not restore Korean, this particular published ESP change is insufficient to cause/fix the reporter's symptoms in those conditions. **No in-game A/B has yet run. No actual fix or public release is claimed.**
+
 ## Root-cause implications
 
 The translated list labels render normally while the same menu's details/requirements are damaged. This strongly prioritizes the **level-up UI's detail string construction, encoding boundary and renderer path** over rewriting 42 individual PERK translation mappings. `PERK/DESC` translation mappings do not independently explain dynamically composed requirements.
