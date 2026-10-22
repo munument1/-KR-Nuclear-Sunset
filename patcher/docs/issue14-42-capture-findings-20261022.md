@@ -13,6 +13,20 @@ Evidence collection: [GitHub Actions run 39775199812](https://github.com/munumen
 - A second real release-data comparison found **2151/2151 unchanged PERK mappings** between v1.0.2 and v1.0.5: 1,104 FULL, 1,047 DESC, with no source/dest/history changes.
 - This is far broader than the four known runtime script cases from #11: requirements are affected even for #40, where the English-only DESC remains readable.
 
+## Exact packaged runtime and font comparison
+
+The CI's additional SHA-256 audit compared both **published** TranslationData archives, not only source control:
+
+- `NVSE/plugins/tnvse.dll`: same SHA-256 (`fae479bd3d6f61b52d824e10cc6fe01abe96c31584f284a5e5969340d0844db4`).
+- `tnvse.ini` payload: identical. `tnvse_fonts.xml` payload: identical.
+- `plugin_fields` catalog policy: identical.
+- `font_bundle` difference: the old bundled source ZIP `NVSE/plugins/fonts/licenses/tNVSE-71-KR-UI-source.zip` was removed in the later folder-based release. No runtime DLL/font config payload difference detected.
+- `runtime_mods`: the sole differing payload is `Nuclear Sunset - Korean UI Strings/NSKR UI Strings.esp` (consistent with the previously documented key-prompt/GMST update). The other UI/runtime bundle payload hashes match.
+
+This narrows the *package difference*, but does not prove what actually loaded in the reporter's MO2 virtual filesystem. In particular, an older or other-mod override can still win at runtime. No causal tie between the UI Strings ESP and this PERK bug has been established.
+
+Evidence: [GitHub Actions comparison run](https://github.com/munument1/-KR-Nuclear-Sunset/actions/runs/39777641060).
+
 ## Screenshot list (PERK owner/FormID candidates)
 
 **IMPORTANT:** These are owner/lower-FormID candidates from release TranslationData, **not confirmed winning plugin overrides in the user's game**. A common master may be overridden by multiple other ESPs. At #40 and #42, different PERK records can share the same translated display name.
