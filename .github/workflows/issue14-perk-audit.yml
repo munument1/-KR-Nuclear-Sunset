@@ -1,0 +1,22 @@
+name: Issue 14 PERK audit tests
+on:
+  push:
+    branches:
+      - audit/issue14-perk-regression-20261022
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile audit source
+        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tests/test_issue14_perk_regression.py
+      - name: Run isolated audit tests
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_issue14_perk_regression.py' -v
