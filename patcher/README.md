@@ -4,6 +4,13 @@
 
 Viva New Vegas 패쳐를 기반으로 Nuclear Sunset / TTW에 맞춘 한국어 패쳐입니다. 설치된 모드를 읽어 별도 `Output/mods`를 생성하며 원본 모드와 프로필은 직접 수정하지 않습니다.
 
+## 이슈 #13 수정 후보
+
+[원인·수정 문서](docs/issue13-findings-20261023.md)를 참조하세요. 결점 선택창 15개,
+Educated 설명 두 분기, NPC·잡동사니 이름 변경 219곳, 레벨업 능력치 선택창 4곳을
+처리하는 **v1.0.7-issue13-candidate**입니다. v1.0.6의 UI 인코딩 복원과 번역 자료는
+보존하며, 실제 게임 표시 검증은 아직 필요합니다.
+
 ## 이슈 #11 — NVSE 런타임 특전 설명
 
 실제 게임 모드가 실행될 때 변경하는 특전 설명을 위해 `Tag Perk Description Adjustment`, `SSS - Sweets Simple Settings`, `Bullet Time - Perk Consistency Patch`의 `NVSE/plugins/scripts/gr_*.txt`에 대한 대응을 추가했습니다. 앞의 두 모드에서는 `SetFormDescription Tag`의 **영문 상수를 실제 게임 효과에 맞는 한국어로 교체**합니다. Bullet Time 스크립트에서는 한글처럼 비ASCII 문자가 들어간 설명의 재기록을 피하고, 영어로 유지한 `Concentrated Fire`(FormID `044CAF`)에는 본래의 `V.A.T.S.` → `Bullet Time` 치환이 작동하도록 합니다. 두 모드에 같은 Tag 스크립트가 있으므로 각각의 MO2 모드 폴더에 출력합니다.

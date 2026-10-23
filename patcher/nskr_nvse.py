@@ -1,8 +1,8 @@
 """Conservative literal translations of loose NVSE script descriptions.
 
 No script is executed or recompiled. Only the quoted argument of an exact
-``SetFormDescription <form> "text"`` statement can change, with the original
-command, comments and line endings retained byte-for-byte.
+``SetFormDescription <form> "text"`` or ``LNSetName "text" <form>`` statement
+can change, with commands, forms, comments and line endings retained byte-for-byte.
 """
 from __future__ import annotations
 
@@ -14,9 +14,14 @@ from tools.loose_translation import TOKEN
 
 
 STATEMENT = re.compile(
-    r'^(?P<prefix>[ \t]*SetFormDescription[ \t]+(?P<form>[^\s";]+)[ \t]+")'
+    r'^(?P<prefix>[ \t]*(?P<command>SetFormDescription)[ \t]+(?P<form>[^\s";]+)[ \t]+")'
     r'(?P<value>(?:\\.|[^"\\\r\n])*)'
     r'(?P<suffix>"[ \t]*(?:(?:;|//).*|)(?:\r\n|\n|\r|))$', re.IGNORECASE)
+NAME_STATEMENT = re.compile(
+    r'^(?P<prefix>[ \t]*(?P<command>LNSetName)[ \t]+")'
+    r'(?P<value>(?:\\.|[^"\\\r\n])*)'
+    r'(?P<suffix>"[ \t]+(?P<form>[^\s";]+)[ \t]*(?:(?:;|//).*|)(?:\r\n|\n|\r|))$',
+    re.IGNORECASE)
 SCRIPT_PREFIX = 'nvse/plugins/scripts/'
 REGEX_REWRITE = re.compile(
     r'^(?P<indent>[ \t]*)svDescription\s*=\s*Sv_RegexReplace\s*'
@@ -39,6 +44,12 @@ def validate_entry(entry):
         raise ValueError('Expected a loose NVSE script entry')
     provider = entry.get('provider')
     path = entry.get('path')
+    if entry.get('script_transform') == 'dslc_menu_literals':
+        if (provider != 'Dynamic Scaling Level Stat Choice'
+                or path != 'nvse/user_defined_functions/DSLC_LevelUp.gek'
+                or entry.get('mappings') or entry.get('encoding') != 'utf-8'):
+            raise ValueError('DSLC transform restricted to its reviewed function/provider')
+        return
     if (not isinstance(provider, str) or not provider or '/' in provider
             or '\\' in provider or provider in {'.', '..'}):
         raise ValueError('Script provider must be one MO2 mod directory')
@@ -54,10 +65,10 @@ def validate_entry(entry):
     if not entry.get('mappings') or not isinstance(entry['mappings'], list):
         raise ValueError('NVSE script needs explicit reviewed mappings')
     for row in entry['mappings']:
-        if (row.get('command') != 'SetFormDescription'
+        if (row.get('command') not in {'SetFormDescription', 'LNSetName'}
                 or not isinstance(row.get('form'), str)
                 or not re.fullmatch(r'[^\s";\\]+', row['form'])):
-            raise ValueError('Only SetFormDescription and its exact target form are supported')
+            raise ValueError('Only reviewed description/name commands and exact forms are supported')
         source, dest = row.get('source'), row.get('dest')
         if (not isinstance(source, str) or not isinstance(dest, str)
                 or not source or not dest
@@ -98,13 +109,16 @@ def merge_script(source: Path, entry):
     """Return byte-identical script except exact, reviewed literal spans."""
     validate_entry(entry)
     raw = source.read_bytes()
+    if entry.get('script_transform') == 'dslc_menu_literals':
+        from nskr_issue13 import merge_stat_menu
+        return merge_stat_menu(raw)
     text, encoding, bom = _decode(raw, entry)
     if entry.get('script_transform') == 'bullet_time_ascii_guard':
         return _guard_bullet_time(text, raw, encoding, bom)
     lookup = {}
     for row in entry['mappings']:
         for candidate in (row['source'], *(row.get('previous_dests') or ()), row['dest']):
-            key = row['form'].casefold(), candidate
+            key = row['command'].casefold(), row['form'].casefold(), candidate
             if key in lookup and lookup[key] != row['dest']:
                 raise ValueError('Conflicting NVSE script translations')
             lookup[key] = row['dest']
@@ -112,10 +126,10 @@ def merge_script(source: Path, entry):
     seen = set()
     translated = already = 0
     for index, line in enumerate(lines):
-        match = STATEMENT.fullmatch(line)
+        match = STATEMENT.fullmatch(line) or NAME_STATEMENT.fullmatch(line)
         if not match:
             continue
-        identity = match['form'].casefold(), match['value']
+        identity = match['command'].casefold(), match['form'].casefold(), match['value']
         dest = lookup.get(identity)
         if dest is None:
             continue
@@ -128,7 +142,7 @@ def merge_script(source: Path, entry):
     missing = [
         {'form': row['form'], 'source': row['source'], 'reason': 'source_or_command_mismatch'}
         for row in entry['mappings']
-        if not any((row['form'].casefold(), candidate) in seen
+        if not any((row['command'].casefold(), row['form'].casefold(), candidate) in seen
                    for candidate in (row['source'], *(row.get('previous_dests') or ()), row['dest']))]
     result = bom + ''.join(lines).encode('utf-8' if encoding == 'utf-8-sig' else encoding)
     # Independently prove exact recovery by swapping only the replaced literal
@@ -136,8 +150,8 @@ def merge_script(source: Path, entry):
     restored = lines[:]
     for index, (before, after) in enumerate(zip(text.splitlines(keepends=True), lines)):
         if before != after:
-            prior = STATEMENT.fullmatch(before)
-            updated = STATEMENT.fullmatch(after)
+            prior = STATEMENT.fullmatch(before) or NAME_STATEMENT.fullmatch(before)
+            updated = STATEMENT.fullmatch(after) or NAME_STATEMENT.fullmatch(after)
             if (not prior or not updated or prior['prefix'] != updated['prefix']
                     or prior['suffix'] != updated['suffix']):
                 raise ValueError('NVSE script changed outside an approved literal')

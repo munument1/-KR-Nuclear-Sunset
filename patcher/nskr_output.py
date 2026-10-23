@@ -19,6 +19,7 @@ import nskr_xedit
 import nskr_fonts
 import nskr_nvse
 import nskr_compiled_scpt
+import nskr_issue13
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -742,7 +743,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                              development, scopes, only_plugins)
     catalog, english_exceptions = preserve_english_concentrated_fire(catalog)
     if not development or 'plugins' in catalog.get('selected_scopes', []):
-        defaults = nskr_nvse.builtin_perk_scripts()
+        defaults = (*nskr_nvse.builtin_perk_scripts(), *nskr_issue13.name_entries())
         existing = {(e['path'].casefold(), e.get('provider', '').casefold())
                     for e in catalog['files'] if e.get('kind') == 'nvse-script'}
         catalog = {**catalog, 'files': [*catalog['files'],
@@ -1058,6 +1059,19 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                     result['translated'] = result.get('translated', 0) + 1
                 elif details['status'] == 'already_translated':
                     result['already_translated'] = result.get('already_translated', 0) + 1
+            if entry['kind'] in {'plugin-records', 'plugin-copy'} and key in {
+                    'vegas elysium.esp', 's6s base game perks redux.esp'}:
+                separate = target.with_name(target.stem + '.issue13-runtime.esp')
+                try:
+                    details = nskr_issue13.translate_runtime_plugin(target, separate)
+                    separate.replace(target)
+                finally:
+                    if separate.is_file():
+                        separate.unlink()
+                result['issue13_runtime'] = details
+                result['translated'] = result.get('translated', 0) + details['translated']
+                result['already_translated'] = result.get('already_translated', 0) + details['already_translated']
+                result['status'] += '; issue13_SCPT_literal_readback_verified'
             if nskr.sha256(source) != original_hash:
                 raise ValueError(f'Source changed during generation: {source}')
             result['output_sha256'] = nskr.sha256(target)
