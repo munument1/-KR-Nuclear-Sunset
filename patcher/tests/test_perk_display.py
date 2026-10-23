@@ -20,7 +20,7 @@ class PerkDisplayTests(unittest.TestCase):
         prefix='조건: 레벨 30\n'.encode('cp949')
         with self.assertRaises(UnicodeDecodeError):
             (prefix+text.encode()).decode('utf-8')
-        untouched=sub(b'DATA',bytes(range(20)))+sub(b'FULL','육혈포 사무라이'.encode()+b'\0')
+        untouched=sub(b'DATA',bytes(range(20)))+sub(b'ICON',b'perk/icon.dds\0')
         raw=plugin(record(b'PERK',sub(b'EDID',b'Target\0')+untouched+sub(b'DESC',text.encode()+b'\0')))
         out,changes=p.patch_bytes(raw,'Vegas Elysium.esp')
         self.assertEqual(len(changes),1)
@@ -53,6 +53,36 @@ class PerkDisplayTests(unittest.TestCase):
 
     def test_cp949_dash_equivalent(self):
         self.assertEqual(p.display_bytes('한글—설명'.encode()).decode('cp949'),'한글―설명')
+
+    def test_requirement_labels_skill_names_and_perk_names_match_body_encoding(self):
+        pieces=[(b'GMST',b'sRequirementsText','조건',b'DATA'),
+                (b'GMST',b'sRanksText','랭크',b'DATA'),
+                (b'GMST',b'sLevelAbbrev','레벨',b'DATA'),
+                (b'AVIF',b'Sneak','은신',b'FULL'),
+                (b'PERK',b'OtherPerk','총기 애호가',b'FULL')]
+        result=[]
+        for sig,edid,text,key in pieces:
+            raw=plugin(record(sig,sub(b'EDID',edid+b'\0')+sub(key,text.encode()+b'\0')))
+            out,changes=p.patch_bytes(raw,'NSKR UI Strings.esp')
+            self.assertEqual(len(changes),1)
+            self.assertIn(text.encode('cp949')+b'\0',out)
+            result.append(text.encode('cp949'))
+            self.assertEqual(p.patch_bytes(out,'NSKR UI Strings.esp'),(out,[]))
+        body='정상 설명'.encode('cp949')
+        self.assertEqual((b': '.join(result)+b'\n'+body).decode('cp949'),
+                         '조건: 랭크: 레벨: 은신: 총기 애호가\n정상 설명')
+
+    def test_runtime_ui_final_pass_includes_requirement_gmst_and_updates_hash(self):
+        import tempfile,hashlib
+        from nskr_output import finalize_perk_display
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);target=root/'mods/UI/NSKR UI Strings.esp'
+            target.parent.mkdir(parents=True)
+            target.write_bytes(plugin(record(b'GMST',sub(b'EDID',b'sRequirementsText\0')+sub(b'DATA','조건'.encode()+b'\0'))))
+            rows=[{'output_path':'mods/UI/NSKR UI Strings.esp','status':'runtime_mod_copy','output_sha256':'old'}]
+            finalize_perk_display(root,rows)
+            self.assertIn('조건'.encode('cp949')+b'\0',target.read_bytes())
+            self.assertEqual(rows[0]['output_sha256'],hashlib.sha256(target.read_bytes()).hexdigest())
 
     def test_restore_concentrated_fire_only_on_exact_identity_and_source(self):
         for filename,(old,new) in p.CONCENTRATED_FIRE.items():

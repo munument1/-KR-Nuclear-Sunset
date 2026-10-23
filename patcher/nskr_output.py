@@ -1076,17 +1076,6 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 result['translated'] = result.get('translated', 0) + details['translated']
                 result['already_translated'] = result.get('already_translated', 0) + details['already_translated']
                 result['status'] += '; issue13_SCPT_literal_readback_verified'
-            if entry['kind'] in {'plugin-records', 'plugin-copy'}:
-                separate = target.with_name(target.stem + '.perk-display' + target.suffix)
-                try:
-                    details = nskr_perk_display.patch_file(target, separate)
-                    separate.replace(target)
-                finally:
-                    if separate.is_file():
-                        separate.unlink()
-                if details:
-                    result['perk_display'] = details
-                    result['status'] += '; CP949_perk_display_readback_verified'
             if nskr.sha256(source) != original_hash:
                 raise ValueError(f'Source changed during generation: {source}')
             result['output_sha256'] = nskr.sha256(target)
@@ -1105,6 +1094,9 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             runtime_files, runtime_status = build_runtime_mods(installation, catalog_dir, catalog['runtime_mods'], stage, seen)
             report['files'].extend(runtime_files)
             report['runtime_mods'] = runtime_status
+        # Runtime UI plugins also supply requirement labels. Normalize only
+        # after those plugins exist, so header and body use the same encoding.
+        finalize_perk_display(stage, report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(
@@ -1122,6 +1114,24 @@ def build_output(installation, catalog_dir, output, progress=None, *,
     nskr.write_json(report_path, report)
     report_text_path.write_text(format_plugin_report(report), encoding='utf-8-sig')
     return report
+
+def finalize_perk_display(stage, files):
+    for row in files:
+        target = nskr.contained(stage, row['output_path'])
+        if target.suffix.casefold() not in {'.esm', '.esp'}:
+            continue
+        separate = target.with_name(target.stem + '.perk-display' + target.suffix)
+        try:
+            details = nskr_perk_display.patch_file(target, separate)
+            separate.replace(target)
+        finally:
+            if separate.is_file():
+                separate.unlink()
+        if details:
+            row['perk_display'] = details
+            row['status'] += '; CP949_perk_display_readback_verified'
+        row['output_sha256'] = nskr.sha256(target)
+
 
 def build_runtime_mods(installation, catalog_dir, specs, stage, seen):
     """Publish small Korean runtime mods that do not replace existing VNV providers."""

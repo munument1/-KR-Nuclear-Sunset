@@ -2,7 +2,9 @@
 
 The font hook detects UTF-8 on a whole string. A perk description can be
 composed with already converted requirement labels, so UTF-8 DESC payloads
-must be normalized before that composition. Compiled SetFormDescription
+must be normalized before that composition. Requirement GMST labels, AVIF
+skill/attribute names and prerequisite PERK names use the same encoding.
+Compiled SetFormDescription
 operands use the same encoding; their byte budgets and opcodes never change.
 SCTX remains UTF-8 source text with the same Unicode meaning as SCDA.
 """
@@ -39,6 +41,10 @@ CONCENTRATED_FIRE = {
         '집중 사격 특성을 선택하면 V.A.T.S.에서 같은 신체 부위를 연속으로 공격할 때마다 명중률이 조금씩 증가하며, 자동 무기의 탄 퍼짐이 20% 감소합니다.'),
 }
 TOKENS = re.compile(r'%%|%[0-9.]*[a-zA-Z]')
+REQUIREMENT_GMSTS = {
+    'srequirementstext', 'srankstext', 'slevelabbrev',
+    'smenudisplaylevelstring', 'sinventorystrreq',
+}
 
 def display_bytes(raw: bytes):
     """Return lossless CP949 only for strictly valid Korean UTF-8 text."""
@@ -62,17 +68,22 @@ def patch_bytes(original: bytes, filename: str):
     filename = filename.casefold()
     def visit(header, payload):
         sig = header[:4]
-        if sig != b'PERK' and not (sig == b'SCPT' and filename in SCRIPT_PLUGINS):
+        if sig not in {b'PERK', b'AVIF', b'GMST'} and not (sig == b'SCPT' and filename in SCRIPT_PLUGINS):
             return payload
         data = _decode_record(header, payload)
         slots = list(_slots(data))
         edid = next((v.rstrip(b'\0').decode('ascii') for k,h,v in slots if k == b'EDID'), '')
         replacements = {}
-        if sig == b'PERK':
+        if sig in {b'PERK', b'AVIF', b'GMST'}:
             for i,(key,h,value) in enumerate(slots):
-                if key == b'DESC':
+                text_field = (
+                    (sig == b'PERK' and key in {b'DESC', b'FULL'})
+                    or (sig == b'AVIF' and key == b'FULL')
+                    or (sig == b'GMST' and key == b'DATA'
+                        and edid.casefold() in REQUIREMENT_GMSTS))
+                if text_field:
                     restore = CONCENTRATED_FIRE.get(filename)
-                    if (restore and edid == 'ConcentratedFire'
+                    if (key == b'DESC' and restore and edid == 'ConcentratedFire'
                             and struct.unpack_from('<I',header,12)[0] & 0xFFFFFF == 0x044CAF
                             and value.rstrip(b'\0') == restore[0].encode('ascii')):
                         encoded = restore[1].encode('cp949') + b'\0'
@@ -80,7 +91,7 @@ def patch_bytes(original: bytes, filename: str):
                         encoded = display_bytes(value)
                     if encoded != value:
                         replacements[i] = encoded
-                        changes.append({'kind':'PERK/DESC CP949', 'edid':edid})
+                        changes.append({'kind':sig.decode()+'/'+key.decode()+' CP949', 'edid':edid})
         else:
             indices = {k:i for i,(k,h,v) in enumerate(slots)}
             if b'SCTX' not in indices or b'SCDA' not in indices:

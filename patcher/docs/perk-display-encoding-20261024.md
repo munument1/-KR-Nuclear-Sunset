@@ -36,3 +36,20 @@ SCTX는 같은 의미의 UTF-8 소스를 유지한다. 각 레코드는 편집 �
 적용 전 파일과 SHA-256, 수정본, 백업, 적용 결과를 별도로 보관한다.
 전체 테스트 111개 통과. 기존 원본 SHA 검사는 이미 번역된 설치 파일 대신
 설치 전 원본 백업을 사용했다. 게임 내 결과는 아직 미검증이다.
+
+## 사용자 재검증 후 상단 조건 문구 수정
+
+사용자는 설명 본문이 정상으로 바뀌었으나 모든 특성의 조건/랭크 표기가
+깨진다고 확인했다. 첫 수정은 PERK/DESC만 정규화하여 상단의 UTF-8
+입력과 혼합되는 경로를 빠뜨렸다. 이후 PERK/FULL, AVIF/FULL 및
+`sRequirementsText`, `sRanksText`, `sLevelAbbrev`,
+`sMenuDisplayLevelString`, `sInventoryStrReq`의 GMST/DATA도 CP949로 맞춘다.
+조건 수치, CTDA, 특성 효과, 정상인 DESC에는 추가 변경이 없다.
+
+최종 정규화는 runtime UI 플러그인까지 생성한 후 수행해야 한다.
+`NSKR UI Strings.esp`가 마지막 우선순위로 GMST를 공급하기 때문이다.
+이 순서와 출력 해시 갱신을 검증하는 회귀 테스트를 추가했다.
+
+추가 적용: `D:\Codex_Trans\비바\perk-header-fix-20261024`.
+61개 파일, PERK/FULL 1028개·AVIF/FULL 86개·GMST/DATA 5개.
+테스트 113개 통과, 변경 파일 해시 일치. 수정 후 게임 내 상단 문구 재검증 필요.
