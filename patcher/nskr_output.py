@@ -1118,6 +1118,15 @@ def build_output(installation, catalog_dir, output, progress=None, *,
 def finalize_perk_display(stage, files):
     for row in files:
         target = nskr.contained(stage, row['output_path'])
+        if (target.name.casefold() == 'gr_tagperkdescriptionsetter.txt'
+                and row.get('provider') in {
+                    'Tag Perk Description Adjustment', 'SSS - Sweets Simple Settings'}):
+            original = target.read_bytes()
+            corrected = nskr_perk_display.normalize_tag_script(original)
+            target.write_bytes(corrected)
+            row['output_sha256'] = nskr.sha256(target)
+            row['status'] += '; CP949_Tag_literal_verified'
+            continue
         if target.suffix.casefold() not in {'.esm', '.esp'}:
             continue
         separate = target.with_name(target.stem + '.perk-display' + target.suffix)

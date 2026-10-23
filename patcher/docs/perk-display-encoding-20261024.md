@@ -53,3 +53,23 @@ SCTX는 같은 의미의 UTF-8 소스를 유지한다. 각 레코드는 편집 �
 추가 적용: `D:\Codex_Trans\비바\perk-header-fix-20261024`.
 61개 파일, PERK/FULL 1028개·AVIF/FULL 86개·GMST/DATA 5개.
 테스트 113개 통과, 변경 파일 해시 일치. 수정 후 게임 내 상단 문구 재검증 필요.
+
+## 남은 표시 이름 및 동적 설명 공급자
+
+사용자는 상단 깨짐과 혈액 팩/태그! 설명 깨짐이 남았다고 보고했다.
+직접 확인한 AVIF 레코드에서 FULL은 CP949였지만 ANAM에는 UTF-8 한글이
+남았다(AVSneak, AVMeleeWeapons, AVAgility, AVStrength 등).
+AVIF의 별도 avName 문자열 경로를 빠뜨린 것으로 판단하여 ANAM도 정규화한다.
+
+혈액 팩은 `SCPTElysiumOnRestart`가 Aid Addon 감지 시
+`MSGBloodBagAADesc`(MESG 03020466)의 설명을 `ELYPerkBloodBag`로 복사한다.
+따라서 PERK/DESC만 바꾸어도 MESG의 UTF-8 문구로 다시 덮어써진다.
+해당 메시지 DESC만 정확한 EDID와 플러그인 이름으로 제한해 CP949로 맞춘다.
+
+태그!는 두 공급자의 `gr_TagPerkDescriptionSetter.txt`가 UTF-8 한글 리터럴로
+설명을 다시 설정했다. 정확한 기존 명령/번역만 허용하여 리터럴을 CP949로
+맞추고, 같은 패쳐 소스로 재생성할 때도 이 검증된 CP949 변형을 받아들인다.
+
+추가 적용: `D:\Codex_Trans\비바\perk-runtime-trace-20261024`.
+10개 파일·100개 텍스트 편집. 테스트 116개 통과, 적용 파일 해시 일치.
+사용자가 게임을 종료했으므로 재실행하지 않았다. 실제 게임 내 결과는 미확인이다.

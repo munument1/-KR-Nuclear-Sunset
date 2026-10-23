@@ -59,6 +59,7 @@ class PerkDisplayTests(unittest.TestCase):
                 (b'GMST',b'sRanksText','랭크',b'DATA'),
                 (b'GMST',b'sLevelAbbrev','레벨',b'DATA'),
                 (b'AVIF',b'Sneak','은신',b'FULL'),
+                (b'AVIF',b'Sneak','은신',b'ANAM'),
                 (b'PERK',b'OtherPerk','총기 애호가',b'FULL')]
         result=[]
         for sig,edid,text,key in pieces:
@@ -70,7 +71,31 @@ class PerkDisplayTests(unittest.TestCase):
             self.assertEqual(p.patch_bytes(out,'NSKR UI Strings.esp'),(out,[]))
         body='정상 설명'.encode('cp949')
         self.assertEqual((b': '.join(result)+b'\n'+body).decode('cp949'),
-                         '조건: 랭크: 레벨: 은신: 총기 애호가\n정상 설명')
+                         '조건: 랭크: 레벨: 은신: 은신: 총기 애호가\n정상 설명')
+
+    def test_blood_bag_message_copied_by_elysium_restart_is_cp949(self):
+        raw=plugin(record(b'MESG',sub(b'EDID',b'MSGBloodBagAADesc\0')+sub(b'DESC','혈액 팩 회복량 +25%'.encode()+b'\0')))
+        out,changes=p.patch_bytes(raw,'Vegas Elysium.esp')
+        self.assertEqual(len(changes),1)
+        self.assertIn('혈액 팩 회복량 +25%'.encode('cp949')+b'\0',out)
+        self.assertEqual(p.patch_bytes(out,'Vegas Elysium.esp'),(out,[]))
+        self.assertEqual(p.patch_bytes(raw,'Other.esp'),(raw,[]))
+
+    def test_tag_loose_setter_literal_is_cp949_and_structure_is_preserved(self):
+        raw=('SetFormDescription Tag "'+p.TAG_DESCRIPTION+'"\r\n').encode()
+        out=p.normalize_tag_script(raw)
+        self.assertEqual(out.decode('cp949'),'SetFormDescription Tag "'+p.TAG_DESCRIPTION+'"\r\n')
+        self.assertEqual(p.normalize_tag_script(out),out)
+        with self.assertRaises(ValueError):p.normalize_tag_script(raw.replace(b'Tag ',b'Other '))
+
+    def test_regeneration_accepts_only_reviewed_cp949_tag_script(self):
+        from nskr_nvse import _decode
+        raw=('SetFormDescription Tag "'+p.TAG_DESCRIPTION+'"\n').encode('cp949')
+        entry={'provider':'Tag Perk Description Adjustment','path':'nvse/plugins/scripts/gr_TagPerkDescriptionSetter.txt','encoding':'utf-8'}
+        text,encoding,bom=_decode(raw,entry)
+        self.assertEqual(encoding,'cp949')
+        self.assertEqual(text.encode(encoding),raw)
+        with self.assertRaises(UnicodeDecodeError):_decode(raw,{**entry,'provider':'Unknown'})
 
     def test_runtime_ui_final_pass_includes_requirement_gmst_and_updates_hash(self):
         import tempfile,hashlib

@@ -45,6 +45,20 @@ REQUIREMENT_GMSTS = {
     'srequirementstext', 'srankstext', 'slevelabbrev',
     'smenudisplaylevelstring', 'sinventorystrreq',
 }
+TAG_DESCRIPTION = '태그! 퍽을 선택하면 네 번째 주력 기술을 지정할 수 있으며, 해당 기술의 숙련도 상승 속도가 두 배가 됩니다.'
+
+def normalize_tag_script(raw):
+    """JIP compiles literal bytes; keep this exact perk setter in CP949 too."""
+    match = re.fullmatch(rb'(SetFormDescription Tag ")([^"\r\n]*)("(?:\r\n|\n|\r)?)',raw)
+    if match is None:
+        raise ValueError('Unexpected Tag perk setter structure')
+    try:
+        text = match[2].decode('utf-8')
+    except UnicodeDecodeError:
+        text = match[2].decode('cp949')
+    if text != TAG_DESCRIPTION:
+        raise ValueError('Unreviewed Tag perk translation')
+    return match[1] + text.encode('cp949') + match[3]
 
 def display_bytes(raw: bytes):
     """Return lossless CP949 only for strictly valid Korean UTF-8 text."""
@@ -68,17 +82,20 @@ def patch_bytes(original: bytes, filename: str):
     filename = filename.casefold()
     def visit(header, payload):
         sig = header[:4]
-        if sig not in {b'PERK', b'AVIF', b'GMST'} and not (sig == b'SCPT' and filename in SCRIPT_PLUGINS):
+        if sig not in {b'PERK', b'AVIF', b'GMST', b'MESG'} and not (sig == b'SCPT' and filename in SCRIPT_PLUGINS):
             return payload
         data = _decode_record(header, payload)
         slots = list(_slots(data))
         edid = next((v.rstrip(b'\0').decode('ascii') for k,h,v in slots if k == b'EDID'), '')
         replacements = {}
-        if sig in {b'PERK', b'AVIF', b'GMST'}:
+        if sig in {b'PERK', b'AVIF', b'GMST', b'MESG'}:
             for i,(key,h,value) in enumerate(slots):
                 text_field = (
                     (sig == b'PERK' and key in {b'DESC', b'FULL'})
-                    or (sig == b'AVIF' and key == b'FULL')
+                    or (sig == b'AVIF' and key in {b'FULL', b'ANAM'})
+                    or (sig == b'MESG' and key == b'DESC'
+                        and filename == 'vegas elysium.esp'
+                        and edid == 'MSGBloodBagAADesc')
                     or (sig == b'GMST' and key == b'DATA'
                         and edid.casefold() in REQUIREMENT_GMSTS))
                 if text_field:

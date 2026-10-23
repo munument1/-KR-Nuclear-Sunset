@@ -291,7 +291,7 @@ class NVSEScriptTests(unittest.TestCase):
         self.assertEqual(len(report['files']), 2)
         for entry in (self.tag, self.tag_other):
             target = output / 'mods' / entry['provider'] / entry['path']
-            self.assertIn('태그!'.encode('utf-8'), target.read_bytes())
+            self.assertIn('태그!'.encode('cp949'), target.read_bytes())
             self.assertEqual((mo2 / 'mods' / entry['provider'] / entry['path']).read_bytes(),
                              TAG_SOURCE.encode('ascii'))
         self.assertEqual(sum(x['translated'] for x in report['files']), 2)

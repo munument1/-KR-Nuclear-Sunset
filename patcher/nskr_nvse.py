@@ -98,7 +98,19 @@ def _decode(raw, entry):
         actual, text = 'utf-8-sig', raw[3:].decode('utf-8')
         bom = b'\xef\xbb\xbf'
     else:
-        actual, text = 'utf-8', raw.decode('utf-8')
+        try:
+            actual, text = 'utf-8', raw.decode('utf-8')
+        except UnicodeDecodeError:
+            if (expected in {'utf-8','utf-8-sig'}
+                    and entry.get('provider') in {
+                        'Tag Perk Description Adjustment','SSS - Sweets Simple Settings'}
+                    and Path(entry.get('path','')).name.casefold() == 'gr_tagperkdescriptionsetter.txt'):
+                from nskr_perk_display import normalize_tag_script
+                # Accept only the exact CP949 setter emitted by our final pass.
+                if normalize_tag_script(raw) != raw:
+                    raise ValueError('Unexpected legacy Tag script bytes')
+                return raw.decode('cp949'), 'cp949', b''
+            raise
         bom = b''
     if expected != actual:
         raise ValueError(f'NVSE script encoding changed: expected {expected}, got {actual}')
