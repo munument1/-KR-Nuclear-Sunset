@@ -20,6 +20,7 @@ import nskr_fonts
 import nskr_nvse
 import nskr_compiled_scpt
 import nskr_issue13
+import nskr_perk_display
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -39,10 +40,10 @@ FO3_TTW_MASTERS = {
 BASE_TRANSLATION_MASTERS = FIXED_ESM_MASTERS | STARTER_PACK_MASTERS | FO3_TTW_MASTERS
 PLUGIN_SUFFIXES = {'.esm', '.esp'}
 
-# Issue #11: this particular PERK description is rewritten at runtime by
-# Bullet Time/JIP and has been observed as '?' after Korean was injected.
-# Preserve *only* its DESC in English while keeping the localized FULL name
-# and all other perks. A previous Korean source is upgraded back to English.
+# Issue #11 originally shipped an English DESC fallback. Keep its exact-source
+# migration here so both old Korean catalogs and installed English fallbacks
+# are accepted by the record backend. The final perk-display pass restores
+# Korean CP949 after the unsafe non-ASCII regex route has been guarded.
 CONCENTRATED_FIRE_ENGLISH_SOURCE = {
     'falloutnv.esm': (
         'With Concentrated Fire, your accuracy to hit any body part in V.A.T.S. '
@@ -55,7 +56,7 @@ CONCENTRATED_FIRE_ENGLISH_SOURCE = {
 
 
 def preserve_english_concentrated_fire(catalog):
-    """Fail-closed, narrowly scoped English fallback for a broken PERK tooltip.
+    """Legacy intermediate English mapping; the final display pass localizes it.
 
     Never mutate the packaged catalog: the output worker receives an adjusted
     copy, allowing exact matching of both the original English and previously
@@ -741,7 +742,10 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         raise FileExistsError(report_text_path)
     catalog = output_catalog(nskr.read_json(catalog_dir / 'catalog.json'),
                              development, scopes, only_plugins)
-    catalog, english_exceptions = preserve_english_concentrated_fire(catalog)
+    # Keep the old exact-source migration so installed English fallbacks remain
+    # recognized, then restore Korean as CP949 in the verified display pass.
+    catalog, _ = preserve_english_concentrated_fire(catalog)
+    english_exceptions = []
     if not development or 'plugins' in catalog.get('selected_scopes', []):
         defaults = (*nskr_nvse.builtin_perk_scripts(), *nskr_issue13.name_entries())
         existing = {(e['path'].casefold(), e.get('provider', '').casefold())
@@ -1072,6 +1076,17 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                 result['translated'] = result.get('translated', 0) + details['translated']
                 result['already_translated'] = result.get('already_translated', 0) + details['already_translated']
                 result['status'] += '; issue13_SCPT_literal_readback_verified'
+            if entry['kind'] in {'plugin-records', 'plugin-copy'}:
+                separate = target.with_name(target.stem + '.perk-display' + target.suffix)
+                try:
+                    details = nskr_perk_display.patch_file(target, separate)
+                    separate.replace(target)
+                finally:
+                    if separate.is_file():
+                        separate.unlink()
+                if details:
+                    result['perk_display'] = details
+                    result['status'] += '; CP949_perk_display_readback_verified'
             if nskr.sha256(source) != original_hash:
                 raise ValueError(f'Source changed during generation: {source}')
             result['output_sha256'] = nskr.sha256(target)
