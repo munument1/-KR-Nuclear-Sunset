@@ -84,6 +84,9 @@ def _edit_record(data, case):
     source_hashes = case['scda_sha256'], case['sctx_sha256']
     result_hashes = case['translated_scda_sha256'], case['translated_sctx_sha256']
     actual = digest(scda), digest(sctx)
+    from nskr_runtime_variants import is_reviewed_finalized
+    if is_reviewed_finalized(edid,scda,sctx):
+        return data,'already_translated'
     if actual == result_hashes:
         return data, 'already_translated'
     if actual != source_hashes:

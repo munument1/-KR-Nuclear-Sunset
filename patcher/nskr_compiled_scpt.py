@@ -190,6 +190,10 @@ def _change_script(data: bytes, spec: dict) -> tuple[bytes, bytes, bytes]:
     (_, sctx) = _one(fields, b'SCTX')
     if len(schr) != 20 or _read_u32(schr, 8) != len(scda):
         raise ValueError('SCHR compiled size does not equal SCDA length')
+    from nskr_runtime_variants import is_reviewed_finalized
+    if is_reviewed_finalized(spec['editor_id'],scda,sctx):
+        literal=_CASE_LITERALS[spec['editor_id']].encode('utf-8')
+        return data,literal,literal
 
     source_literals = (spec['source_en'],
                        *spec.get('previous_script_literals', ()),
@@ -266,6 +270,14 @@ def _verify_output(original: bytes, output: bytes, formid: int, old: bytes, new:
                     raise ValueError('SCPT subrecord count changed')
                 src_scda = _one(fields_a, b'SCDA')[1]
                 dest_scda = _one(fields_b, b'SCDA')[1]
+                from nskr_runtime_variants import is_reviewed_finalized
+                edid=_one(fields_a,b'EDID')[1].rstrip(b'\0').decode('ascii')
+                if (ha==hb and data_a==data_b and is_reviewed_finalized(
+                        edid,src_scda,_one(fields_a,b'SCTX')[1])):
+                    if _read_u32(_one(fields_a,b'SCHR')[1],8)!=len(src_scda):
+                        raise ValueError('Finalized SCPT size mismatch')
+                    pa,pb=ea,eb
+                    continue
                 position = src_scda.find(old)
                 if position < 2 or src_scda.count(old) != 1:
                     raise ValueError('Readback cannot locate original SCDA literal')
