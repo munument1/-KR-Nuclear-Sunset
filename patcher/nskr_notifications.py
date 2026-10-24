@@ -211,6 +211,11 @@ def finalize(stage,files):
         if target.suffix.casefold() in ('.esm','.esp'):
             output,changes,issues=patch_bytes(raw,target.name,PLAN)
             if issues:row['notification_review_notes']=issues
+        elif target.name.casefold()=='tnvse.ini':
+            import nskr_skill_display
+            if row.get('provider') not in nskr_skill_display.PROVIDERS:continue
+            output=nskr_skill_display.patch_config(raw)
+            changes=[{'kind':'JIP Big Guns Korean runtime description'}] if output!=raw else []
         elif target.name in {'lang_en.ini','EnhancedMovement_Translations.ini','TNW_Translations.ini'}:
             output,changes=ini_edit(raw,target.name,INI_TRANSLATIONS)
         else:
