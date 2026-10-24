@@ -1,0 +1,152 @@
+{
+  "test_suite": {
+    "run": 104,
+    "passed": 102,
+    "skipped": 2
+  },
+  "packaged_executable_exit_code": 0,
+  "base_release": "v1.0.6",
+  "base_resources_unchanged": 27,
+  "candidate_sha256": "6f80afa63bfaf301b98e62bc122bb58cd7c6ac87a5cd4767ff9eaf07348186fb",
+  "in_game_validation": "not_run",
+  "fixture": "isolated MO2 tree using cached v1.0.4 translated outputs and verified original loose scripts",
+  "files": [
+    {
+      "path": "S6S Base Game Perks Redux.esp",
+      "source_sha256": "af542a6fafac138c526d3d665cd1b8e44c077f1349caa005ab59b46d22c6bd4b",
+      "output_sha256": "010c43a9d523a133842926d3efa8487edf7f53de6130d8cecb309e251cc2f1f6",
+      "translated": 3,
+      "already_translated": 434,
+      "unmatched": 0,
+      "status": "sst_matched_text_only; native_readback_verified; issue13_SCPT_literal_readback_verified",
+      "issue13_runtime": {
+        "scripts": [
+          {
+            "editor_id": "SCPTOnLoadedBasePerks",
+            "status": "translated",
+            "literals": 2
+          }
+        ],
+        "source_sha256": "fc5883014b4cf4b9de6818ae083f76c3405a4123c1d3153e2efc6ffa6dad60dd",
+        "output_sha256": "010c43a9d523a133842926d3efa8487edf7f53de6130d8cecb309e251cc2f1f6",
+        "runtime_validation": "not_run",
+        "translated": 2,
+        "already_translated": 0
+      }
+    },
+    {
+      "path": "Vegas Elysium.esp",
+      "source_sha256": "8b1d35b2be3f8d79ad84e571ba9c12d9b2725bd9a2a52f0062a44bc7d1436f77",
+      "output_sha256": "5baffbb1978e4b586b6b3090b07a4fe57edb08892e89e8a30ddf722ab03b3234",
+      "translated": 15,
+      "already_translated": 274,
+      "unmatched": 0,
+      "status": "sst_matched_text_only; native_readback_verified; issue13_SCPT_literal_readback_verified",
+      "issue13_runtime": {
+        "scripts": [
+          {
+            "editor_id": "ChallengeWaterSCRIPT",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTVegasElysiumConstantRun",
+            "status": "translated",
+            "literals": 4
+          },
+          {
+            "editor_id": "SCPTFlawPromptAddictive",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptBottomlessStomach",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptCongenitalHeartDefect",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptParanoid",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptHumanSieve",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptStubborn",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTFlawPromptWhyDoTheyHunger",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTOnUseStealthBoy",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTHomesickLatePrompt",
+            "status": "translated",
+            "literals": 1
+          },
+          {
+            "editor_id": "SCPTOnHitElysium",
+            "status": "translated",
+            "literals": 1
+          }
+        ],
+        "source_sha256": "8b1d35b2be3f8d79ad84e571ba9c12d9b2725bd9a2a52f0062a44bc7d1436f77",
+        "output_sha256": "5baffbb1978e4b586b6b3090b07a4fe57edb08892e89e8a30ddf722ab03b3234",
+        "runtime_validation": "not_run",
+        "translated": 15,
+        "already_translated": 0
+      }
+    },
+    {
+      "path": "nvse/plugins/scripts/gr_EnemyRankRenamer1.txt",
+      "source_sha256": "4ff1d7207a394ca8d8e8839db724dad0ca49fc63427075a213dc4c231d7bb253",
+      "output_sha256": "7e9f0c7dcf1ef0357a5a11b8849b772cbee652efb9f379a1fe073c1ba42f2300",
+      "translated": 102,
+      "already_translated": 0,
+      "unmatched": 0,
+      "status": "nvse_runtime_description_literal_verified"
+    },
+    {
+      "path": "nvse/plugins/scripts/gr_EnemyRankRenamer2.txt",
+      "source_sha256": "e3d7b0702893048e13788fd23125aba2bda084dc7865d36ce03ea3815d6f6b55",
+      "output_sha256": "e30df1a6889945c1a96654b2fd721a224b0b0bd7be5a9eea19baf347f2c4c2a1",
+      "translated": 109,
+      "already_translated": 0,
+      "unmatched": 0,
+      "status": "nvse_runtime_description_literal_verified"
+    },
+    {
+      "path": "nvse/plugins/scripts/gr_p20MICmiscnames.txt",
+      "source_sha256": "300d8fb2f36028b13f585ed9fee7a2ed479d458b294ce3029762aa68b32a2d1e",
+      "output_sha256": "fc9d19dd838c10ad9d9bb9c4ac6ac5c4b91ffedc50eae9a0a1c42da1b0b1ff6e",
+      "translated": 8,
+      "already_translated": 0,
+      "unmatched": 0,
+      "status": "nvse_runtime_description_literal_verified"
+    },
+    {
+      "path": "nvse/user_defined_functions/DSLC_LevelUp.gek",
+      "source_sha256": "93e1cbc956aa39f6096d12b4d50aaca1712773e5832ae6cae9eaca9689f85236",
+      "output_sha256": "00d943bae0ef0456187b5072cdbbf170d303b92fb4fc5a701c49b363980e626b",
+      "translated": 4,
+      "already_translated": 0,
+      "unmatched": 0,
+      "status": "nvse_runtime_description_literal_verified"
+    }
+  ]
+}

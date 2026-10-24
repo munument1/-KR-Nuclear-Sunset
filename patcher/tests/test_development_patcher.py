@@ -212,7 +212,9 @@ class DevelopmentOutputTests(unittest.TestCase):
     def test_runtime_output_preserves_mod_structure_without_activating_plugin(self):
         payload = self.catalog / 'runtime/UI.esp'
         payload.parent.mkdir()
-        payload.write_bytes(b'user supplied UI runtime')
+        # Final UI normalization now parses the runtime ESP as well.
+        # Use a valid empty TES4 header rather than arbitrary placeholder text.
+        payload.write_bytes(b'TES4' + (b'\0' * 20))
         self.metadata['runtime_mods'] = [{
             'mod': 'Korean UI', 'review_status': 'validated_gmst_only_candidate',
             'plugins': ['UI.esp'], 'files': [{

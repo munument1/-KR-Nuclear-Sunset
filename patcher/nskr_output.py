@@ -19,6 +19,9 @@ import nskr_xedit
 import nskr_fonts
 import nskr_nvse
 import nskr_compiled_scpt
+import nskr_issue13
+import nskr_perk_display
+import nskr_notifications
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -38,10 +41,10 @@ FO3_TTW_MASTERS = {
 BASE_TRANSLATION_MASTERS = FIXED_ESM_MASTERS | STARTER_PACK_MASTERS | FO3_TTW_MASTERS
 PLUGIN_SUFFIXES = {'.esm', '.esp'}
 
-# Issue #11: this particular PERK description is rewritten at runtime by
-# Bullet Time/JIP and has been observed as '?' after Korean was injected.
-# Preserve *only* its DESC in English while keeping the localized FULL name
-# and all other perks. A previous Korean source is upgraded back to English.
+# Issue #11 originally shipped an English DESC fallback. Keep its exact-source
+# migration here so both old Korean catalogs and installed English fallbacks
+# are accepted by the record backend. The final perk-display pass restores
+# Korean CP949 after the unsafe non-ASCII regex route has been guarded.
 CONCENTRATED_FIRE_ENGLISH_SOURCE = {
     'falloutnv.esm': (
         'With Concentrated Fire, your accuracy to hit any body part in V.A.T.S. '
@@ -54,7 +57,7 @@ CONCENTRATED_FIRE_ENGLISH_SOURCE = {
 
 
 def preserve_english_concentrated_fire(catalog):
-    """Fail-closed, narrowly scoped English fallback for a broken PERK tooltip.
+    """Legacy intermediate English mapping; the final display pass localizes it.
 
     Never mutate the packaged catalog: the output worker receives an adjusted
     copy, allowing exact matching of both the original English and previously
@@ -461,7 +464,15 @@ def translation_companion(installation, virtual):
 
 
 def merge_loose(source, entry):
-    text, encoding = decode(source)
+    try:
+        text, encoding = decode(source)
+    except UnicodeDecodeError:
+        from nskr_notification_data import INI_TRANSLATIONS
+        original=source.read_bytes()
+        text=original.decode('cp949')
+        restored,_=nskr_notifications.ini_edit(text.encode('utf-8'),source.name,INI_TRANSLATIONS)
+        if restored!=original:raise ValueError('Unrecognized legacy translation INI bytes')
+        encoding='utf-8'
     matches = defaultdict(set)
     previous = defaultdict(set)
     already_applied = defaultdict(set)
@@ -740,9 +751,12 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         raise FileExistsError(report_text_path)
     catalog = output_catalog(nskr.read_json(catalog_dir / 'catalog.json'),
                              development, scopes, only_plugins)
-    catalog, english_exceptions = preserve_english_concentrated_fire(catalog)
+    # Keep the old exact-source migration so installed English fallbacks remain
+    # recognized, then restore Korean as CP949 in the verified display pass.
+    catalog, _ = preserve_english_concentrated_fire(catalog)
+    english_exceptions = []
     if not development or 'plugins' in catalog.get('selected_scopes', []):
-        defaults = nskr_nvse.builtin_perk_scripts()
+        defaults = (*nskr_nvse.builtin_perk_scripts(), *nskr_issue13.name_entries())
         existing = {(e['path'].casefold(), e.get('provider', '').casefold())
                     for e in catalog['files'] if e.get('kind') == 'nvse-script'}
         catalog = {**catalog, 'files': [*catalog['files'],
@@ -1058,6 +1072,19 @@ def build_output(installation, catalog_dir, output, progress=None, *,
                     result['translated'] = result.get('translated', 0) + 1
                 elif details['status'] == 'already_translated':
                     result['already_translated'] = result.get('already_translated', 0) + 1
+            if entry['kind'] in {'plugin-records', 'plugin-copy'} and key in {
+                    'vegas elysium.esp', 's6s base game perks redux.esp'}:
+                separate = target.with_name(target.stem + '.issue13-runtime.esp')
+                try:
+                    details = nskr_issue13.translate_runtime_plugin(target, separate)
+                    separate.replace(target)
+                finally:
+                    if separate.is_file():
+                        separate.unlink()
+                result['issue13_runtime'] = details
+                result['translated'] = result.get('translated', 0) + details['translated']
+                result['already_translated'] = result.get('already_translated', 0) + details['already_translated']
+                result['status'] += '; issue13_SCPT_literal_readback_verified'
             if nskr.sha256(source) != original_hash:
                 raise ValueError(f'Source changed during generation: {source}')
             result['output_sha256'] = nskr.sha256(target)
@@ -1076,6 +1103,11 @@ def build_output(installation, catalog_dir, output, progress=None, *,
             runtime_files, runtime_status = build_runtime_mods(installation, catalog_dir, catalog['runtime_mods'], stage, seen)
             report['files'].extend(runtime_files)
             report['runtime_mods'] = runtime_status
+        # Runtime UI plugins also supply requirement labels. Normalize only
+        # after those plugins exist, so header and body use the same encoding.
+        finalize_perk_display(stage, report['files'])
+        nskr_notifications.add_outputs(installation,stage,report['files'])
+        nskr_notifications.finalize(stage,report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(
@@ -1093,6 +1125,33 @@ def build_output(installation, catalog_dir, output, progress=None, *,
     nskr.write_json(report_path, report)
     report_text_path.write_text(format_plugin_report(report), encoding='utf-8-sig')
     return report
+
+def finalize_perk_display(stage, files):
+    for row in files:
+        target = nskr.contained(stage, row['output_path'])
+        if (target.name.casefold() == 'gr_tagperkdescriptionsetter.txt'
+                and row.get('provider') in {
+                    'Tag Perk Description Adjustment', 'SSS - Sweets Simple Settings'}):
+            original = target.read_bytes()
+            corrected = nskr_perk_display.normalize_tag_script(original)
+            target.write_bytes(corrected)
+            row['output_sha256'] = nskr.sha256(target)
+            row['status'] += '; CP949_Tag_literal_verified'
+            continue
+        if target.suffix.casefold() not in {'.esm', '.esp'}:
+            continue
+        separate = target.with_name(target.stem + '.perk-display' + target.suffix)
+        try:
+            details = nskr_perk_display.patch_file(target, separate)
+            separate.replace(target)
+        finally:
+            if separate.is_file():
+                separate.unlink()
+        if details:
+            row['perk_display'] = details
+            row['status'] += '; CP949_perk_display_readback_verified'
+        row['output_sha256'] = nskr.sha256(target)
+
 
 def build_runtime_mods(installation, catalog_dir, specs, stage, seen):
     """Publish small Korean runtime mods that do not replace existing VNV providers."""
