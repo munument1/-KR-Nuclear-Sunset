@@ -21,6 +21,7 @@ import nskr_nvse
 import nskr_compiled_scpt
 import nskr_issue13
 import nskr_perk_display
+import nskr_notifications
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -463,7 +464,15 @@ def translation_companion(installation, virtual):
 
 
 def merge_loose(source, entry):
-    text, encoding = decode(source)
+    try:
+        text, encoding = decode(source)
+    except UnicodeDecodeError:
+        from nskr_notification_data import INI_TRANSLATIONS
+        original=source.read_bytes()
+        text=original.decode('cp949')
+        restored,_=nskr_notifications.ini_edit(text.encode('utf-8'),source.name,INI_TRANSLATIONS)
+        if restored!=original:raise ValueError('Unrecognized legacy translation INI bytes')
+        encoding='utf-8'
     matches = defaultdict(set)
     previous = defaultdict(set)
     already_applied = defaultdict(set)
@@ -1097,6 +1106,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         # Runtime UI plugins also supply requirement labels. Normalize only
         # after those plugins exist, so header and body use the same encoding.
         finalize_perk_display(stage, report['files'])
+        nskr_notifications.add_outputs(installation,stage,report['files'])
+        nskr_notifications.finalize(stage,report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(

@@ -121,6 +121,16 @@ def merge_script(source: Path, entry):
     """Return byte-identical script except exact, reviewed literal spans."""
     validate_entry(entry)
     raw = source.read_bytes()
+    try:
+        raw.decode('utf-8')
+    except UnicodeDecodeError:
+        # Exact notification operands emitted by the final display pass may be
+        # CP949 within an otherwise UTF-8 script. Normalize only those literals.
+        from nskr_notifications import normalize_loose_input
+        try:
+            raw=normalize_loose_input(raw,entry.get('provider',''),entry.get('path',''))
+        except UnicodeDecodeError:
+            pass # Existing strict BOM/Tag handling below owns other encodings.
     if entry.get('script_transform') == 'dslc_menu_literals':
         from nskr_issue13 import merge_stat_menu
         return merge_stat_menu(raw)
