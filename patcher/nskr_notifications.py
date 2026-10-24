@@ -12,6 +12,28 @@ from nskr_perk_display import display_bytes,HANGUL
 QUOTED=re.compile(rb'"([^"\r\n]*)"')
 SINK=re.compile(rb'^\s*(?:\w+\.)?(?:SetFormDescription|MessageBoxExAlt|MessageBoxEx|MessageEx|MessageBox|Message|DebugNotification|ShowNotification)\b',re.I)
 ARGS=re.compile(r'%%|%[{}]|%[-+ #0]*\d*(?:\.\d+)?(?:pp|[A-Za-z])')
+IDENTIFIER_ARGUMENT=re.compile(
+    rb'\b(?:GetPluginVersion|IsModLoaded|GetModIndex|GetFormFromMod|GFFM|EditorIDToFormID|'
+    rb'CompileScript|RunScript|ReadFromJSON|WriteToJSON|SetEventHandler|RemoveEventHandler|'
+    rb'GetINIFloat_Cached|GetINIString_Cached)\s*\(?\s*"([^"\r\n]*)"',re.I)
+PLUGIN_IDENTIFIER_REPAIRS={'ShowOffNVSE 플러그인':'ShowOffNVSE Plugin',
+                           'UI Organizer 플러그인':'UI Organizer Plugin'}
+
+def protected_literal(line,match):
+    return any(m.span(1)==match.span(1) for m in IDENTIFIER_ARGUMENT.finditer(line))
+
+def repair_plugin_identifiers(raw):
+    """Restore the two exact identifiers emitted by the earlier notification pass."""
+    changes=[]
+    def repair(match):
+        value=match[1]
+        for corrupted,original in PLUGIN_IDENTIFIER_REPAIRS.items():
+            if value in (corrupted.encode('utf-8'),corrupted.encode('cp949')):
+                changes.append({'kind':'plugin_identifier_restored','source':corrupted,'translation':original})
+                start,end=match.span(1);offset=match.start()
+                return match[0][:start-offset]+original.encode('ascii')+match[0][end-offset:]
+        return match[0]
+    return IDENTIFIER_ARGUMENT.sub(repair,raw),changes
 def args(text):return [x for x in ARGS.findall(text) if x not in ('%%','%r','%R','%q','%Q','%e','%E')]
 
 def compiled_edit(code,old,new):
@@ -59,6 +81,7 @@ def script_edit(source,code,mappings):
         if SINK.match(line) or (not line.lstrip().startswith((b';',b'//'))
                                and any(b'"'+s.encode()+b'"' in line for s in by_source)):
             for match in QUOTED.finditer(line):
+                if protected_literal(line,match):continue
                 raw=match[1]
                 try:old=raw.decode('utf-8')
                 except UnicodeDecodeError:continue
@@ -137,19 +160,25 @@ def patch_bytes(original,filename,plan):
     return _walk(original,visit),changes,issues
 
 def loose_edit(raw,mappings):
-    changes=[]
-    for row in mappings:
-        old=row['old'].encode();new=row['new'].encode('cp949')
-        before=b'"'+old+b'"';after=b'"'+new+b'"'
-        if before in raw:
-            if args(row['old'])!=args(row['new']):raise ValueError('Loose notification arguments changed')
-            raw=raw.replace(before,after)
-            changes.append({'kind':'loose_notification','source':row['old'],'translation':row['new']})
+    raw,changes=repair_plugin_identifiers(raw)
+    lookup={row['old']:row['new'] for row in mappings}
     result=[]
     for line in raw.splitlines(keepends=True):
         if SINK.match(line):
             def convert(match):
+                if protected_literal(line,match):return match[0]
                 value=match[1]
+                try:old=value.decode('utf-8')
+                except UnicodeDecodeError:return match[0]
+                new=lookup.get(old)
+                if new is not None:
+                    if args(old)!=args(new):raise ValueError('Loose notification arguments changed')
+                    if old.count('|')!=new.count('|') or old.count('^')!=new.count('^'):
+                        raise ValueError('Loose notification choices changed')
+                    encoded=new.encode('cp949')
+                    if encoded!=value:
+                        changes.append({'kind':'loose_notification','source':old,'translation':new})
+                        return b'"'+encoded+b'"'
                 try:converted=display_bytes(value)
                 except UnicodeEncodeError:return match[0]
                 if converted!=value:
@@ -193,6 +222,7 @@ def ini_edit(raw,filename,translations):
 def normalize_loose_input(raw,provider,path):
     """Recover UTF-8 only from exact CP949 literals previously emitted here."""
     from nskr_notification_data import PLAN
+    raw,_=repair_plugin_identifiers(raw)
     key=(provider+'/'+path.replace('\\','/')).casefold()
     for row in PLAN:
         if row['signature']=='loose' and row['file'].casefold()==key:

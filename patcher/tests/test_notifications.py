@@ -74,6 +74,42 @@ class NotificationTests(unittest.TestCase):
         result,_,status=n.compiled_edit(code,row['old'],row['new'])
         self.assertEqual(status,'changed');self.assertEqual(result,b'EXPR\x02\x00  END')
 
+    def test_plugin_names_are_identifiers_even_inside_notification_calls(self):
+        raw=(b'if GetPluginVersion "ShowOffNVSE Plugin" < 165\n'
+             b'MessageBoxEx "Update plugin: %g" (GetPluginVersion ("ShowOffNVSE Plugin"))\n'
+             b'endif\n')
+        mappings=[{'old':'ShowOffNVSE Plugin','new':'ShowOffNVSE 플러그인'},
+                  {'old':'Update plugin: %g','new':'갱신 필요: %g'}]
+        out,changes=n.loose_edit(raw,mappings)
+        self.assertEqual(out.count(b'"ShowOffNVSE Plugin"'),2)
+        self.assertNotIn('ShowOffNVSE 플러그인'.encode('cp949'),out)
+        self.assertIn('갱신 필요: %g'.encode('cp949'),out)
+        self.assertTrue(out.startswith(b'if GetPluginVersion "ShowOffNVSE Plugin" < 165\n'))
+
+    def test_compiled_identifier_operand_does_not_change(self):
+        identifier=b'ShowOffNVSE Plugin';message=b'Update plugin: %g'
+        operand=lambda x:struct.pack('<H',len(x))+x
+        code=b'CMD'+operand(identifier)+b'NEXT'+operand(message)+operand(identifier)+b'END'
+        source=b'MessageBoxEx "'+message+b'" (GetPluginVersion "'+identifier+b'")\n'
+        mapping=[{'old':identifier.decode(),'new':'ShowOffNVSE 플러그인'},
+                 {'old':message.decode(),'new':'갱신: %g'}]
+        out,compiled,_,issues=n.script_edit(source,code,mapping)
+        self.assertFalse(issues);self.assertEqual(compiled.count(identifier),2)
+        self.assertIn(b'GetPluginVersion "'+identifier+b'"',out)
+
+    def test_known_identifier_repairs_are_context_scoped(self):
+        for encoding in ('utf-8','cp949'):
+            corrupted='ShowOffNVSE 플러그인'.encode(encoding)
+            raw=b'if GetPluginVersion ("'+corrupted+b'") < 165\nMessageEx "'+corrupted+b'"\n'
+            out,changes=n.repair_plugin_identifiers(raw)
+            self.assertEqual(len(changes),1)
+            self.assertIn(b'GetPluginVersion ("ShowOffNVSE Plugin")',out)
+            self.assertIn(b'MessageEx "'+corrupted+b'"',out)
+            self.assertEqual(n.repair_plugin_identifiers(out),(out,[]))
+
+    def test_reviewed_plan_has_no_plugin_identifier_translations(self):
+        self.assertFalse([r for r in PLAN if r['old'] in {'ShowOffNVSE Plugin','UI Organizer Plugin'}])
+
     def test_loose_roundtrip_only_known_provider(self):
         row=next(x for x in PLAN if x['signature']=='loose' and any('\uac00'<=c<='\ud7a3' for c in x['new']))
         provider,path=row['file'].split('/',1)
