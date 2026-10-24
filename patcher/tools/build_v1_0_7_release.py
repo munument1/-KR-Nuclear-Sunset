@@ -29,7 +29,7 @@ def build(base,work):
     if any(sha(package/n)!=h for n,h in original.items()):raise ValueError('Baseline extraction mismatch')
     catalog_path=package/'TranslationData/catalog.json'
     catalog=json.loads(catalog_path.read_text('utf-8-sig'))
-    catalog.update(version=nskr.VERSION,packaging='folder',channel='release')
+    catalog.update(version=nskr.VERSION,packaging='folder',channel='release',translation_ready=True)
     catalog_path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2),encoding='utf-8')
     validate_payloads(package,catalog)
     sources=sorted(ROOT.glob('nskr*.py'))+[ROOT/'ns_inventory.py']
