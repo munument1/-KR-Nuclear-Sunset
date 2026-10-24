@@ -31,7 +31,30 @@ REPLACEMENTS = {
          '폭력보다 지혜로 문제를 해결하는 선한 성품입니다. 카르마가 선함 미만이면 즉시 선함이 됩니다. 매력 +1, 흥정·화술 +5. 에너지 무기·폭발물·총기·중화기·근접 무기·격투 -5.'),
 }
 SCRIPT_PLUGINS = {'new blood.esp', 'ns.esp', 's6s base game perks redux.esp',
-                  'sweet consumables.esp', 's6s perks.esp'}
+                  'sweet consumables.esp', 's6s perks.esp',
+                  'ns quickselect.esp','aid addon.esp','star ttw 2.esp'}
+EXTRA_LITERALS = {
+    ('ns quickselect.esp','SCPTBATHStartup'): [
+        ('PerkQuickPockets',
+         'You have learned to better store your equipment on your person. This perk grants +20%% equip speed and +40%% attack speed for a few seconds after using a quick hotkey, as well as +15%% equip speed with all weapons during Bullet Time.',
+         '단축키로 무기를 바꾸면 몇 초간 장비 속도 +20%%, 공격 속도 +40%%. 불릿 타임에서는 모든 무기의 장비 속도도 +15%% 증가합니다.',False)],
+    ('ns quickselect.esp','QuickSelectBATHIntegration'): [
+        ('rQuickPocketsPerk',
+         'You have learned to more quickly utilize your throwables. This perk grants +20%% equip speed and +40%% attack speed for a few seconds after equipping a throwable via Quick Select.',
+         '빠른 선택으로 투척 무기를 장비하면 몇 초간 장비 속도 +20%%, 공격 속도 +40%% 효과를 얻습니다.',False),
+        ('rQuickPocketsPerk',
+         'You have learned to more quickly utilize your throwables. This perk grants +20%% equip speed and +40%% attack speed for a few seconds after equipping a throwable via Quick Select, as well as +15%% equip speed with all weapons during Bullet Time.',
+         '빠른 선택으로 투척 무기를 장비하면 몇 초간 장비 속도 +20%%, 공격 속도 +40%%. 불릿 타임에서는 모든 무기의 장비 속도도 +15%% 증가합니다.',False)],
+    ('aid addon.esp','SCPTAidAddonStartup2'): [
+        ('LifeGiver',
+         " The value of your Medicine and Survival skills will also be doubled when using a Doctor's Bag or Medkit on a companion.",
+         ' 동료에게 의사 가방이나 의료 키트를 사용하면 의학 및 생존 기술 수치가 두 배로 적용됩니다.',True)],
+    ('star ttw 2.esp','SCPTStarsGameRestartedStuff'): [
+        ('MathWrath','%z Charging your Pip-Vision will also be twice as efficient.',
+         '%z 핍 비전 충전 효율도 두 배가 됩니다.',False),
+        ('rBalancedLoadPerk','%z Your backpack AP regen penalty will also be reduced by one tier.',
+         '%z 배낭의 AP 재생 불이익도 한 단계 줄어듭니다.',False)],
+}
 CONCENTRATED_FIRE = {
     'falloutnv.esm': (
         'With Concentrated Fire, your accuracy to hit any body part in V.A.T.S. increases slightly with each subsequent hit on that body part.',
@@ -44,6 +67,8 @@ TOKENS = re.compile(r'%%|%[0-9.]*[a-zA-Z]')
 REQUIREMENT_GMSTS = {
     'srequirementstext', 'srankstext', 'slevelabbrev',
     'smenudisplaylevelstring', 'sinventorystrreq',
+    'sor','sand','snot','sskillincreased','sskillincreasednum',
+    'sskilldecreased',
 }
 TAG_DESCRIPTION = '태그! 퍽을 선택하면 네 번째 주력 기술을 지정할 수 있으며, 해당 기술의 숙련도 상승 속도가 두 배가 됩니다.'
 
@@ -77,6 +102,26 @@ def display_bytes(raw: bytes):
         raise ValueError('Non-roundtripping Korean perk text')
     return encoded
 
+def rewrite_compiled_literal(code, literal, logical):
+    encoded = display_bytes(logical)
+    if encoded == literal:
+        return code,False
+    if code.count(literal) != 1:
+        if code.count(encoded) == 1:
+            at = code.index(encoded)
+            budget = struct.unpack_from('<H',code,at-2)[0] if at >= 2 else 0
+            if (budget >= len(encoded) and at+budget <= len(code)
+                    and code[at+len(encoded):at+budget] == b' '*(budget-len(encoded))):
+                return code,False
+        raise ValueError('Compiled perk literal is not unique')
+    if len(encoded) > len(literal):
+        raise ValueError('Compiled perk literal exceeds original byte budget')
+    offset = code.index(literal)
+    if offset < 2 or struct.unpack_from('<H',code,offset-2)[0] != len(literal):
+        raise ValueError('Compiled perk literal size prefix mismatch')
+    padded = encoded + b' '*(len(literal)-len(encoded))
+    return code[:offset]+padded+code[offset+len(literal):],True
+
 def patch_bytes(original: bytes, filename: str):
     changes = []
     filename = filename.casefold()
@@ -97,7 +142,8 @@ def patch_bytes(original: bytes, filename: str):
                         and filename == 'vegas elysium.esp'
                         and edid == 'MSGBloodBagAADesc')
                     or (sig == b'GMST' and key == b'DATA'
-                        and edid.casefold() in REQUIREMENT_GMSTS))
+                        and (edid.casefold() in REQUIREMENT_GMSTS
+                             or edid.casefold().startswith('smagiceffectitem'))))
                 if text_field:
                     restore = CONCENTRATED_FIRE.get(filename)
                     if (key == b'DESC' and restore and edid == 'ConcentratedFire'
@@ -116,6 +162,21 @@ def patch_bytes(original: bytes, filename: str):
             source = slots[indices[b'SCTX']][2]
             code = slots[indices[b'SCDA']][2]
             original_code = code
+            for form,old,new,expression in EXTRA_LITERALS.get((filename,edid),[]):
+                if TOKENS.findall(old) != TOKENS.findall(new):
+                    raise ValueError('Perk format argument mismatch')
+                oldb,newb = old.encode(),new.encode()
+                prefix = ('SetFormDescription '+form+' '+('($sDesc + ' if expression else '')+'"').encode()
+                if prefix+oldb+b'"' in source:
+                    literal=oldb
+                elif prefix+newb+b'"' in source:
+                    literal=newb
+                else:
+                    raise ValueError('Reviewed extra perk statement changed: '+edid+'/'+form)
+                code,changed = rewrite_compiled_literal(code,literal,newb)
+                if changed:
+                    source=source.replace(prefix+literal+b'"',prefix+newb+b'"',1)
+                    changes.append({'kind':'SCPT literal CP949','edid':edid,'form':form,'byte_budget':len(literal)})
             for match in DESCRIPTION.finditer(source):
                 form = match[1].decode('ascii')
                 literal = match[2]
@@ -129,25 +190,9 @@ def patch_bytes(original: bytes, filename: str):
                     logical = new.encode('utf-8')
                 else:
                     logical = literal
-                encoded = display_bytes(logical)
-                if encoded == literal:
+                code,changed = rewrite_compiled_literal(code,literal,logical)
+                if not changed:
                     continue
-                if code.count(literal) != 1:
-                    # A previous run retains UTF-8 SCTX and stores CP949 SCDA.
-                    if code.count(encoded) == 1:
-                        at = code.index(encoded)
-                        budget = struct.unpack_from('<H',code,at-2)[0] if at >= 2 else 0
-                        if (budget >= len(encoded) and at+budget <= len(code)
-                                and code[at+len(encoded):at+budget] == b' '*(budget-len(encoded))):
-                            continue
-                    raise ValueError('Compiled perk literal is not unique: '+edid+'/'+form)
-                if len(encoded) > len(literal):
-                    raise ValueError('Compiled perk literal exceeds original byte budget')
-                padded = encoded + b' ' * (len(literal)-len(encoded))
-                offset = code.index(literal)
-                if offset < 2 or struct.unpack_from('<H',code,offset-2)[0] != len(literal):
-                    raise ValueError('Compiled perk literal size prefix mismatch')
-                code = code[:offset] + padded + code[offset+len(literal):]
                 if spec:
                     source = source.replace(literal,logical,1)
                 changes.append({'kind':'SCPT literal CP949', 'edid':edid,'form':form,

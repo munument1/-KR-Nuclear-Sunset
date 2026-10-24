@@ -73,3 +73,27 @@ AVIF의 별도 avName 문자열 경로를 빠뜨린 것으로 판단하여 ANAM�
 추가 적용: `D:\Codex_Trans\비바\perk-runtime-trace-20261024`.
 10개 파일·100개 텍스트 편집. 테스트 116개 통과, 적용 파일 해시 일치.
 사용자가 게임을 종료했으므로 재실행하지 않았다. 실제 게임 내 결과는 미확인이다.
+
+## 09:40 화면: 연결어, 추가 런타임 문장, 잡지 알림
+
+새 화면에서는 조건·랭크·레벨과 기술 이름은 정상이며 `sOr`의 연결어가
+깨져 있다. `sOr`가 UTF-8로 남은 것을 확인했고, CP949 정규화 대상에 추가했다.
+잡지 사용/능력치 상승 알림에서 조합되는 `sSkillIncreased`,
+`sSkillIncreasedNum`, `sSkillDecreased`, `sMagicEffectItem*`도 정규화한다.
+숫자와 `%s`, `%d` 등의 형식 인자는 바꾸지 않는다.
+
+신속한 주머니는 NS QuickSelect의 QuickSelectBATHIntegration 두 분기와
+SCPTBATHStartup이 영어 설명을 다시 기록했다. 세 분기를 모두 번역했다.
+생명력 부여의 영어 접미사는 Aid Addon의 SCPTAidAddonStartup2가
+`$sDesc + "..."` 식으로 붙인다. 수학 천재의 접미사는 STARS의
+SCPTStarsGameRestartedStuff가 `%z` 형식으로 붙인다. 같은 STARS 함수가
+붙이는 배낭 AP 재생 불이익 문장도 번역했다.
+
+각 편집은 검토한 플러그인·SCPT EDID·대상 폼·기존 문장과 문맥을 확인한 뒤
+원래 SCDA 바이트 예산 안에서 수행한다. 표현식 연결도 별도 회귀 테스트로 검증했다.
+
+로컬 적용: `D:\Codex_Trans\비바\perk-magazine-fix-20261024`.
+4개 파일, 26개 텍스트 편집. 테스트 118개 통과. 수정본/백업/해시 목록 보관.
+게임 내 재검증은 미실시했다. 잡지 알림은 이미지가 제공되지 않아 공유 UI
+문구 경로를 수정한 것이며, 사용자가 본 정확한 알림의 해결 여부는 미확인이다.
+기타 동적 영문 경로는 remaining-runtime-english-audit.json에 점검 결과를 보관했다.

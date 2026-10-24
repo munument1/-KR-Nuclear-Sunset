@@ -97,6 +97,32 @@ class PerkDisplayTests(unittest.TestCase):
         self.assertEqual(text.encode(encoding),raw)
         with self.assertRaises(UnicodeDecodeError):_decode(raw,{**entry,'provider':'Unknown'})
 
+    def test_or_and_skill_notification_templates_keep_format_and_encoding(self):
+        for edid,text in [('sOr','또는'),('sSkillIncreasedNum','%s %d 증가'),
+                          ('sMagicEffectItemSecondsPlural','초')]:
+            raw=plugin(record(b'GMST',sub(b'EDID',edid.encode()+b'\0')+sub(b'DATA',text.encode()+b'\0')))
+            out,changes=p.patch_bytes(raw,'NSKR UI Strings.esp')
+            self.assertEqual(len(changes),1)
+            self.assertIn(text.encode('cp949')+b'\0',out)
+            self.assertEqual(p.patch_bytes(out,'NSKR UI Strings.esp'),(out,[]))
+
+    def test_all_extra_runtime_branches_preserve_bytecode_and_formats(self):
+        for (filename,edid),rows in p.EXTRA_LITERALS.items():
+            code=b'';source='scn '+edid+'\r\n'
+            for form,old,new,expression in rows:
+                self.assertEqual(p.TOKENS.findall(old),p.TOKENS.findall(new))
+                self.assertLessEqual(len(new.encode('cp949')),len(old.encode()))
+                oldb=old.encode()
+                code+=b'OPCODE'+struct.pack('<H',len(oldb))+oldb+b'NEXTOP'
+                source+='SetFormDescription '+form+' '+('($sDesc + ' if expression else '')+'"'+old+'"'+(')' if expression else '')+'\r\n'
+            raw=plugin(record(b'SCPT',sub(b'EDID',edid.encode()+b'\0')+sub(b'SCHR',struct.pack('<5I',0,0,len(code),0,0))+sub(b'SCDA',code)+sub(b'SCTX',source.encode())))
+            out,changes=p.patch_bytes(raw,filename)
+            self.assertEqual(len(changes),len(rows))
+            for form,old,new,expression in rows:
+                self.assertIn(b'OPCODE'+struct.pack('<H',len(old.encode()))+new.encode('cp949'),out)
+                self.assertIn(new.encode(),out)
+            self.assertEqual(p.patch_bytes(out,filename),(out,[]))
+
     def test_runtime_ui_final_pass_includes_requirement_gmst_and_updates_hash(self):
         import tempfile,hashlib
         from nskr_output import finalize_perk_display
