@@ -1,0 +1,2159 @@
+#include "dictionary_internal.h"
+#include "dictionary_translation_guard.h"
+#include "dictionary_ui_syntax.h"
+#include "encoding.h"
+#include "load_config.h"
+#include "native_calls.h"
+#include "text_safety.h"
+
+#include <algorithm>
+#include <cctype>
+#include <string_view>
+
+namespace fonthook
+{
+	namespace
+	{
+		thread_local bool s_suppressDictionaryTranslationForCurrentTile = false;
+	}
+
+	bool SetDictionaryTranslationSuppressedForCurrentTile(
+		bool suppress) noexcept
+	{
+		const bool previous = s_suppressDictionaryTranslationForCurrentTile;
+		s_suppressDictionaryTranslationForCurrentTile = suppress;
+		return previous;
+	}
+
+	bool IsDictionaryTranslationSuppressedForCurrentTile() noexcept
+	{
+		return s_suppressDictionaryTranslationForCurrentTile;
+	}
+
+	namespace
+	{
+		bool ShouldBypassDictionaryTranslation() noexcept
+		{
+			const bool currentTileSuppressed =
+				IsDictionaryTranslationSuppressedForCurrentTile();
+			const bool shouldReadConsoleState =
+				g_bEnableDictionaryTranslation
+				&& !currentTileSuppressed
+				&& g_bDisableDictionaryTranslationInConsole;
+			return dictionary_translation_guard::ShouldBypassDictionaryTranslation(
+				g_bEnableDictionaryTranslation,
+				currentTileSuppressed,
+				g_bDisableDictionaryTranslationInConsole,
+				shouldReadConsoleState
+					&& dictionary_translation_guard::IsRetailConsoleOpen());
+		}
+	}
+
+	namespace implementation::dictionary_translate {}
+	using namespace implementation::dictionary_translate;
+
+	namespace implementation::dictionary_translate
+	{
+		struct PreparedTranslationMatch
+		{
+			std::string translated;
+			size_t entryIndex = 0;
+			bool exact = false;
+			bool found = false;
+		};
+
+		struct ShrinkTranslationMatch
+		{
+			std::string side;
+			std::string candidateText;
+			std::string key;
+			std::string translated;
+			size_t entryIndex = 0;
+			bool exact = false;
+			bool found = false;
+		};
+
+		struct MappedPreparedSource
+		{
+			std::string original;
+			std::string text;
+			std::string key;
+			std::vector<size_t> rawBegin;
+			std::vector<size_t> rawEnd;
+			bool containsDbcs = false;
+			bool containsWindows1252SmartQuote = false;
+		};
+
+		struct MappedChar
+		{
+			char ch = 0;
+			size_t rawBegin = 0;
+			size_t rawEnd = 0;
+			bool dbcs = false;
+		};
+
+		constexpr char kDbcsLookupUnit = '\x1F';
+		constexpr size_t kWindows1252StructuredMaxBytes = 2048;
+		thread_local UInt64 s_windows1252MatchSerial = 0;
+
+		bool TryTranslateWindows1252QuoteCanonicalSource(
+			const std::string& source,
+			PreparedTranslationMatch& match,
+			int depth,
+			bool allowWildcard,
+			bool sourceKnownToContainSmartQuote = false);
+
+		struct RichTextTag
+		{
+			std::string text;
+			std::string name;
+			bool closing = false;
+			bool selfClosing = false;
+			bool valid = false;
+		};
+
+		struct RichTextSegment
+		{
+			std::string text;
+			RichTextTag tag;
+			bool isTag = false;
+			bool hasVisibleText = false;
+		};
+
+		struct RichTextParts
+		{
+			std::string visibleText;
+			std::string prefix;
+			std::string suffix;
+		};
+
+		struct RichTextRetainedPart
+		{
+			std::string text;
+			bool isStyle = false;
+		};
+
+		bool IsSourceWhitespace(char ch)
+		{
+			return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f';
+		}
+
+		bool IsAsciiAlpha(char ch)
+		{
+			return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+		}
+
+		char ToLowerAsciiChar(char ch)
+		{
+			if (ch >= 'A' && ch <= 'Z')
+				return static_cast<char>(ch + ('a' - 'A'));
+			return ch;
+		}
+
+		bool StartsWithIgnoreCase(const std::string& text, size_t pos, std::string_view pattern)
+		{
+			if (pos + pattern.size() > text.size())
+				return false;
+			for (size_t i = 0; i < pattern.size(); ++i)
+			{
+				if (ToLowerAsciiChar(text[pos + i]) != ToLowerAsciiChar(pattern[i]))
+					return false;
+			}
+			return true;
+		}
+
+		bool EqualsIgnoreCase(std::string_view left, std::string_view right)
+		{
+			if (left.size() != right.size())
+				return false;
+			for (size_t i = 0; i < left.size(); ++i)
+			{
+				if (ToLowerAsciiChar(left[i]) != ToLowerAsciiChar(right[i]))
+					return false;
+			}
+			return true;
+		}
+
+		bool IsKnownRichTextTagName(std::string_view name)
+		{
+			static constexpr std::string_view names[] =
+			{
+				"a", "b", "br", "center", "color", "div", "em", "face",
+				"font", "hr", "i", "img", "left", "p", "right", "span",
+				"strong", "u",
+			};
+			for (std::string_view candidate : names)
+			{
+				if (candidate == name)
+					return true;
+			}
+			return false;
+		}
+
+		bool IsRichTextAttributeNameChar(char ch)
+		{
+			return IsAsciiAlpha(ch) || (ch >= '0' && ch <= '9') ||
+				ch == '_' || ch == '-' || ch == ':';
+		}
+
+		bool HasValidRichTextTagRemainder(
+			const std::string& text, size_t pos, size_t end)
+		{
+			while (pos < end && IsSourceWhitespace(text[pos]))
+				++pos;
+			if (pos == end)
+				return true;
+			if (text[pos] == '/')
+				return pos + 1 == end;
+
+			while (pos < end)
+			{
+				const size_t nameBegin = pos;
+				while (pos < end && IsRichTextAttributeNameChar(text[pos]))
+					++pos;
+				if (pos == nameBegin)
+					return false;
+				while (pos < end && IsSourceWhitespace(text[pos]))
+					++pos;
+				if (pos == end || text[pos] != '=')
+					return false;
+				++pos;
+				while (pos < end && IsSourceWhitespace(text[pos]))
+					++pos;
+				if (pos == end)
+					return false;
+
+				if (text[pos] == '"' || text[pos] == '\'')
+				{
+					const char quote = text[pos++];
+					while (pos < end && text[pos] != quote)
+						++pos;
+					if (pos == end)
+						return false;
+					++pos;
+				}
+				else
+				{
+					const size_t valueBegin = pos;
+					while (pos < end && !IsSourceWhitespace(text[pos]) &&
+						text[pos] != '/')
+					{
+						++pos;
+					}
+					if (pos == valueBegin)
+						return false;
+				}
+
+				while (pos < end && IsSourceWhitespace(text[pos]))
+					++pos;
+				if (pos < end && text[pos] == '/')
+					return pos + 1 == end;
+			}
+			return true;
+		}
+
+		bool TryDecodeDoubleByteAt(const std::string& text, size_t pos, UInt32& outCode)
+		{
+			return pos + 1 < text.size() && TryDecodeDoubleByte(&text[pos], outCode);
+		}
+
+		bool FindDbcsAwareTagEnd(const std::string& text, size_t begin, char closeChar, size_t& end)
+		{
+			char quote = 0;
+			for (size_t i = begin + 1; i < text.size();)
+			{
+				UInt32 dbcsCode = 0;
+				if (TryDecodeDoubleByteAt(text, i, dbcsCode))
+				{
+					i += 2;
+					continue;
+				}
+
+				const char ch = text[i];
+				if (quote)
+				{
+					if (ch == quote)
+						quote = 0;
+					++i;
+					continue;
+				}
+
+				if (ch == '"' || ch == '\'')
+				{
+					quote = ch;
+					++i;
+					continue;
+				}
+
+				if (ch == closeChar)
+				{
+					end = i;
+					return true;
+				}
+				++i;
+			}
+			return false;
+		}
+
+		RichTextTag ParseRichTextTag(const std::string& text, size_t begin, size_t end)
+		{
+			RichTextTag tag;
+			if (begin >= end || end >= text.size())
+				return tag;
+
+			tag.text = text.substr(begin, end - begin + 1);
+			size_t pos = begin + 1;
+			while (pos < end && IsSourceWhitespace(text[pos]))
+				++pos;
+			if (pos < end && text[pos] == '/')
+			{
+				tag.closing = true;
+				++pos;
+				while (pos < end && IsSourceWhitespace(text[pos]))
+					++pos;
+			}
+
+			const size_t nameBegin = pos;
+			while (pos < end && IsAsciiAlpha(text[pos]))
+			{
+				tag.name.push_back(ToLowerAsciiChar(text[pos]));
+				++pos;
+			}
+			if (pos == nameBegin ||
+				(text[begin] == '<' &&
+					(!IsKnownRichTextTagName(tag.name) ||
+						!HasValidRichTextTagRemainder(text, pos, end))))
+				return tag;
+
+			size_t trim = end;
+			while (trim > begin && IsSourceWhitespace(text[trim - 1]))
+				--trim;
+			tag.selfClosing = trim > begin && text[trim - 1] == '/';
+			tag.valid = true;
+			return tag;
+		}
+
+		bool IsRetainableRichTextStyleTag(const RichTextTag& tag)
+		{
+			return tag.valid &&
+				!tag.selfClosing &&
+				(EqualsIgnoreCase(tag.name, "font") ||
+					EqualsIgnoreCase(tag.name, "color") ||
+					EqualsIgnoreCase(tag.name, "face"));
+		}
+
+		bool IsRetainableRichTextMediaTag(const RichTextTag& tag)
+		{
+			return tag.valid && !tag.closing &&
+				(EqualsIgnoreCase(tag.name, "img") ||
+					EqualsIgnoreCase(tag.name, "hr"));
+		}
+
+		bool HasClosingStyleAfter(
+			const std::vector<RichTextSegment>& segments,
+			size_t begin,
+			std::string_view name)
+		{
+			for (size_t i = begin; i < segments.size(); ++i)
+			{
+				const RichTextTag& tag = segments[i].tag;
+				if (segments[i].isTag && tag.valid && tag.closing &&
+					EqualsIgnoreCase(tag.name, name))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool RichTextSegmentHasVisibleText(const std::string& text)
+		{
+			for (size_t i = 0; i < text.size();)
+			{
+				UInt32 dbcsCode = 0;
+				if (TryDecodeDoubleByteAt(text, i, dbcsCode))
+					return true;
+
+				const unsigned char ch = static_cast<unsigned char>(text[i]);
+				if (!IsSourceWhitespace(text[i]) && !std::iscntrl(ch))
+					return true;
+				++i;
+			}
+			return false;
+		}
+
+		std::vector<RichTextSegment> SplitRichTextSegments(const std::string& source)
+		{
+			std::vector<RichTextSegment> segments;
+			std::string textBuffer;
+			textBuffer.reserve(source.size());
+
+			const auto flushText = [&]()
+				{
+					if (textBuffer.empty())
+						return;
+					RichTextSegment segment;
+					segment.text = std::move(textBuffer);
+					segment.hasVisibleText = RichTextSegmentHasVisibleText(segment.text);
+					segments.push_back(std::move(segment));
+					textBuffer.clear();
+				};
+
+			for (size_t i = 0; i < source.size();)
+			{
+				UInt32 dbcsCode = 0;
+				if (TryDecodeDoubleByteAt(source, i, dbcsCode))
+				{
+					textBuffer.push_back(source[i]);
+					textBuffer.push_back(source[i + 1]);
+					i += 2;
+					continue;
+				}
+
+				const char ch = source[i];
+				const char closeChar = ch == '<' ? '>' : (ch == '{' ? '}' : 0);
+				size_t tagEnd = 0;
+				if (closeChar && FindDbcsAwareTagEnd(source, i, closeChar, tagEnd))
+				{
+					RichTextTag tag = ParseRichTextTag(source, i, tagEnd);
+					if (tag.valid)
+					{
+						flushText();
+						RichTextSegment segment;
+						segment.isTag = true;
+						segment.text = tag.text;
+						segment.tag = std::move(tag);
+						segments.push_back(std::move(segment));
+						i = tagEnd + 1;
+						continue;
+					}
+				}
+
+				textBuffer.push_back(ch);
+				++i;
+			}
+
+			flushText();
+			return segments;
+		}
+
+		RichTextParts ExtractRichTextParts(const std::string& source)
+		{
+			RichTextParts parts;
+			const std::vector<RichTextSegment> segments = SplitRichTextSegments(source);
+			if (segments.empty())
+				return parts;
+
+			size_t firstVisible = segments.size();
+			size_t lastVisible = 0;
+			for (size_t i = 0; i < segments.size(); ++i)
+			{
+				if (!segments[i].isTag && segments[i].hasVisibleText)
+				{
+					firstVisible = std::min(firstVisible, i);
+					lastVisible = i;
+				}
+			}
+
+			if (firstVisible == segments.size())
+				return parts;
+
+			std::vector<RichTextRetainedPart> prefixParts;
+			std::vector<std::string> retainedStyleStack;
+			for (size_t i = 0; i < firstVisible; ++i)
+			{
+				if (!segments[i].isTag)
+					continue;
+
+				const RichTextTag& tag = segments[i].tag;
+				if (IsRetainableRichTextMediaTag(tag))
+				{
+					prefixParts.push_back({ tag.text, false });
+				}
+				else if (!tag.closing && IsRetainableRichTextStyleTag(tag) &&
+					HasClosingStyleAfter(segments, lastVisible + 1, tag.name))
+				{
+					prefixParts.push_back({ tag.text, true });
+					retainedStyleStack.push_back(tag.name);
+				}
+			}
+
+			for (const RichTextSegment& segment : segments)
+			{
+				if (segment.isTag)
+				{
+					parts.visibleText.push_back(' ');
+				}
+				else
+				{
+					parts.visibleText += segment.text;
+				}
+			}
+
+			std::vector<RichTextRetainedPart> suffixParts;
+			for (size_t i = lastVisible + 1; i < segments.size(); ++i)
+			{
+				if (!segments[i].isTag)
+					continue;
+
+				const RichTextTag& tag = segments[i].tag;
+				if (IsRetainableRichTextMediaTag(tag))
+				{
+					suffixParts.push_back({ tag.text, false });
+				}
+				else if (tag.closing && IsRetainableRichTextStyleTag(tag) &&
+					!retainedStyleStack.empty() &&
+					EqualsIgnoreCase(tag.name, retainedStyleStack.back()))
+				{
+					suffixParts.push_back({ tag.text, true });
+					retainedStyleStack.pop_back();
+				}
+			}
+
+			const bool keepStyleParts = retainedStyleStack.empty();
+			for (const RichTextRetainedPart& prefixPart : prefixParts)
+			{
+				if (keepStyleParts || !prefixPart.isStyle)
+					parts.prefix += prefixPart.text;
+			}
+
+			for (const RichTextRetainedPart& suffixPart : suffixParts)
+			{
+				if (keepStyleParts || !suffixPart.isStyle)
+					parts.suffix += suffixPart.text;
+			}
+
+			return parts;
+		}
+
+		bool TryMatchEscapedSourceWhitespace(const std::string& text, size_t pos, size_t& end)
+		{
+			if (StartsWithIgnoreCase(text, pos, "[CRLF]"))
+			{
+				end = pos + 6;
+				return true;
+			}
+
+			if (pos + 1 >= text.size() || text[pos] != '\\')
+				return false;
+
+			const char code = text[pos + 1];
+			if ((code == 'r' || code == 'R') &&
+				pos + 3 < text.size() &&
+				text[pos + 2] == '\\' &&
+				(text[pos + 3] == 'n' || text[pos + 3] == 'N'))
+			{
+				end = pos + 4;
+				return true;
+			}
+
+			if (code == 'n' || code == 'N' || code == 'r' || code == 'R' || code == 't' || code == 'T')
+			{
+				end = pos + 2;
+				return true;
+			}
+
+			return false;
+		}
+
+		bool IsSourceBreakTag(const std::string& text, size_t tagBegin, size_t tagEnd)
+		{
+			size_t pos = tagBegin + 1;
+			while (pos < tagEnd && IsSourceWhitespace(text[pos]))
+				++pos;
+			if (pos < tagEnd && text[pos] == '/')
+			{
+				++pos;
+				while (pos < tagEnd && IsSourceWhitespace(text[pos]))
+					++pos;
+			}
+
+			const size_t nameBegin = pos;
+			while (pos < tagEnd && IsAsciiAlpha(text[pos]))
+				++pos;
+			const size_t nameLength = pos - nameBegin;
+			if (nameLength == 0)
+				return false;
+
+			const bool isParagraph = nameLength == 1 && ToLowerAsciiChar(text[nameBegin]) == 'p';
+			const bool isDiv =
+				nameLength == 3 &&
+				ToLowerAsciiChar(text[nameBegin]) == 'd' &&
+				ToLowerAsciiChar(text[nameBegin + 1]) == 'i' &&
+				ToLowerAsciiChar(text[nameBegin + 2]) == 'v';
+			if (!isParagraph && !isDiv)
+				return false;
+
+			return pos == tagEnd || IsSourceWhitespace(text[pos]) || text[pos] == '/';
+		}
+
+		char Correct1252Char(char ch)
+		{
+			static constexpr char table[129] =
+				"                 ''\"\"                                           AAA A ACEEEEIIII NOOO O  UUUU  saaa a aceeeeiiii nooo o  uuuu   ";
+			const UInt8 c = (UInt8)ch;
+			if (c >= 128)
+				return table[c - 128];
+			return ch;
+		}
+
+		constexpr bool IsWindows1252SmartQuoteByte(char ch)
+		{
+			const UInt8 value = static_cast<UInt8>(ch);
+			return value >= 0x91 && value <= 0x94;
+		}
+
+		constexpr char CanonicalizeWindows1252SmartQuoteByte(char ch)
+		{
+			const UInt8 value = static_cast<UInt8>(ch);
+			return value == 0x91 || value == 0x92 ? '\'' :
+				(value == 0x93 || value == 0x94 ? '"' : ch);
+		}
+
+		static_assert(CanonicalizeWindows1252SmartQuoteByte(
+			static_cast<char>(0x92)) == '\'');
+		static_assert(CanonicalizeWindows1252SmartQuoteByte(
+			static_cast<char>(0x94)) == '"');
+
+		bool ContainsWindows1252SmartQuoteByte(std::string_view source)
+		{
+			return std::any_of(source.begin(), source.end(), [](char ch)
+				{
+					return IsWindows1252SmartQuoteByte(ch);
+				});
+		}
+
+		MappedPreparedSource PrepareSourceForLookupMapped(
+			const std::string& source, bool preferWindows1252SmartQuotes = false)
+		{
+			MappedPreparedSource mapped;
+			mapped.original = source;
+
+			std::vector<MappedChar> units;
+			units.reserve(source.size());
+			for (size_t i = 0; i < source.size();)
+			{
+				if (IsWindows1252SmartQuoteByte(source[i]))
+					mapped.containsWindows1252SmartQuote = true;
+
+				size_t escapedEnd = 0;
+				if (TryMatchEscapedSourceWhitespace(source, i, escapedEnd))
+				{
+					units.push_back({ ' ', i, escapedEnd });
+					i = escapedEnd;
+					continue;
+				}
+
+				if (source[i] == '<')
+				{
+					const size_t end = source.find('>', i + 1);
+					if (end != std::string::npos && IsSourceBreakTag(source, i, end))
+					{
+						units.push_back({ ' ', i, end + 1 });
+						i = end + 1;
+						continue;
+					}
+				}
+
+				// CP936 accepts 0x91-0x94 as lead bytes, so contractions such as
+				// I\x92m otherwise consume the following ASCII letter as DBCS.  This
+				// alternate, dictionary-backed candidate handles only smart quotes;
+				// the normal DBCS-first candidate remains the fallback.
+				if (preferWindows1252SmartQuotes &&
+					IsWindows1252SmartQuoteByte(source[i]))
+				{
+					units.push_back({
+						CanonicalizeWindows1252SmartQuoteByte(source[i]), i, i + 1 });
+					++i;
+					continue;
+				}
+
+				UInt32 dbcsCode = 0;
+				if (TryDecodeDoubleByteAt(source, i, dbcsCode))
+				{
+					units.push_back({ kDbcsLookupUnit, i, i + 2, true });
+					mapped.containsDbcs = true;
+					i += 2;
+					continue;
+				}
+
+				const unsigned char ch = static_cast<unsigned char>(source[i]);
+				if (IsSourceWhitespace(source[i]))
+				{
+					units.push_back({ ' ', i, i + 1 });
+				}
+				else if (!std::iscntrl(ch))
+				{
+					units.push_back({ Correct1252Char(source[i]), i, i + 1 });
+				}
+				++i;
+			}
+
+			std::vector<MappedChar> collapsed;
+			collapsed.reserve(units.size());
+			for (const MappedChar& unit : units)
+			{
+				if (!unit.dbcs && IsSourceWhitespace(unit.ch))
+				{
+					if (!collapsed.empty() && !collapsed.back().dbcs && collapsed.back().ch == ' ')
+					{
+						collapsed.back().rawEnd = unit.rawEnd;
+					}
+					else
+					{
+						collapsed.push_back({ ' ', unit.rawBegin, unit.rawEnd });
+					}
+				}
+				else
+				{
+					collapsed.push_back(unit);
+				}
+			}
+
+			size_t begin = 0;
+			while (begin < collapsed.size() && !collapsed[begin].dbcs && collapsed[begin].ch == ' ')
+				++begin;
+			size_t end = collapsed.size();
+			while (end > begin && !collapsed[end - 1].dbcs && collapsed[end - 1].ch == ' ')
+				--end;
+
+			mapped.text.reserve(end - begin);
+			mapped.key.reserve(end - begin);
+			mapped.rawBegin.reserve(end - begin);
+			mapped.rawEnd.reserve(end - begin);
+			for (size_t i = begin; i < end; ++i)
+			{
+				const MappedChar& unit = collapsed[i];
+				if (unit.dbcs)
+				{
+					mapped.text.push_back(kDbcsLookupUnit);
+					mapped.key.push_back(kDbcsLookupUnit);
+				}
+				else
+				{
+					mapped.text.push_back(unit.ch);
+					mapped.key.push_back(ToLowerAsciiChar(unit.ch));
+				}
+				mapped.rawBegin.push_back(unit.rawBegin);
+				mapped.rawEnd.push_back(unit.rawEnd);
+			}
+			return mapped;
+		}
+
+		bool HasValidMappedSource(const MappedPreparedSource& mapped)
+		{
+			return mapped.text.size() == mapped.key.size() &&
+				mapped.text.size() == mapped.rawBegin.size() &&
+				mapped.text.size() == mapped.rawEnd.size();
+		}
+
+		std::string RawMappedRange(const MappedPreparedSource& mapped, size_t begin, size_t end)
+		{
+			if (!HasValidMappedSource(mapped) || begin >= end || end > mapped.text.size())
+				return {};
+			const size_t rawBegin = mapped.rawBegin[begin];
+			const size_t rawEnd = mapped.rawEnd[end - 1];
+			if (rawBegin >= rawEnd || rawEnd > mapped.original.size())
+				return {};
+			return mapped.original.substr(rawBegin, rawEnd - rawBegin);
+		}
+
+		// Resolve &variable; escape sequences in-place using the game engine.
+		// Returns true if any variables were resolved.
+		bool PreResolveGameVariables(std::string& text)
+		{
+			if (text.find('&') == std::string::npos)
+				return false;
+
+			std::string result;
+			result.reserve(text.size());
+			bool changed = false;
+
+			for (size_t i = 0; i < text.size(); )
+			{
+				if (text[i] != '&' || i + 2 >= text.size())
+				{
+					result.push_back(text[i++]);
+					continue;
+				}
+
+				text_safety::GameVariableToken token;
+				if (!text_safety::TryParseGameVariableToken(text, i, token))
+				{
+					result.push_back(text[i++]);
+					continue;
+				}
+
+				std::string varName(text, token.nameBegin, token.nameLength);
+				char outBuf[text_safety::kRetailReplacementOutputCapacity] = {};
+				if (Interface_FindTextReplacementString(
+					varName.c_str(), outBuf,
+					static_cast<UInt32>(sizeof(outBuf)), token.isPositive))
+				{
+					result.append(outBuf);
+					i = token.nextIndex;
+					changed = true;
+				}
+				else
+				{
+					result.push_back(text[i++]);
+				}
+			}
+
+			if (changed)
+				text.swap(result);
+			return changed;
+		}
+
+		bool IsExplicitDictionaryMetadataId(std::string_view tag)
+		{
+			if (tag.rfind("tNVSE ", 0) == 0)
+				return true;
+			if (tag.size() <= 3 || tag.rfind("GID", 0) != 0)
+				return false;
+			return std::all_of(tag.begin() + 3, tag.end(), [](char ch)
+				{
+					return ch >= '0' && ch <= '9';
+				});
+		}
+
+		std::string StripLeadingId(
+			std::string text, std::string& id, bool& explicitMetadata)
+		{
+			id.clear();
+			explicitMetadata = false;
+			if (text.empty() || text[0] != '<' ||
+				(text.size() > 1 && text[1] == '<'))
+				return text;
+			const size_t end = text.find('>');
+			if (end == std::string::npos)
+				return text;
+
+			std::string tag = text.substr(1, end - 1);
+			explicitMetadata = IsExplicitDictionaryMetadataId(tag);
+			if (tag.rfind("tNVSE ", 0) == 0)
+				tag.erase(0, 6);
+			id = tag;
+			text.erase(0, end + 1);
+			return text;
+		}
+
+		void TrimAsciiWhitespace(std::string& text)
+		{
+			const auto isTrim = [](unsigned char ch)
+				{
+					return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+				};
+
+			size_t first = 0;
+			while (first < text.size() && isTrim((unsigned char)text[first]))
+				++first;
+			size_t last = text.size();
+			while (last > first && isTrim((unsigned char)text[last - 1]))
+				--last;
+			text = text.substr(first, last - first);
+		}
+
+		bool IsAsciiLetter(char ch)
+		{
+			return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+		}
+
+		size_t NextDbcsAwareCharEnd(const std::string& text, size_t begin)
+		{
+			if (begin >= text.size())
+				return text.size();
+
+			UInt32 dbcsCode = 0;
+			if (TryDecodeDoubleByteAt(text, begin, dbcsCode))
+				return begin + 2;
+
+			return begin + 1;
+		}
+
+		size_t PreviousDbcsAwareCharBegin(const std::string& text, size_t end)
+		{
+			if (end == 0)
+				return 0;
+
+			size_t previous = 0;
+			for (size_t cursor = 0; cursor < end;)
+			{
+				previous = cursor;
+				const size_t next = NextDbcsAwareCharEnd(text, cursor);
+				if (next >= end)
+					break;
+				cursor = next;
+			}
+
+			return previous;
+		}
+
+		size_t ShrinkRight(const std::string& text, size_t end)
+		{
+			if (end == 0)
+				return 0;
+
+			const size_t charBegin = PreviousDbcsAwareCharBegin(text, end);
+			if (IsAsciiLetter(text[charBegin]))
+			{
+				while (end > 0)
+				{
+					const size_t previous = PreviousDbcsAwareCharBegin(text, end);
+					if (!IsAsciiLetter(text[previous]))
+						break;
+					end = previous;
+				}
+				return end;
+			}
+
+			return charBegin;
+		}
+
+		size_t ShrinkLeft(const std::string& text, size_t begin)
+		{
+			if (begin >= text.size())
+				return text.size();
+
+			if (IsAsciiLetter(text[begin]))
+			{
+				while (begin < text.size() && IsAsciiLetter(text[begin]))
+					++begin;
+				return begin;
+			}
+
+			return NextDbcsAwareCharEnd(text, begin);
+		}
+
+		void TrimCandidateRange(const std::string& text, size_t& begin, size_t& end)
+		{
+			const auto isTrim = [](unsigned char ch)
+				{
+					return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+				};
+
+			while (begin < end && isTrim((unsigned char)text[begin]))
+				++begin;
+			while (end > begin && isTrim((unsigned char)text[end - 1]))
+				--end;
+		}
+
+		void AddWildcardCandidates(
+			const std::vector<size_t>& indexes,
+			std::vector<size_t>& candidates,
+			std::unordered_set<size_t>& seen)
+		{
+			for (size_t index : indexes)
+			{
+				if (seen.insert(index).second)
+					candidates.push_back(index);
+			}
+		}
+
+		void AddWildcardCandidatesForKey(
+			const std::unordered_map<std::string, std::vector<size_t>>& indexMap,
+			const std::string& candidateKey,
+			std::vector<size_t>& candidates,
+			std::unordered_set<size_t>& seen)
+		{
+			const auto it = indexMap.find(candidateKey);
+			if (it != indexMap.end())
+				AddWildcardCandidates(it->second, candidates, seen);
+		}
+
+		void CollectPrefixWildcardCandidates(
+			const std::string& key,
+			std::vector<size_t>& candidates,
+			std::unordered_set<size_t>& seen)
+		{
+			for (size_t end = key.size(); end > 0; --end)
+				AddWildcardCandidatesForKey(s_wildcardPrefixIndex, key.substr(0, end), candidates, seen);
+		}
+
+		void CollectSuffixWildcardCandidates(
+			const std::string& key,
+			std::vector<size_t>& candidates,
+			std::unordered_set<size_t>& seen)
+		{
+			for (size_t begin = 0; begin < key.size(); ++begin)
+				AddWildcardCandidatesForKey(s_wildcardSuffixIndex, key.substr(begin), candidates, seen);
+		}
+
+		bool TryTranslateExactKey(const std::string& key, PreparedTranslationMatch& match, int depth)
+		{
+			match = PreparedTranslationMatch{};
+
+			auto exactIt = s_exactIndex.find(key);
+			if (exactIt == s_exactIndex.end())
+				return false;
+
+			for (size_t index : exactIt->second)
+			{
+				if (ExpandTarget(s_entries[index], {}, match.translated, depth))
+				{
+					match.entryIndex = index;
+					match.exact = true;
+					match.found = true;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool ContainsWindows1252ExtendedByte(std::string_view source)
+		{
+			return std::any_of(source.begin(), source.end(), [](char ch)
+				{
+					return static_cast<UInt8>(ch) >= 0x80;
+				});
+		}
+
+		bool TryTranslateWindows1252ExactSource(
+			const std::string& source, PreparedTranslationMatch& match, int depth)
+		{
+			match = PreparedTranslationMatch{};
+			if (s_windows1252ExactIndex.empty()
+				|| !ContainsWindows1252ExtendedByte(source))
+			{
+				return false;
+			}
+
+			const std::string key = PrepareSourceForWindows1252ExactLookup(source);
+			const auto exactIt = s_windows1252ExactIndex.find(key);
+			if (exactIt == s_windows1252ExactIndex.end())
+				return false;
+
+			for (size_t index : exactIt->second)
+			{
+				if (ExpandTarget(s_entries[index], {}, match.translated, depth))
+				{
+					match.entryIndex = index;
+					match.exact = true;
+					match.found = true;
+					++s_windows1252MatchSerial;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool TryTranslateWindows1252WildcardSource(
+			const std::string& source, PreparedTranslationMatch& match, int depth)
+		{
+			match = PreparedTranslationMatch{};
+			if (!g_bEnableDictionaryWildcardTranslation ||
+				s_windows1252WildcardIndex.empty() ||
+				!ContainsWindows1252ExtendedByte(source))
+			{
+				return false;
+			}
+
+			const std::string key = PrepareSourceForWindows1252ExactLookup(source);
+			std::vector<std::string> captures;
+			for (const Windows1252WildcardAlias& alias : s_windows1252WildcardIndex)
+			{
+				if (alias.entryIndex >= s_entries.size() ||
+					key.size() < alias.lengthWithoutBinds)
+				{
+					continue;
+				}
+
+				const DictionaryEntry& entry = s_entries[alias.entryIndex];
+				if (MatchWildcardTokens(alias.tokens, entry.bindCount, key, captures) &&
+					ExpandTarget(entry, captures, match.translated, depth))
+				{
+					match.entryIndex = alias.entryIndex;
+					match.exact = false;
+					match.found = true;
+					++s_windows1252MatchSerial;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool TryTranslateWindows1252Source(
+			const std::string& source, PreparedTranslationMatch& match, int depth)
+		{
+			if (TryTranslateWindows1252ExactSource(source, match, depth))
+				return true;
+			return TryTranslateWindows1252WildcardSource(source, match, depth);
+		}
+
+		struct DeterministicUiTranslation
+		{
+			std::string translated;
+			dictionary_ui_syntax::Kind kind = dictionary_ui_syntax::Kind::None;
+			UInt32 translatedSlots = 0;
+		};
+
+		bool TryTranslateDeterministicUiSource(
+			const std::string& source,
+			DeterministicUiTranslation& result,
+			int depth);
+
+		bool TryTranslateDeterministicUiSlot(
+			const std::string& source,
+			PreparedTranslationMatch& match,
+			int depth,
+			bool allowGeneralRecursiveTranslation)
+		{
+			match = PreparedTranslationMatch{};
+			if (source.empty() || depth >= 4 || !HasAlphabet(source))
+				return false;
+
+			if (TryTranslateWindows1252Source(source, match, depth) ||
+				TryTranslateWindows1252QuoteCanonicalSource(
+					source, match, depth, true))
+			{
+				return true;
+			}
+
+			const MappedPreparedSource mapped = PrepareSourceForLookupMapped(source);
+			if (!mapped.key.empty() && TryTranslateExactKey(mapped.key, match, depth))
+				return true;
+
+			// Deterministic formats can be nested by the game or a menu mod.  Peel
+			// another verified syntax layer before considering the legacy wrapper's
+			// broader recursive compatibility path.
+			DeterministicUiTranslation nestedUi;
+			if (depth + 1 < 4 && TryTranslateDeterministicUiSource(
+				source, nestedUi, depth + 1))
+			{
+				match.translated = std::move(nestedUi.translated);
+				match.found = true;
+				return true;
+			}
+
+			if (!allowGeneralRecursiveTranslation || depth + 1 >= 4)
+				return false;
+			std::string recursiveTranslation;
+			if (!TranslateInternal(
+				source.c_str(), recursiveTranslation, depth + 1))
+			{
+				return false;
+			}
+			match.translated = std::move(recursiveTranslation);
+			match.found = true;
+			return true;
+		}
+
+		bool TryRebuildDeterministicUiSlots(
+			const std::string& source,
+			const dictionary_ui_syntax::Span* slots,
+			size_t slotCount,
+			bool allowGeneralRecursiveTranslation,
+			int depth,
+			std::string& rebuilt,
+			UInt32& translatedSlots)
+		{
+			rebuilt.clear();
+			translatedSlots = 0;
+			if (!slots || slotCount == 0)
+				return false;
+
+			rebuilt.reserve(source.size());
+			size_t cursor = 0;
+			for (size_t slotIndex = 0; slotIndex < slotCount; ++slotIndex)
+			{
+				const dictionary_ui_syntax::Span& slot = slots[slotIndex];
+				if (slot.begin < cursor || slot.end <= slot.begin ||
+					slot.end > source.size())
+				{
+					return false;
+				}
+
+				rebuilt.append(source, cursor, slot.begin - cursor);
+				const std::string slotSource =
+					source.substr(slot.begin, slot.end - slot.begin);
+				PreparedTranslationMatch slotMatch;
+				if (TryTranslateDeterministicUiSlot(
+					slotSource, slotMatch, depth,
+					allowGeneralRecursiveTranslation) &&
+					slotMatch.translated != slotSource)
+				{
+					rebuilt += slotMatch.translated;
+					++translatedSlots;
+				}
+				else
+				{
+					rebuilt += slotSource;
+				}
+				cursor = slot.end;
+			}
+			rebuilt.append(source, cursor, std::string::npos);
+			return translatedSlots != 0 && rebuilt != source;
+		}
+
+		bool TryTranslateDeterministicUiSource(
+			const std::string& source,
+			DeterministicUiTranslation& result,
+			int depth)
+		{
+			result = DeterministicUiTranslation{};
+			if (source.empty() || depth >= 4 ||
+				source.size() > kWindows1252StructuredMaxBytes)
+			{
+				return false;
+			}
+
+			dictionary_ui_syntax::Match syntax;
+			if (!dictionary_ui_syntax::TryParse(source, syntax))
+				return false;
+
+			std::string rebuilt;
+			UInt32 primaryTranslatedSlots = 0;
+			const bool primaryMatched = TryRebuildDeterministicUiSlots(
+				source, syntax.slots.data(), syntax.slotCount,
+				syntax.allowGeneralRecursiveSlotTranslation, depth,
+				rebuilt, primaryTranslatedSlots);
+			if (primaryMatched &&
+				!syntax.preferFallbackWhenItTranslatesMoreSlots)
+			{
+				result.translated = std::move(rebuilt);
+				result.kind = syntax.kind;
+				result.translatedSlots = primaryTranslatedSlots;
+				return true;
+			}
+
+			std::string fallbackRebuilt;
+			UInt32 fallbackTranslatedSlots = 0;
+			const bool fallbackMatched = TryRebuildDeterministicUiSlots(
+				source, syntax.fallbackSlots.data(),
+				syntax.fallbackSlotCount,
+				syntax.allowGeneralRecursiveSlotTranslation, depth,
+				fallbackRebuilt, fallbackTranslatedSlots);
+			if (!primaryMatched && !fallbackMatched)
+				return false;
+
+			const bool useFallback = fallbackMatched &&
+				(!primaryMatched ||
+					fallbackTranslatedSlots > primaryTranslatedSlots);
+			result.translated = useFallback
+				? std::move(fallbackRebuilt)
+				: std::move(rebuilt);
+			result.kind = syntax.kind;
+			result.translatedSlots = useFallback
+				? fallbackTranslatedSlots
+				: primaryTranslatedSlots;
+			return true;
+		}
+
+		struct FormattedLine
+		{
+			std::string leadingWhitespace;
+			std::string text;
+			std::string trailingWhitespace;
+			std::string lineBreak;
+		};
+
+		bool IsLineWhitespace(char ch)
+		{
+			return ch == ' ' || ch == '\t';
+		}
+
+		std::vector<FormattedLine> SplitFormattedLines(const std::string& text)
+		{
+			std::vector<FormattedLine> lines;
+			size_t cursor = 0;
+			while (cursor < text.size())
+			{
+				const size_t lineBegin = cursor;
+				size_t lineEnd = cursor;
+				while (lineEnd < text.size() && text[lineEnd] != '\r' && text[lineEnd] != '\n')
+					++lineEnd;
+
+				std::string lineBreak;
+				if (lineEnd < text.size())
+				{
+					if (text[lineEnd] == '\r' && lineEnd + 1 < text.size() && text[lineEnd + 1] == '\n')
+					{
+						lineBreak = "\r\n";
+						cursor = lineEnd + 2;
+					}
+					else
+					{
+						lineBreak.assign(1, text[lineEnd]);
+						cursor = lineEnd + 1;
+					}
+				}
+				else
+				{
+					cursor = lineEnd;
+				}
+
+				const std::string line = text.substr(lineBegin, lineEnd - lineBegin);
+				size_t textBegin = 0;
+				while (textBegin < line.size() && IsLineWhitespace(line[textBegin]))
+					++textBegin;
+
+				size_t textEnd = line.size();
+				while (textEnd > textBegin && IsLineWhitespace(line[textEnd - 1]))
+					--textEnd;
+
+				FormattedLine formattedLine;
+				formattedLine.leadingWhitespace = line.substr(0, textBegin);
+				formattedLine.text = line.substr(textBegin, textEnd - textBegin);
+				formattedLine.trailingWhitespace = line.substr(textEnd);
+				formattedLine.lineBreak = std::move(lineBreak);
+				lines.push_back(std::move(formattedLine));
+			}
+			return lines;
+		}
+
+		bool MatchWildcardWithCaptureSource(
+			const DictionaryEntry& entry,
+			const std::string& key,
+			const MappedPreparedSource* mappedSource,
+			std::vector<std::string>& captures)
+		{
+			if (!mappedSource || !HasValidMappedSource(*mappedSource) || mappedSource->key != key)
+				return MatchWildcard(entry, key, captures);
+
+			captures.clear();
+			size_t cursor = 0;
+			const bool startsWithBind = entry.tokens.size() > 0 && entry.tokens.front().empty();
+			const bool endsWithBind = entry.tokens.size() > 0 && entry.tokens.back().empty();
+
+			for (size_t i = 0; i < entry.tokens.size(); ++i)
+			{
+				const std::string& token = entry.tokens[i];
+				if (token.empty())
+					continue;
+
+				const size_t found = key.find(token, cursor);
+				if (found == std::string::npos)
+					return false;
+				if (i == 0 && !startsWithBind && found != 0)
+					return false;
+
+				if (found > cursor)
+					captures.push_back(RawMappedRange(*mappedSource, cursor, found));
+				else if (i > 0)
+					captures.emplace_back();
+				cursor = found + token.size();
+			}
+
+			if (!endsWithBind && cursor != key.size())
+				return false;
+			if (endsWithBind)
+				captures.push_back(RawMappedRange(*mappedSource, cursor, key.size()));
+
+			while (captures.size() < entry.bindCount)
+				captures.emplace_back();
+			return captures.size() == entry.bindCount;
+		}
+
+		bool TryTranslateWildcardKey(
+			const std::string& key,
+			PreparedTranslationMatch& match,
+			int depth,
+			const MappedPreparedSource* mappedSource = nullptr)
+		{
+			match = PreparedTranslationMatch{};
+			if (!g_bEnableDictionaryWildcardTranslation)
+				return false;
+
+			std::vector<size_t> candidateIndexes;
+			std::unordered_set<size_t> seenCandidates;
+			CollectPrefixWildcardCandidates(key, candidateIndexes, seenCandidates);
+			CollectSuffixWildcardCandidates(key, candidateIndexes, seenCandidates);
+			AddWildcardCandidates(s_wildcardLooseIndex, candidateIndexes, seenCandidates);
+
+			std::sort(candidateIndexes.begin(), candidateIndexes.end(), [](size_t left, size_t right)
+				{
+					return EntryLess(s_entries[left], s_entries[right]);
+				});
+
+			std::vector<std::string> captures;
+			for (size_t index : candidateIndexes)
+			{
+				const auto& entry = s_entries[index];
+				if (entry.bindCount != 0 && entry.lengthWithoutBinds == 0)
+					continue;
+				if (mappedSource && mappedSource->containsDbcs && !entry.hasAsciiLiteralAnchor)
+					continue;
+				if (key.size() < entry.lengthWithoutBinds)
+					continue;
+
+				if (MatchWildcardWithCaptureSource(entry, key, mappedSource, captures) &&
+					ExpandTarget(entry, captures, match.translated, depth))
+				{
+					match.entryIndex = index;
+					match.exact = false;
+					match.found = true;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool TryTranslatePreparedKey(
+			const std::string& key,
+			PreparedTranslationMatch& match,
+			int depth,
+			const MappedPreparedSource* mappedSource = nullptr)
+		{
+			if (TryTranslateExactKey(key, match, depth))
+				return true;
+			return TryTranslateWildcardKey(key, match, depth, mappedSource);
+		}
+
+		bool TryTranslateWindows1252QuoteCanonicalSource(
+			const std::string& source,
+			PreparedTranslationMatch& match,
+			int depth,
+			bool allowWildcard,
+			bool sourceKnownToContainSmartQuote)
+		{
+			match = PreparedTranslationMatch{};
+			if (!sourceKnownToContainSmartQuote &&
+				!ContainsWindows1252SmartQuoteByte(source))
+				return false;
+
+			const MappedPreparedSource mapped =
+				PrepareSourceForLookupMapped(source, true);
+			if (mapped.key.empty())
+				return false;
+
+			const bool matched = TryTranslateExactKey(mapped.key, match, depth) ||
+				(allowWildcard &&
+					TryTranslateWildcardKey(mapped.key, match, depth, &mapped));
+			if (matched)
+				++s_windows1252MatchSerial;
+			return matched;
+		}
+
+		bool TryTranslateBeforeLinebreakText(const std::string& source, std::string& translated, int depth)
+		{
+			if (depth >= 4 || (source.find('\n') == std::string::npos && source.find('\r') == std::string::npos))
+				return false;
+
+			const std::vector<FormattedLine> lines = SplitFormattedLines(source);
+			if (lines.size() < 2)
+				return false;
+
+			std::string result;
+			bool changed = false;
+
+			for (const FormattedLine& line : lines)
+			{
+				result += line.leadingWhitespace;
+
+				if (line.text.empty() || !HasAlphabet(line.text))
+				{
+					result += line.text;
+					result += line.trailingWhitespace;
+					result += line.lineBreak;
+					continue;
+				}
+
+				PreparedTranslationMatch match;
+				const bool windows1252Match =
+					TryTranslateWindows1252ExactSource(line.text, match, depth);
+				const std::string key = windows1252Match
+					? std::string{}
+					: PrepareSourceForLookup(line.text);
+				if (windows1252Match ||
+					(!key.empty() && TryTranslateExactKey(key, match, depth)))
+				{
+					result += match.translated;
+					changed = true;
+
+					if (g_bEnableDictionaryTranslationLog)
+					{
+						gLog.FormattedMessage(
+							"tnvse_dictionary: before-linebreak %sexact hit:",
+							windows1252Match ? "Windows-1252 raw " : "");
+						gLog.FormattedMessage("tnvse_dictionary:   line=\"%s\"", line.text.c_str());
+						gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+							s_entries[match.entryIndex].key.c_str(), match.translated.c_str());
+					}
+				}
+				else
+				{
+					result += line.text;
+				}
+
+				result += line.trailingWhitespace;
+				result += line.lineBreak;
+			}
+
+			if (!changed)
+				return false;
+
+			translated = std::move(result);
+			return true;
+		}
+
+		bool TryBuildShrinkMatch(
+			const std::string& source,
+			size_t begin,
+			size_t end,
+			const char* side,
+			const std::string& fullKey,
+			std::unordered_set<std::string>& searchedKeys,
+			ShrinkTranslationMatch& result,
+			int depth)
+		{
+			result = ShrinkTranslationMatch{};
+			if (begin >= end)
+				return false;
+
+			size_t trimBegin = begin;
+			size_t trimEnd = end;
+			TrimCandidateRange(source, trimBegin, trimEnd);
+			if (trimBegin >= trimEnd)
+				return false;
+
+			std::string candidateText = source.substr(trimBegin, trimEnd - trimBegin);
+			if (!HasAlphabet(candidateText))
+				return false;
+
+			PreparedTranslationMatch match;
+			const bool windows1252Match =
+				TryTranslateWindows1252Source(candidateText, match, depth);
+			std::string key;
+			if (windows1252Match)
+			{
+				key = PrepareSourceForWindows1252ExactLookup(candidateText);
+				key.insert(key.begin(), '\x1E');
+			}
+			else
+			{
+				MappedPreparedSource mappedSource =
+					PrepareSourceForLookupMapped(candidateText);
+				key = mappedSource.key;
+				if (key.empty() || key == fullKey ||
+					!searchedKeys.insert(key).second ||
+					!TryTranslatePreparedKey(key, match, depth, &mappedSource))
+				{
+					return false;
+				}
+			}
+
+			result.side = side;
+			result.candidateText = std::move(candidateText);
+			result.key = std::move(key);
+			result.entryIndex = match.entryIndex;
+			result.exact = match.exact;
+			result.found = true;
+			result.translated = source.substr(0, trimBegin) + match.translated + source.substr(trimEnd);
+
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage("tnvse_dictionary: shrink fuzzy %shit[%s]:",
+					windows1252Match ? "Windows-1252 raw " : "", result.side.c_str());
+				gLog.FormattedMessage("tnvse_dictionary:   candidate=\"%s\"", result.candidateText.c_str());
+				gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+					s_entries[result.entryIndex].key.c_str(), result.translated.c_str());
+			}
+
+			return true;
+		}
+
+		bool IsBetterShrinkMatch(const ShrinkTranslationMatch& left, const ShrinkTranslationMatch& right)
+		{
+			if (!right.found)
+				return true;
+			return EntryLess(s_entries[left.entryIndex], s_entries[right.entryIndex]);
+		}
+
+		bool TryTranslateShrinkText(const std::string& source, std::string& translated, int depth)
+		{
+			if (depth >= 4)
+				return false;
+
+			std::string fullKey = PrepareSourceForLookup(source);
+			if (fullKey.empty())
+				return false;
+
+			std::unordered_set<std::string> searchedKeys;
+			searchedKeys.insert(fullKey);
+
+			size_t rightEnd = source.size();
+			size_t leftBegin = 0;
+			while (rightEnd > 0 || leftBegin < source.size())
+			{
+				bool progressed = false;
+				ShrinkTranslationMatch bestMatch;
+
+				if (rightEnd > 0)
+				{
+					const size_t nextRightEnd = ShrinkRight(source, rightEnd);
+					if (nextRightEnd != rightEnd)
+					{
+						rightEnd = nextRightEnd;
+						progressed = true;
+
+						ShrinkTranslationMatch match;
+						if (TryBuildShrinkMatch(source, 0, rightEnd, "prefix", fullKey, searchedKeys, match, depth) &&
+							IsBetterShrinkMatch(match, bestMatch))
+						{
+							bestMatch = std::move(match);
+						}
+					}
+				}
+
+				if (leftBegin < source.size())
+				{
+					const size_t nextLeftBegin = ShrinkLeft(source, leftBegin);
+					if (nextLeftBegin != leftBegin)
+					{
+						leftBegin = nextLeftBegin;
+						progressed = true;
+
+						ShrinkTranslationMatch match;
+						if (TryBuildShrinkMatch(source, leftBegin, source.size(), "suffix", fullKey, searchedKeys, match, depth) &&
+							IsBetterShrinkMatch(match, bestMatch))
+						{
+							bestMatch = std::move(match);
+						}
+					}
+				}
+
+				if (bestMatch.found)
+				{
+					translated = bestMatch.translated;
+					if (g_bEnableDictionaryTranslationLog)
+						gLog.FormattedMessage("tnvse_dictionary: shrink fuzzy result[%s]: \"%s\" ->\"%s\"",
+							bestMatch.side.c_str(), source.c_str(), translated.c_str());
+					return true;
+				}
+
+				if (!progressed)
+					break;
+			}
+
+			return false;
+		}
+
+		void TrimPositiveCache()
+		{
+			while (s_positiveCache.size() > kPositiveCacheLimit
+				&& !s_positiveCacheOrder.empty())
+			{
+				s_positiveCache.erase(*s_positiveCacheOrder.front());
+				s_positiveCacheOrder.pop_front();
+			}
+		}
+
+		void TrimNegativeCache()
+		{
+			while (s_negativeCache.size() > kNegativeCacheLimit
+				&& !s_negativeCacheOrder.empty())
+			{
+				s_negativeCache.erase(*s_negativeCacheOrder.front());
+				s_negativeCacheOrder.pop_front();
+			}
+		}
+
+		void StorePositiveCache(std::string_view key, const std::string& translated)
+		{
+			auto [entry, inserted] = s_positiveCache.emplace(
+				std::string(key), translated);
+			if (inserted)
+				s_positiveCacheOrder.push_back(&entry->first);
+			TrimPositiveCache();
+		}
+
+		void StoreNegativeCache(std::string_view key)
+		{
+			auto [entry, inserted] = s_negativeCache.emplace(key);
+			if (inserted)
+				s_negativeCacheOrder.push_back(&*entry);
+			TrimNegativeCache();
+		}
+	}
+
+	// ---- main translation engine ----
+	bool TryTranslateWindows1252Text(
+		const std::string& source, std::string& translated, int depth)
+	{
+		translated.clear();
+		if (source.empty() || depth >= 4 || !s_dictionaryLoaded ||
+			!HasAlphabet(source))
+		{
+			return false;
+		}
+
+		PreparedTranslationMatch match;
+		if (!TryTranslateWindows1252Source(source, match, depth) &&
+			!TryTranslateWindows1252QuoteCanonicalSource(
+				source, match, depth, true))
+		{
+			DeterministicUiTranslation uiTranslation;
+			if (!TryTranslateDeterministicUiSource(
+				source, uiTranslation, depth))
+			{
+				return false;
+			}
+			translated = std::move(uiTranslation.translated);
+			return true;
+		}
+		translated = std::move(match.translated);
+		return true;
+	}
+
+	bool TryTranslateExactText(const std::string& source, std::string& translated, int depth)
+	{
+		translated.clear();
+		if (source.empty() || depth >= 4 || !s_dictionaryLoaded || !HasAlphabet(source))
+			return false;
+
+		PreparedTranslationMatch match;
+		if (TryTranslateWindows1252ExactSource(source, match, depth))
+		{
+			translated = std::move(match.translated);
+			return true;
+		}
+
+		const MappedPreparedSource mappedSource = PrepareSourceForLookupMapped(source);
+		if (mappedSource.containsWindows1252SmartQuote &&
+			TryTranslateWindows1252QuoteCanonicalSource(
+				source, match, depth, false, true))
+		{
+			translated = std::move(match.translated);
+			return true;
+		}
+		if (mappedSource.key.empty())
+			return false;
+		if (!TryTranslateExactKey(mappedSource.key, match, depth))
+			return false;
+
+		translated = std::move(match.translated);
+		return true;
+	}
+
+	bool TranslateInternal(const char* source, std::string& translated, int depth)
+	{
+		if (!source || !*source || !s_dictionaryLoaded)
+			return false;
+		if (!HasAlphabet(source))
+			return false;
+
+		std::string raw(source);
+		PreResolveGameVariables(raw);
+		const std::string originalRaw = raw;
+		const std::string_view cacheKey(originalRaw);
+
+		const auto tryWindows1252Direct = [&](const std::string& candidate)
+			{
+				PreparedTranslationMatch match;
+				if (!TryTranslateWindows1252Source(candidate, match, depth))
+					return false;
+
+				translated = match.translated;
+				if (g_bEnableDictionaryTranslationLog)
+				{
+					gLog.FormattedMessage(
+						"tnvse_dictionary: TranslateInternal Windows-1252 raw %s match:",
+						match.exact ? "exact" : "wildcard");
+					gLog.FormattedMessage("tnvse_dictionary:   source=\"%s\"", source);
+					gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+						s_entries[match.entryIndex].key.c_str(), translated.c_str());
+				}
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			};
+
+		// Cache by the original text because wildcard captures preserve source casing.
+		const std::string_view cacheLookup(raw);
+		auto positive = s_positiveCache.find(cacheLookup);
+		if (positive != s_positiveCache.end())
+		{
+			translated = positive->second;
+			return true;
+		}
+		if (s_negativeCache.find(cacheLookup) != s_negativeCache.end())
+			return false;
+
+		std::string id;
+		bool explicitMetadataId = false;
+		std::string withoutId = StripLeadingId(raw, id, explicitMetadataId);
+		if (!id.empty())
+		{
+			auto idIt = s_idIndex.find(id);
+			if (idIt != s_idIndex.end())
+			{
+				if (ExpandTarget(s_entries[idIt->second], {}, translated, depth))
+				{
+					StorePositiveCache(cacheKey, translated);
+					return true;
+				}
+			}
+			if (explicitMetadataId)
+				raw = withoutId;
+		}
+
+		if (tryWindows1252Direct(raw))
+			return true;
+
+		MappedPreparedSource mappedSource = PrepareSourceForLookupMapped(raw);
+		PreparedTranslationMatch quoteCanonicalMatch;
+		if (mappedSource.containsWindows1252SmartQuote &&
+			TryTranslateWindows1252QuoteCanonicalSource(
+				raw, quoteCanonicalMatch, depth, false, true))
+		{
+			translated = quoteCanonicalMatch.translated;
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage(
+					"tnvse_dictionary: TranslateInternal Windows-1252 quote-canonical exact match:");
+				gLog.FormattedMessage("tnvse_dictionary:   source=\"%s\"", source);
+				gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+					s_entries[quoteCanonicalMatch.entryIndex].key.c_str(),
+					translated.c_str());
+			}
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		std::string key = mappedSource.key;
+		const bool sourceContainsDbcs = mappedSource.containsDbcs;
+		const bool sourceIsMixed = sourceContainsDbcs && HasAlphabet(raw);
+		const bool allowPatternTranslation = !sourceContainsDbcs
+			|| (g_bEnableDictionaryMixedSourceTranslation && sourceIsMixed);
+		PreparedTranslationMatch fullMatch;
+		if (TryTranslateExactKey(key, fullMatch, depth))
+		{
+			translated = fullMatch.translated;
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage("tnvse_dictionary: TranslateInternal %s match:", fullMatch.exact ? "exact" : "wildcard");
+				gLog.FormattedMessage("tnvse_dictionary:   source=\"%s\"", source);
+				gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+					s_entries[fullMatch.entryIndex].key.c_str(), translated.c_str());
+			}
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		DeterministicUiTranslation uiTranslation;
+		if (TryTranslateDeterministicUiSource(raw, uiTranslation, depth))
+		{
+			translated = std::move(uiTranslation.translated);
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage(
+					"tnvse_dictionary: TranslateInternal deterministic-ui match syntax=%s translatedSlots=%u:",
+					dictionary_ui_syntax::KindName(uiTranslation.kind),
+					uiTranslation.translatedSlots);
+				gLog.FormattedMessage("tnvse_dictionary:   source=\"%s\"", source);
+				gLog.FormattedMessage("tnvse_dictionary:   result=\"%s\"",
+					translated.c_str());
+			}
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		constexpr size_t kLargeMultilineDocumentBytes = 4096;
+		const bool largeMultilineDocument = depth == 0
+			&& raw.size() >= kLargeMultilineDocumentBytes
+			&& (raw.find('\n') != std::string::npos
+				|| raw.find('\r') != std::string::npos);
+		const bool hasWindows1252CandidateByte =
+			ContainsWindows1252ExtendedByte(raw);
+		const bool hasWindows1252Aliases = !s_windows1252ExactIndex.empty() ||
+			!s_windows1252WildcardIndex.empty();
+		const auto tryWindows1252Backed = [&](const char* method, auto&& attempt)
+			{
+				if (!sourceContainsDbcs || !hasWindows1252CandidateByte ||
+					!hasWindows1252Aliases)
+					return false;
+				const UInt64 serialBefore = s_windows1252MatchSerial;
+				std::string candidate;
+				if (!attempt(candidate) ||
+					s_windows1252MatchSerial == serialBefore)
+				{
+					return false;
+				}
+				translated = std::move(candidate);
+				if (g_bEnableDictionaryTranslationLog)
+				{
+					gLog.FormattedMessage(
+						"tnvse_dictionary: Windows-1252-backed structured match method=%s",
+						method);
+				}
+				return true;
+			};
+		if (largeMultilineDocument)
+		{
+			// Notes and terminal documents are complete prose blocks, not one UI
+			// label. Whole-document wildcard, regex, fuzzy and shrinking searches
+			// have super-linear worst cases and can monopolize the game's UI thread.
+			// Preserve useful translation semantics by accepting the full exact/ID
+			// matches above and exact per-line matches here, then cache the result.
+			const bool beforeLinebreakMatch =
+				g_bEnableDictionaryBeforeLinebreakTranslation &&
+				((!sourceContainsDbcs &&
+					TryTranslateBeforeLinebreakText(raw, translated, depth)) ||
+					tryWindows1252Backed("large-before-linebreak",
+						[&](std::string& candidate)
+						{
+							return TryTranslateBeforeLinebreakText(
+								raw, candidate, depth);
+						}));
+			if (beforeLinebreakMatch)
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage(
+					"tnvse_dictionary: large multiline document used bounded exact-only policy bytes=%u",
+					static_cast<UInt32>(raw.size()));
+			}
+			StoreNegativeCache(cacheKey);
+			return false;
+		}
+
+		if (sourceContainsDbcs && hasWindows1252CandidateByte &&
+			raw.size() <= kWindows1252StructuredMaxBytes)
+		{
+			if (g_bEnableMuxQuestPromptTranslation &&
+				tryWindows1252Backed("mux-quest",
+					[&](std::string& candidate)
+					{
+						return TryTranslateMuxQuestPrompt(raw, candidate, depth);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryPerkDescriptionTranslation &&
+				tryWindows1252Backed("perk-description",
+					[&](std::string& candidate)
+					{
+						return TryTranslatePerkDescription(
+							raw, candidate, depth, false);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryItemEffectTranslation &&
+				tryWindows1252Backed("item-effect",
+					[&](std::string& candidate)
+					{
+						return TryTranslateItemEffectList(raw, candidate, depth);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryMultiplierTextTranslation &&
+				tryWindows1252Backed("multiplier",
+					[&](std::string& candidate)
+					{
+						return TryTranslateMultiplierText(raw, candidate, depth);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryWildcardTranslation &&
+				tryWindows1252Backed("wildcard-capture",
+					[&](std::string& candidate)
+					{
+						PreparedTranslationMatch match;
+						if (!TryTranslateWildcardKey(
+							key, match, depth, &mappedSource))
+						{
+							return false;
+						}
+						candidate = std::move(match.translated);
+						return true;
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryTrimBypassFuzzyTranslation &&
+				tryWindows1252Backed("trim-bypass-fuzzy",
+					[&](std::string& candidate)
+					{
+						return TryTranslateFuzzyText(
+							originalRaw, candidate, depth);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryRegexTranslation &&
+				tryWindows1252Backed("regex-capture",
+					[&](std::string& candidate)
+					{
+						return TryTranslateRegexText(
+							raw, candidate, sourceIsMixed);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+			if (g_bEnableDictionaryShrinkFuzzyTranslation &&
+				tryWindows1252Backed("shrink-fuzzy",
+					[&](std::string& candidate)
+					{
+						return TryTranslateShrinkText(raw, candidate, depth);
+					}))
+			{
+				StorePositiveCache(cacheKey, translated);
+				return true;
+			}
+		}
+
+		// Per-line exact lookup is linear and remains safe for longer documents;
+		// the wildcard/regex/fuzzy probes above stay bounded to short UI text.
+		if (sourceContainsDbcs && hasWindows1252CandidateByte &&
+			g_bEnableDictionaryBeforeLinebreakTranslation &&
+			tryWindows1252Backed("before-linebreak",
+				[&](std::string& candidate)
+				{
+					return TryTranslateBeforeLinebreakText(raw, candidate, depth);
+				}))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableMuxQuestPromptTranslation && TryTranslateMuxQuestPrompt(raw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (sourceIsMixed && g_bEnableDictionaryMixedSourceTranslation &&
+			g_bEnableDictionaryPerkDescriptionTranslation &&
+			TryTranslatePerkDescription(raw, translated, depth, true))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryPerkDescriptionTranslation &&
+			TryTranslatePerkDescription(raw, translated, depth, false))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryItemEffectTranslation && TryTranslateItemEffectList(raw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryMultiplierTextTranslation && TryTranslateMultiplierText(raw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (allowPatternTranslation && g_bEnableDictionaryWildcardTranslation && TryTranslateWildcardKey(key, fullMatch, depth, &mappedSource))
+		{
+			translated = fullMatch.translated;
+			if (g_bEnableDictionaryTranslationLog)
+			{
+				gLog.FormattedMessage("tnvse_dictionary: TranslateInternal %swildcard match:",
+					sourceIsMixed ? "mixed-source " : "");
+				gLog.FormattedMessage("tnvse_dictionary:   source=\"%s\"", source);
+				gLog.FormattedMessage("tnvse_dictionary:   entry=\"%s\" ->\"%s\"",
+					s_entries[fullMatch.entryIndex].key.c_str(), translated.c_str());
+			}
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryTrimBypassFuzzyTranslation && TryTranslateFuzzyText(originalRaw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (allowPatternTranslation && g_bEnableDictionaryRegexTranslation && TryTranslateRegexText(raw, translated, sourceIsMixed))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryBeforeLinebreakTranslation && TryTranslateBeforeLinebreakText(raw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (!sourceContainsDbcs && g_bEnableDictionaryShrinkFuzzyTranslation && TryTranslateShrinkText(raw, translated, depth))
+		{
+			StorePositiveCache(cacheKey, translated);
+			return true;
+		}
+
+		if (g_bEnableDictionaryTranslationLog)
+			gLog.FormattedMessage("tnvse_dictionary: TranslateInternal no match: \"%s\" ->negative cache", source);
+
+		StoreNegativeCache(cacheKey);
+		return false;
+	}
+
+	// ---- public API ----
+
+	// Retail appends a localized key name to this hard-coded English sentence.
+	// Match only this known engine prefix, then preserve/normalize the suffix
+	// independently. Do not enable broad mixed-source fuzzy translation.
+	bool TryTranslateEngineLockPrefix(const char* source, std::string& translated)
+	{
+		static constexpr std::string_view prefix =
+			"This lock cannot be picked. It requires a key to open.";
+		if (!source) return false;
+		const std::string_view input(source);
+		if (input.size() < prefix.size() ||
+			input.compare(0, prefix.size(), prefix) != 0) return false;
+		const std::string_view suffix = input.substr(prefix.size());
+		if (!suffix.empty() && suffix.front() != ' ' && suffix.front() != '\r'
+			&& suffix.front() != '\n' && suffix.front() != '\t') return false;
+		std::string head;
+		if (!TryTranslateExactText(std::string(prefix), head, 0)) return false;
+		const char* tail = source + prefix.size();
+		std::string converted;
+		ConvertToMultiByte(tail, converted, true);
+		translated = head;
+		translated += tail;
+		return true;
+	}
+
+	bool TranslateText(const char* source, std::string& translated)
+	{
+		if (ShouldBypassDictionaryTranslation())
+			return false;
+		if (TryTranslateEngineLockPrefix(source, translated))
+			return true;
+		const bool result = TranslateInternal(source, translated, 0);
+		return result;
+	}
+
+	bool TranslateRichText(const char* source, std::string& translated)
+	{
+		translated.clear();
+		if (ShouldBypassDictionaryTranslation() || !source || !*source)
+			return false;
+
+		const RichTextParts parts = ExtractRichTextParts(source);
+		if (parts.visibleText.empty())
+			return false;
+
+		std::string translatedBody;
+		if (!TranslateText(parts.visibleText.c_str(), translatedBody))
+			return false;
+
+		translated.reserve(parts.prefix.size() + translatedBody.size() + parts.suffix.size());
+		translated = parts.prefix;
+		translated += translatedBody;
+		translated += parts.suffix;
+		return true;
+	}
+
+} // namespace fonthook

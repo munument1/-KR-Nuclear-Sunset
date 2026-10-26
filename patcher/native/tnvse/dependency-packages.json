@@ -1,0 +1,10 @@
+[
+  {
+    "package": "Microsoft.DXSDK.D3DX.9.29.952.8",
+    "sha256": "ead0906ae8a26c18a7525da7490127a2110f7c58f18293738283e30e97c6ea4b"
+  },
+  {
+    "package": "VC-LTL.5.3.1",
+    "sha256": "5df98b0a58411ad1da9101b3a3892c7680711f076e5d1f38741779515f7070ac"
+  }
+]

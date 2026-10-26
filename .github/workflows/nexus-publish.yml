@@ -180,14 +180,34 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
-            [b]v1.0.7 update (2026-10-24):[/b] Fixed mixed-encoding perk descriptions and requirements, untranslated runtime suffixes and consumable notifications, and the JIP Big Guns description. Restored internal ShowOff/UI Organizer lookup identifiers to prevent false installed-version -1 warnings. Existing requirements checks remain enabled.
-            [b]v1.0.7 업데이트:[/b] 퍽 설명·요구 조건 깨짐, 실행 중 추가되는 영어 문구와 아이템 사용 알림, 중화기 설명을 수정했습니다. ShowOff/UI Organizer 버전 -1 오경고도 복구했습니다. 전체 패쳐를 새 폴더에 풀고 Output을 새로 생성하여 적용한 뒤 게임을 완전히 재시작하세요. TranslationData만 교체하지 마세요.
+            [b]v1.0.8 update (2026-10-26):[/b] Corrected reviewed scripts that restore English item, location and NPC names, fast-travel prompts and companion messages. Updated tNVSE with strict UTF-8/lossless conversion, door prompt normalization and an exact key-required engine message translation. Same-save in-game verification remains pending.
+            [b]v1.0.8 업데이트:[/b] 펑가 열매·장비·장소·NPC 등의 이름을 영어로 덮어쓰는 스크립트, 빠른 이동·동료 안내를 수정했습니다. tNVSE의 인코딩 처리와 문 안내 조합을 보강하고 열쇠 필요 안내를 번역했습니다. 전체 패쳐를 새 폴더에 풀고 새 Output을 적용한 뒤 게임을 재시작하세요. TranslationData만 교체하지 마세요. 동일 세이브의 실게임 확인은 필요합니다.
             [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main
           archive_existing_version: 'false'
           allow_mod_manager_download: 'false'
           update_mod_version: 'true'
+
+      - name: Verify published Nexus version through API
+        if: steps.upload.outcome == 'success'
+        uses: actions/github-script@v7
+        env:
+          NEXUS_API_KEY: ${{ secrets.NEXUS_KEY }}
+          FILE_ID: ${{ steps.nexus.outputs.file_id }}
+          VERSION: ${{ steps.release.outputs.version }}
+        with:
+          script: |
+            const key = process.env.NEXUS_API_KEY;
+            core.setSecret(key);
+            const response = await fetch('https://api.nexusmods.com/v3/mod-files/' + process.env.FILE_ID + '/versions', {
+              headers: { apikey: key, 'User-Agent': 'KR-Patcher-Release-Sync' }, redirect: 'error'
+            });
+            if (!response.ok) throw new Error('Nexus readback HTTP ' + response.status);
+            const versions = (await response.json()).data.versions;
+            const published = versions.find(v => v.version === process.env.VERSION && v.category === 'main');
+            if (!published) throw new Error('New main version missing from Nexus API readback');
+            core.info('Verified Nexus main version: ' + published.version);
 
       - name: Write run summary
         if: steps.release.outputs.ready == 'true'

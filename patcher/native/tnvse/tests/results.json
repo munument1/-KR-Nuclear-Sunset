@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [],
+    "exit_code": 0,
+    "output": "DICTIONARY checked=4612 rejected=0\nRESULT tests=72 failures=0 particle=0\n"
+  },
+  {
+    "arguments": [
+      "--particle"
+    ],
+    "exit_code": 0,
+    "output": "RESULT tests=68 failures=0 particle=1\n"
+  }
+]

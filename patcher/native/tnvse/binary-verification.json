@@ -1,0 +1,68 @@
+{
+  "baseline": {
+    "path": "D:\\Codex_Trans\\\ube44\ubc14\\tnvse-fix-20261026\\baseline-build\\tnvse.dll",
+    "bytes": 3414016,
+    "machine": "I386",
+    "format": "PE32",
+    "sha256": "8a968a00c775ec906ba3d406fb2830bfde2775b9391e4a651ef8d01bdbd706e4",
+    "exports": [
+      "NVSEPlugin_Load",
+      "NVSEPlugin_Query"
+    ],
+    "imports": [
+      "api-ms-win-core-synch-l1-2-0.dll",
+      "d3dx9_43.dll",
+      "imm32.dll",
+      "kernel32.dll",
+      "msvcrt.dll",
+      "ole32.dll",
+      "oleaut32.dll",
+      "user32.dll"
+    ]
+  },
+  "candidate": {
+    "path": "D:\\Codex_Trans\\\ube44\ubc14\\tnvse-fix-20261026\\build\\bin\\Release\\tnvse.dll",
+    "bytes": 3418112,
+    "machine": "I386",
+    "format": "PE32",
+    "sha256": "0bb5c3c5387fb76679a1bef7dbdd2bced05c7fa9e849d3d80613d5814b58c52f",
+    "exports": [
+      "NVSEPlugin_Load",
+      "NVSEPlugin_Query"
+    ],
+    "imports": [
+      "api-ms-win-core-synch-l1-2-0.dll",
+      "d3dx9_43.dll",
+      "imm32.dll",
+      "kernel32.dll",
+      "msvcrt.dll",
+      "ole32.dll",
+      "oleaut32.dll",
+      "user32.dll"
+    ]
+  },
+  "installed_before": {
+    "path": "C:\\Modlists\\NuclearSunset\\mods\\Nuclear Sunset - Korean Fonts for tNVSE\\NVSE\\plugins\\tnvse.dll",
+    "bytes": 3416064,
+    "machine": "I386",
+    "format": "PE32",
+    "sha256": "88c7bbbd3498b08deb86bcdb8ac951344110df1a367759455c5c92a11ed13fdd",
+    "exports": [
+      "NVSEPlugin_Load",
+      "NVSEPlugin_Query"
+    ],
+    "imports": [
+      "api-ms-win-core-synch-l1-2-0.dll",
+      "d3dx9_43.dll",
+      "imm32.dll",
+      "kernel32.dll",
+      "msvcrt.dll",
+      "ole32.dll",
+      "oleaut32.dll",
+      "user32.dll"
+    ]
+  },
+  "architecture_verified": true,
+  "exports_unchanged": true,
+  "runtime_dependencies_unchanged": true
+}

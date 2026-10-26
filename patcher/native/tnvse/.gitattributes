@@ -1,0 +1,4 @@
+# Unified-diff context deliberately retains the original indentation.
+source.patch -whitespace text eol=lf
+Src/** text eol=lf
+run_regression.py text eol=lf

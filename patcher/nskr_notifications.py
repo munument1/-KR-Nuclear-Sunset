@@ -73,7 +73,7 @@ def compiled_edit(code,old,new):
                 return code,[],'already'
     return code,[],'compiled_literal_not_found'
 
-def script_edit(source,code,mappings):
+def script_edit(source,code,mappings,*,preserve_utf8_literals=()):
     by_source={row['old']:row['new'] for row in mappings}
     edits=[];changes=[];issues=[];initial_code=code;ledger=[]
     offset=0
@@ -85,6 +85,7 @@ def script_edit(source,code,mappings):
                 raw=match[1]
                 try:old=raw.decode('utf-8')
                 except UnicodeDecodeError:continue
+                if old in preserve_utf8_literals:continue
                 new=by_source.get(old,old if HANGUL.search(old) else None)
                 if new is None:continue
                 if args(old)!=args(new):raise ValueError('Notification format arguments changed')
@@ -131,7 +132,15 @@ def patch_bytes(original,filename,plan):
             indices={k:i for i,(k,h,v) in enumerate(slots)}
             if b'SCTX' not in indices or b'SCDA' not in indices:return payload
             source,code=slots[indices[b'SCTX']][2],slots[indices[b'SCDA']][2]
-            out_source,out_code,records,errors=script_edit(source,code,relevant.get(edid,[]))
+            # A small reviewed set consumes raw UTF-8 actor/location names.
+            # Do not undo its consumer-specific encoding on regeneration.
+            from nskr_dynamic_display import PLAN as DYNAMIC_PLAN
+            preserve=[new for old,new in DYNAMIC_PLAN.get((filename.casefold(),edid),())]
+            from nskr_runtime_override_data import COMPILED as OVERRIDES
+            preserve.extend(new for old,new,encoding in
+                            OVERRIDES.get((filename.casefold(),edid),()) if encoding=='utf-8')
+            out_source,out_code,records,errors=script_edit(source,code,relevant.get(edid,[]),
+                                                         preserve_utf8_literals=preserve)
             changes.extend({**x,'edid':edid} for x in records)
             issues.extend({**x,'edid':edid} for x in errors)
             if out_code!=code or out_source!=source:

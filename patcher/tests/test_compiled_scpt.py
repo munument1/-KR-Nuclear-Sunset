@@ -141,6 +141,8 @@ class InstalledSourceTests(unittest.TestCase):
                 source = MODS.joinpath(*spec['relative_plugin'].split('/'))
                 if not source.is_file():
                     self.skipTest('Installed Nuclear Sunset originals unavailable')
+                if hashlib.sha256(source.read_bytes()).hexdigest() != spec['expected_sha256']:
+                    self.skipTest('Pinned English fixture unavailable: installed plugin was modified')
                 self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), spec['expected_sha256'])
                 self.assertTrue(inspect_record(source, spec)['schr_compiled_size_matches_scda'])
                 with tempfile.TemporaryDirectory() as temp:
