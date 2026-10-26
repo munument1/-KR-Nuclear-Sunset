@@ -22,6 +22,10 @@ import nskr_compiled_scpt
 import nskr_issue13
 import nskr_perk_display
 import nskr_notifications
+import nskr_composed_display
+import nskr_dynamic_display
+import nskr_runtime_text
+import nskr_runtime_overrides
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -282,6 +286,48 @@ def format_plugin_report(report):
         lines.append('[이전 한국어 번역 확인 필요]')
         lines.append(f"기존 한글 또는 변경된 원문과 일치하지 않는 항목: {report['unresolved_previous_translations']}개")
         lines.append('이전 버전 TranslationData로 출처가 확인되기 전에는 변경하지 않았습니다.')
+        lines.append('')
+    composition_files = [row for row in report.get('files', [])
+                         if row.get('composition_display') or row.get('composition_review_notes')]
+    if composition_files:
+        lines.append('[대화 판정·효과 종료 알림 인코딩]')
+        for row in composition_files:
+            lines.append(f"- {row['output_path']} · CP949 변환 {len(row.get('composition_display', []))}곳 · "
+                         f"검토 필요 {len(row.get('composition_review_notes', []))}곳")
+            for note in row.get('composition_review_notes', []):
+                lines.append(f"  {note['signature']}/{note['field']} {note['form']} · {note['reason']}")
+        lines.append('기술·퍽 판정 선택지와 약물 효과 종료 알림은 게임 내 확인이 필요합니다.')
+        lines.append('')
+    dynamic_files = [row for row in report.get('files', [])
+                     if row.get('dynamic_display') or row.get('dynamic_encoding_review_notes')]
+    if dynamic_files:
+        lines.append('[동적 NPC·위치 이름 알림 인코딩]')
+        for row in dynamic_files:
+            lines.append(f"- {row['output_path']} · UTF-8 메시지 피연산자 {len(row.get('dynamic_display', []))}곳 · "
+                         f"검토 필요 {len(row.get('dynamic_encoding_review_notes', []))}곳")
+            for note in row.get('dynamic_encoding_review_notes', []):
+                lines.append(f"  {note['edid']} · {note['reason']}")
+        lines.append('동료 치료·호출 알림은 게임 내 확인이 필요합니다.')
+        lines.append('')
+    runtime_text_files = [row for row in report.get('files', [])
+                          if row.get('runtime_text') or row.get('runtime_text_review_notes')]
+    if runtime_text_files:
+        lines.append('[런타임 아이템 이름·이동 안내]')
+        for row in runtime_text_files:
+            lines.append(f"- {row['output_path']} · 수정 {len(row.get('runtime_text', []))}곳 · "
+                         f"검토 필요 {len(row.get('runtime_text_review_notes', []))}곳")
+            for note in row.get('runtime_text_review_notes', []):
+                lines.append(f"  {note.get('key', note.get('source', ''))} · {note['reason']}")
+        lines.append('실행 중 이름·설정을 다시 쓰는 스크립트이므로 게임을 완전히 종료한 뒤 재실행해 확인하세요.')
+        lines.append('')
+    override_files = [r for r in report.get('files', [])
+                      if r.get('runtime_overrides') or r.get('override_review_notes')]
+    if override_files:
+        lines.append('[실행 중 영어 표시 덮어쓰기 방지]')
+        for row in override_files:
+            lines.append(f"- {row['output_path']} · 수정 {len(row.get('runtime_overrides', []))}곳")
+            for note in row.get('override_review_notes', []):
+                lines.append(f"  {note.get('edid', note.get('source', ''))} · {note['reason']}")
         lines.append('')
     lines.extend([
         ('개발용 시험에서는 신규 플러그인 자동 상속을 사용하지 않습니다.'
@@ -1108,6 +1154,10 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         finalize_perk_display(stage, report['files'])
         nskr_notifications.add_outputs(installation,stage,report['files'])
         nskr_notifications.finalize(stage,report['files'])
+        nskr_composed_display.finalize(stage, report['files'])
+        nskr_dynamic_display.finalize(stage, report['files'])
+        nskr_runtime_text.finalize(installation, stage, report['files'])
+        nskr_runtime_overrides.finalize(installation, stage, report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(

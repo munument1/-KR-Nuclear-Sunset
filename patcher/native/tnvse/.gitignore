@@ -1,0 +1,6 @@
+tests/*.exe
+tests/*.obj
+tests/*.bin
+tests/*.cmd
+tests/*.log
+tests/regression.cpp

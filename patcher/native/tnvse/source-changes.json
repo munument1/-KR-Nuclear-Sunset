@@ -1,0 +1,22 @@
+{
+  "font/encoding.cpp": {
+    "before_sha256": "9c7f67bbd76795dd6b1dbe8f79dbb037f449c8c9c62d506b16c71c14be8d54e5",
+    "after_sha256": "b8749e09d5a08bf7c15c29316d1104d98e1c5c6a6b1145acbe46688c86d234d1"
+  },
+  "font/encoding.h": {
+    "before_sha256": "937563468a7766594eb46b91d88e83b978610621606b8d83ea0e4e3e3ef0190a",
+    "after_sha256": "8664ae3ae3c0559881ff1babcbc89a6387177d51843e0b8fc411d3f105dc332f"
+  },
+  "font/text_hooks.cpp": {
+    "before_sha256": "d0b9b7d48945fe9c194a92136b6df12ca8a537c54fa74978457a8383acf50514",
+    "after_sha256": "0dbdd1ea81a8189a4950b29f0fcbb2a1e9779592d3ee0c02bcee72aa558b634e"
+  },
+  "game/game_hooks.cpp": {
+    "before_sha256": "ec4b2079c734ec8aeec608fa5dffa1de44e2b8e1a807ee89deefb93c28aa29cd",
+    "after_sha256": "33df7fa20e883c387aeed1974b5029ad44489544853f534fe574a77b29b02271"
+  },
+  "dictionary/dictionary_translate.cpp": {
+    "before_sha256": "1e4e3483a1f4f734ff8ed5533929cea5c8d6257f7f6e9c8d40f8964348de0850",
+    "after_sha256": "b31490ad2f9d12eb1c33c6a6d7e8bb76b31b192fe93804c594eb7959d2b1fcb9"
+  }
+}
