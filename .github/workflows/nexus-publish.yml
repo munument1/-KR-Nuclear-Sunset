@@ -3,10 +3,6 @@ name: Publish patcher to Nexus Mods
 on:
   release:
     types: [published]
-  workflow_run:
-    workflows: ['Build and release Nuclear Sunset Pretendard font fix']
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
@@ -27,7 +23,6 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
