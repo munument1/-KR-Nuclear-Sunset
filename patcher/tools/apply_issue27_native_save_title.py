@@ -12,7 +12,7 @@ from pathlib import Path
 
 SOURCE_SHA256 = "214575469b5b6a5bd5a3f8b2de18ab4769e105be3368feb7085254320dcfd824"
 
-INCLUDES = '#include "BGSSaveLoadManager.hpp"\n#include "hook_identity.h"\n'
+INCLUDES = '#include "BGSSaveLoadManager.hpp"\n#include "hook_identity.h"\n#include <algorithm>\n#include <string>\n'
 ENTRY = "namespace fonthook\n{\n"
 HELPER = r"""
 	// Issue #27: save headers can contain UTF-8 player titles while nearby UI
