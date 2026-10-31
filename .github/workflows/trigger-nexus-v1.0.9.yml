@@ -1,0 +1,30 @@
+name: Dispatch published v1.0.9 to Nexus
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trigger-nexus-v1.0.9.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Confirm published GitHub release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.0.9 --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease,assets \
+            --jq '{draft:.isDraft,prerelease:.isPrerelease,files:[.assets[].name]}'
+      - name: Dispatch existing Nexus publishing workflow for v1.0.9
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run nexus-publish.yml --repo "$GITHUB_REPOSITORY" \
+            --ref main -f tag=v1.0.9 -f dry_run=false
+          echo "Dispatched explicit Nexus publish for the verified v1.0.9 GitHub release."
