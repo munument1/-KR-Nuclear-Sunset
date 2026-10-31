@@ -102,7 +102,9 @@ MAKE = "\t\t\tconst char* pStr = apTextString->pString;\n\t\t\tstd::string sConv
 def apply(raw: bytes) -> bytes:
     if hashlib.sha256(raw).hexdigest() != SOURCE_SHA256:
         raise ValueError("Source SHA mismatch: do not apply to another tNVSE revision")
-    src = raw.decode("utf-8")
+    decoded = raw.decode("utf-8")
+    original_crlf = "\r\n" in decoded
+    src = decoded.replace("\r\n", "\n")
     for original in ('#include "native_calls.h"\n', ENTRY, CREATE, MAKE):
         if src.count(original) != 1:
             raise ValueError("Native source structural anchor missing/ambiguous")
@@ -115,7 +117,7 @@ def apply(raw: bytes) -> bytes:
     src = src.replace(MAKE,
         "\t\t\tNormalizeMixedSaveTitleForUi(apTextString);\n" + MAKE)
     assert src.count("NormalizeMixedSaveTitleForUi(") == 3
-    return src.encode("utf-8")
+    return (src.replace("\n", "\r\n") if original_crlf else src).encode("utf-8")
 
 
 def main():
