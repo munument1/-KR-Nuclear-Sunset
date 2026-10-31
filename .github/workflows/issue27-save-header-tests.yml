@@ -27,4 +27,4 @@ jobs:
         run: |
           curl --fail --location --silent --show-error --max-time 60 "$SOURCE" -o "$RUNNER_TEMP/issue27-reporter.zip"
           cd patcher
-          python tools/verify_issue27_reporter_save.py "$RUNNER_TEMP/issue27-reporter.zip"
+          python -m tools.verify_issue27_reporter_save "$RUNNER_TEMP/issue27-reporter.zip"
