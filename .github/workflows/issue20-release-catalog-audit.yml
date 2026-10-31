@@ -6,6 +6,7 @@ on:
       - 'patcher/tools/audit_issue20_release_casings.py'
       - 'patcher/tools/download_issue_evidence.py'
       - 'patcher/tools/audit_issue20_missing_strings.py'
+      - 'patcher/tools/audit_issue20_book_effect_prefix.py'
       - '.github/workflows/issue20-release-catalog-audit.yml'
   workflow_dispatch:
 
@@ -36,6 +37,8 @@ jobs:
           path: ${{ runner.temp }}/nskr-audit/issue20-casing-evidence.json
       - name: Audit screenshot-visible English mappings
         run: python patcher/tools/audit_issue20_missing_strings.py "$RUNNER_TEMP/nskr-audit/NuclearSunset-TranslationData-v1.0.8.zip"
+      - name: Inspect book effect prefix in published mappings
+        run: python patcher/tools/audit_issue20_book_effect_prefix.py "$RUNNER_TEMP/nskr-audit/NuclearSunset-TranslationData-v1.0.8.zip"
       - name: Collect screenshots linked in issues 20 and 22
         env:
           GH_TOKEN: ${{ github.token }}
