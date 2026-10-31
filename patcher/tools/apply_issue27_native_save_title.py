@@ -12,9 +12,38 @@ from pathlib import Path
 
 SOURCE_SHA256 = "214575469b5b6a5bd5a3f8b2de18ab4769e105be3368feb7085254320dcfd824"
 
-INCLUDES = '#include "BGSSaveLoadManager.hpp"\n#include "hook_identity.h"\n#include <algorithm>\n#include <string>\n'
+INCLUDES = '#include "hook_identity.h"\n#include <algorithm>\n#include <string>\n'
 ENTRY = "namespace fonthook\n{\n"
 HELPER = r"""
+	// FNV 1.4.0.525: read-only ABI prefix of BGSSaveLoadManager and
+	// SaveGameData, independently recorded in commonlib_nv.  The tNVSE 71
+	// bundled source lacks BGSSaveLoadFile.hpp, so do not include a newer
+	// BGSSaveLoadManager.hpp that changes the shipped native build.
+	struct SaveTitleDataView
+	{
+		const char* filename;
+		UInt32 unused;
+		UInt32 saveNumber;
+		const char* playerName;
+		const char* playerTitle;
+		const char* location;
+		const char* playTime;
+	};
+	struct SaveTitleListNodeView
+	{
+		SaveTitleDataView item;
+		SaveTitleListNodeView* next;
+	};
+	struct SaveTitleManagerView
+	{
+		SaveTitleListNodeView* saveList;
+		UInt32 saveCount;
+	};
+	static_assert(sizeof(SaveTitleDataView) == 0x1C);
+	static_assert(offsetof(SaveTitleDataView, playerTitle) == 0x10);
+	static_assert(sizeof(SaveTitleListNodeView) == 0x20);
+	static_assert(sizeof(SaveTitleManagerView) == 0x8);
+
 	// Issue #27: save headers can contain UTF-8 player titles while nearby UI
 	// fragments are CP949. Strictly converting the WHOLE mixed string fails.
 	// Only convert an exact UTF-8 title present in the current save-list
@@ -49,13 +78,13 @@ HELPER = r"""
 		if (!hook_identity::IsAccessibleRegion(kSaveManagerSingleton,
 				sizeof(void*), false))
 			return;
-		BGSSaveLoadManager* manager =
-			*reinterpret_cast<BGSSaveLoadManager**>(kSaveManagerSingleton);
+		SaveTitleManagerView* manager =
+			*reinterpret_cast<SaveTitleManagerView**>(kSaveManagerSingleton);
 		if (!manager || !hook_identity::IsAccessibleRegion(
 				reinterpret_cast<SIZE_T>(manager), sizeof(*manager), false))
 			return;
-		auto* node = manager->pSaveList;
-		const UInt32 cap = std::min<UInt32>(manager->uiNumSaves, 256);
+		auto* node = manager->saveList;
+		const UInt32 cap = std::min<UInt32>(manager->saveCount, 256);
 		if (!node || !cap) return;
 
 		std::string convertedText(text->pString, length);
@@ -65,7 +94,7 @@ HELPER = r"""
 					reinterpret_cast<SIZE_T>(node), sizeof(*node), false))
 				return;
 			std::string utf8Title;
-			if (ReadBoundedSaveTitle(node->m_item.pPlayerTitle, utf8Title)
+			if (ReadBoundedSaveTitle(node->item.playerTitle, utf8Title)
 				&& IsValidUTF8With3ByteMin(utf8Title.c_str()))
 			{
 				const size_t match = convertedText.find(utf8Title);
@@ -90,7 +119,7 @@ HELPER = r"""
 					return;
 				}
 			}
-			node = node->m_pkNext;
+			node = node->next;
 		}
 	}
 
