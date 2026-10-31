@@ -73,6 +73,7 @@ def inspect_header(buf: bytes):
     sep()
     language = buf[pos:pos+64].rstrip(b'\x00')
     pos += 64
+    sep()  # NV saves contain a '|' delimiter after the 64-byte language field.
     width, height, save_number = integer(), integer(), integer()
     # Header metadata stores its own name/title/level/location separate from UI.
     name, title = string(), string()
