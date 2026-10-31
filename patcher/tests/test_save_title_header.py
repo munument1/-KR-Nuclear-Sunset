@@ -6,7 +6,7 @@ from tools.audit_save_title_header import inspect_header, decode_checks
 
 def sample(title: bytes, name: bytes = b'Courier', level: int = 12):
     buf = bytearray(b'FO3SAVEGAME' + b'\0' * 8 + b'|')
-    buf += b'ENGLISH'.ljust(64, b'\0')
+    buf += b'ENGLISH'.ljust(64, b'\0') + b'|'  # actual FNV header separator
     for value in (512, 288, 123):
         buf += struct.pack('<I', value) + b'|'
     def string(v):
@@ -34,6 +34,17 @@ class SaveHeaderTests(unittest.TestCase):
                 self.assertTrue(report['name_is_non_ascii'])
                 self.assertNotIn('쿠리어', repr(report))
                 self.assertEqual(report['screen_dimensions'], [512, 288])
+
+    def test_real_issue27_utf8_title_length_without_private_data(self):
+        # Minimal synthetic version of the title and level in reporter's
+        # save (private save bytes are NOT committed).
+        title = '볼트 거주자'.encode('utf-8')
+        data = sample(title, name=b'Test', level=1)
+        report = inspect_header(data)
+        self.assertEqual(report['title']['hex'], 'ebb3bced8ab820eab1b0eca3bcec9e90')
+        self.assertEqual(report['title']['encoding_check']['utf-8']['text'], '볼트 거주자')
+        self.assertEqual(report['title']['length'], 16)
+        self.assertEqual(report['level'], 1)
 
     def test_english_title_and_invalid_bytes(self):
         plain = inspect_header(sample(b'Drifter'))
