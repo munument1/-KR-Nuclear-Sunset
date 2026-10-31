@@ -42,6 +42,10 @@ jobs:
         shell: pwsh
         run: |
           nuget install Microsoft.DXSDK.D3DX -Version 9.29.952.8 -OutputDirectory "$env:RUNNER_TEMP\\nuget" -NonInteractive
+      - name: Restore FreeType include-only dependency for source check
+        shell: pwsh
+        run: |
+          git clone --quiet --depth 1 --branch VER-2-13-3 https://github.com/freetype/freetype.git "$env:RUNNER_TEMP\\freetype"
       - name: Test x86 compiler and syntax of actual modified translation unit
         shell: pwsh
         run: |
@@ -60,6 +64,7 @@ jobs:
           $dxHeaders = Get-ChildItem -Path "$env:RUNNER_TEMP\\nuget" -Recurse -Filter d3dx9math.h
           if (-not $dxHeaders) { throw "DirectX SDK header missing" }
           $dirs += $dxHeaders | ForEach-Object { $_.DirectoryName }
+          $dirs += "$env:RUNNER_TEMP\\freetype\\include"
           $includes=@($dirs | ForEach-Object { "/I$_" })
           & cl.exe /nologo /std:c++20 /EHsc /DWIN32_LEAN_AND_MEAN /DNOMINMAX /FIPrefix.h /FIITypes.h /FIMemory.h /FIIErrors.h /c @includes "$env:RUNNER_TEMP\patched_geometry.cpp" "/Fo$env:RUNNER_TEMP\issue27_geometry.obj"
           if($LASTEXITCODE -ne 0) { throw "Native source compilation failed: $LASTEXITCODE" }
