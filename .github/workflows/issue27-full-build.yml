@@ -1,0 +1,143 @@
+name: Issue 27 full native build feasibility
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/issue27-full-build.yml'
+      - 'patcher/tools/apply_issue27_native_save_title.py'
+      - 'patcher/tools/build_v1_0_10_release.py'
+      - 'patcher/nskr.py'
+      - 'patcher/docs/releases/v1.0.10.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/issue27-full-build.yml'
+      - 'patcher/tools/build_v1_0_10_release.py'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  inspect-build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exactly shipped tNVSE 71 source and inspect layout
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\rel" -Force | Out-Null
+          gh release download v1.0.9 --repo "$env:GITHUB_REPOSITORY" --pattern "NuclearSunset-Korean-Patcher-v1.0.9.zip" --dir "$env:RUNNER_TEMP\rel"
+          @'
+          import zipfile,os,pathlib
+          z=next((pathlib.Path(os.environ["RUNNER_TEMP"])/"rel").glob("*.zip"))
+          with zipfile.ZipFile(z) as a:
+              ls=[n for n in a.namelist() if "tNVSE-71-KR-UI-source/tNVSE" in n and not n.endswith('/')]
+              head=ls[0].split("tNVSE-71-KR-UI-source/tNVSE/")[0]+"tNVSE-71-KR-UI-source/tNVSE/"
+              print("Packaged source files count",len(ls))
+              for p in sorted(ls):
+                  item=p[len(head):]
+                  if item.count('/')<2 or item.lower().endswith((".sln",".vcxproj",".props",".cmake",".config",".json")):
+                      print("PATH",item)
+              root=pathlib.Path(os.environ["RUNNER_TEMP"])/"tnvse-source"
+              for m in a.infolist():
+                  if m.filename.startswith(head) and not m.is_dir():
+                      rel=m.filename[len(head):]
+                      target=root/rel
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(a.read(m))
+              print("SOURCE ROOT",root)
+          '@ | python -
+          cmake --version
+          nuget help | Select-Object -First 4
+      - name: Prepare exact pinned native source candidate
+        shell: pwsh
+        run: |
+          $src="$env:RUNNER_TEMP\tnvse-source\tnvse\Src\font\font_text_geometry.cpp"
+          python patcher/tools/apply_issue27_native_save_title.py --input $src --output "$env:RUNNER_TEMP\candidate_geometry.cpp"
+          Copy-Item -LiteralPath "$env:RUNNER_TEMP\candidate_geometry.cpp" -Destination $src
+      - name: Restore pinned NuGet prerequisites
+        shell: pwsh
+        run: |
+          nuget install Microsoft.DXSDK.D3DX -Version 9.29.952.8 -OutputDirectory "$env:RUNNER_TEMP\tnvse-source\tnvse\packages" -NonInteractive
+          nuget install VC-LTL -Version 5.3.1 -OutputDirectory "$env:RUNNER_TEMP\tnvse-source\tnvse\packages" -NonInteractive
+          Write-Output "CMake files:"
+          Get-ChildItem "$env:RUNNER_TEMP\tnvse-source" -Name | Select-Object -First 15
+      - name: Attempt Win32 native DLL configure/build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $src="$env:RUNNER_TEMP\tnvse-source"
+          if (-not (Test-Path "$src\CMakeLists.txt")) { throw "Full source snapshot missing CMakeLists.txt" }
+          cmake -S $src -B "$env:RUNNER_TEMP\tnvse-build" -A Win32 -G "Visual Studio 17 2022"
+          if($LASTEXITCODE -ne 0) { throw "configure failed" }
+          cmake --build "$env:RUNNER_TEMP\tnvse-build" --config Release --parallel 3
+          if($LASTEXITCODE -ne 0) { throw "native build failed" }
+          $dlls=@(Get-ChildItem "$env:RUNNER_TEMP\tnvse-build" -Recurse -Filter tnvse.dll)
+          if($dlls.Count -ne 1) { throw "Expected exactly one DLL, got $($dlls.Count)" }
+          $dll=$dlls[0]
+          Get-FileHash -Algorithm SHA256 $dll.FullName | Format-List
+          $pe=[System.IO.File]::ReadAllBytes($dll.FullName)
+          if($pe.Length -lt 4096 -or $pe[0] -ne 0x4d -or $pe[1] -ne 0x5a) { throw "Invalid native DLL MZ" }
+          $offset=[BitConverter]::ToInt32($pe,0x3c)
+          if($offset -lt 64 -or $offset -gt 4096 -or $pe[$offset] -ne 0x50 -or $pe[$offset+1] -ne 0x45) { throw "Invalid PE header" }
+          if([BitConverter]::ToUInt16($pe,$offset+4) -ne 0x14c) { throw "Native DLL is not Win32 x86" }
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\verified-native" -Force | Out-Null
+          Copy-Item $dll.FullName "$env:RUNNER_TEMP\verified-native\tnvse.dll"
+      - name: Upload isolated x86 DLL candidate only on native build success
+        uses: actions/upload-artifact@v4
+        with:
+          name: nskr-issue27-tnvse-candidate-x86-not-for-release
+          path: ${{ runner.temp }}/verified-native/tnvse.dll
+          retention-days: 7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+      - name: Install pinned packager dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pyinstaller==6.16.0
+      - name: Verify save-title and previous catalog regressions
+        shell: pwsh
+        working-directory: patcher
+        run: |
+          python -m unittest discover -s tests -p test_save_title_header.py -v
+          python -m unittest discover -s tests -p test_stewie_book_effects.py -v
+      - name: Fetch signed baseline v1.0.9 and verify release SHA
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\baseline" -Force | Out-Null
+          gh release download v1.0.9 --repo "$env:GITHUB_REPOSITORY" --pattern "NuclearSunset-Korean-Patcher-v1.0.9.zip" --pattern "SHA256SUMS.txt" --dir "$env:RUNNER_TEMP\baseline"
+      - name: Create v1.0.10 full patcher and TranslationData (no original files modified)
+        shell: pwsh
+        run: |
+          python patcher/tools/build_v1_0_10_release.py --base "$env:RUNNER_TEMP\baseline\NuclearSunset-Korean-Patcher-v1.0.9.zip" --checksums "$env:RUNNER_TEMP\baseline\SHA256SUMS.txt" --dll "$env:RUNNER_TEMP\verified-native\tnvse.dll" --work "$env:RUNNER_TEMP\nskr-v1.0.10-build"
+          if ($LASTEXITCODE -ne 0) { throw "v1.0.10 packaging failed" }
+      - name: Upload verified v1.0.10 packages for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: nskr-v1.0.10-verified-packages
+          path: ${{ runner.temp }}/nskr-v1.0.10-build/output/*
+          retention-days: 30
+      - name: Publish new GitHub v1.0.10 ONLY after all packaging tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.0.10 --repo "$env:GITHUB_REPOSITORY" *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Existing release: refusing overwrite" }
+          $out="$env:RUNNER_TEMP\nskr-v1.0.10-build\output"
+          gh release create v1.0.10 "$out\NuclearSunset-Korean-Patcher-v1.0.10.zip" "$out\NuclearSunset-TranslationData-v1.0.10.zip" "$out\SHA256SUMS.txt" "$out\build-report.json" --target "$env:GITHUB_SHA" --title "Nuclear Sunset Korean Patcher v1.0.10" --notes-file "patcher/docs/releases/v1.0.10.md" --repo "$env:GITHUB_REPOSITORY"
+      - name: Explicitly dispatch Nexus v1.0.10 publishing workflow
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run nexus-publish.yml --repo "$env:GITHUB_REPOSITORY" --ref main -f tag=v1.0.10 -f dry_run=false
+          if ($LASTEXITCODE -ne 0) { throw "Nexus workflow dispatch failed" }
