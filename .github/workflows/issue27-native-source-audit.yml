@@ -1,0 +1,35 @@
+name: Issue 27 native source baseline
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/issue27-native-source-audit.yml'
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Read actual v1.0.9 binary-corresponding native source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/v1"
+          gh release download v1.0.9 --repo "$GITHUB_REPOSITORY" --pattern 'NuclearSunset-Korean-Patcher-v1.0.9.zip' --dir "$RUNNER_TEMP/v1"
+          python3 - <<'PY'
+          import pathlib,hashlib,zipfile,os,json
+          z=next((pathlib.Path(os.environ["RUNNER_TEMP"])/"v1").glob("*.zip"))
+          with zipfile.ZipFile(z) as src:
+            paths=[n for n in src.namelist() if n.endswith(("font/font_text_geometry.cpp","font/font_manager.cpp","font/font_engine.h","game/save_display_name.cpp")) and "/tnvse/Src/" in n]
+            out=pathlib.Path(os.environ["RUNNER_TEMP"])/"native-source"
+            out.mkdir()
+            for n in paths:
+              data=src.read(n)
+              (out/pathlib.PurePosixPath(n).name).write_bytes(data)
+              print("Native baseline", pathlib.PurePosixPath(n).name, len(data), hashlib.sha256(data).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nskr-1.0.9-exact-native-source-audit
+          path: ${{ runner.temp }}/native-source/*
+          retention-days: 1
