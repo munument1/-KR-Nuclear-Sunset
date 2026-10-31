@@ -1,0 +1,60 @@
+name: Issue 27 Win32 C++ candidate compile
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/tools/apply_issue27_native_save_title.py'
+      - '.github/workflows/issue27-win32-compile.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve and unpack the exact released 1.0.9 tNVSE sources
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\release" -Force | Out-Null
+          gh release download v1.0.9 --repo "$env:GITHUB_REPOSITORY" --pattern "NuclearSunset-Korean-Patcher-v1.0.9.zip" --dir "$env:RUNNER_TEMP\release"
+          @'
+          import os,zipfile,pathlib
+          archive=next((pathlib.Path(os.environ["RUNNER_TEMP"])/"release").glob("*.zip"))
+          with zipfile.ZipFile(archive) as z:
+              prefixes=[n.split("tnvse/Src/font/font_text_geometry.cpp")[0] for n in z.namelist() if n.endswith("tnvse/Src/font/font_text_geometry.cpp")]
+              if len(prefixes)!=1: raise ValueError("not unique source")
+              p=prefixes[0]
+              root=pathlib.Path(os.environ["RUNNER_TEMP"])/"tnvse71"
+              for i in z.infolist():
+                  if i.filename.startswith(p) and not i.is_dir():
+                      target=root/i.filename[len(p):]
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(z.read(i))
+              print("Extracted exactly shipped tNVSE 71 source")
+          '@ | python -
+          python patcher/tools/apply_issue27_native_save_title.py --input "$env:RUNNER_TEMP\tnvse71\tnvse\Src\font\font_text_geometry.cpp" --output "$env:RUNNER_TEMP\patched_geometry.cpp"
+      - name: Test x86 compiler and syntax of actual modified translation unit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products * -property installationPath
+          if (-not $vs) { throw "MSVC unavailable" }
+          Import-Module (Join-Path $vs "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
+          Enter-VsDevShell -VsInstallPath $vs -SkipAutomaticLocation -DevCmdArguments "-arch=x86"
+          $roots=@("$env:RUNNER_TEMP\tnvse71\tnvse\Src","$env:RUNNER_TEMP\tnvse71\commonlib_nv\Include")
+          $dirs= @()
+          foreach ($root in $roots) {
+            $dirs += $root
+            if(Test-Path $root) { $dirs += (Get-ChildItem -Path $root -Directory -Recurse).FullName }
+          }
+          $includes=@($dirs | ForEach-Object { "/I$_" })
+          & cl.exe /nologo /std:c++20 /EHsc /DWIN32_LEAN_AND_MEAN /DNOMINMAX /c @includes "$env:RUNNER_TEMP\patched_geometry.cpp" "/Fo$env:RUNNER_TEMP\issue27_geometry.obj"
+          if($LASTEXITCODE -ne 0) { throw "Native source compilation failed: $LASTEXITCODE" }
+          if(-not (Test-Path "$env:RUNNER_TEMP\issue27_geometry.obj")) { throw "Object not produced" }
+          Write-Output "Win32 x86 source candidate compiled successfully (not linked, no in-game test)"
