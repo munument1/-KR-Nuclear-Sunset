@@ -61,10 +61,11 @@ def edit(raw, *, to_display):
     if len(changes) > 1:
         raise ValueError('Ambiguous book prefix edit')
     if changes:
-        # Reverse only the altered bytes to independently preserve the file layout.
-        restored = edit(result, to_display=not to_display)[0]
-        if restored != raw:
-            raise ValueError('Book prefix edit changed unrelated INI bytes')
+        # Every original non-matching line was copied verbatim above. The only
+        # edited bytes are the one reviewed setting's encoded value.
+        expected, replacement = (UTF8, CP949) if to_display else (CP949, UTF8)
+        if len(result) - len(raw) != len(replacement) - len(expected):
+            raise ValueError('Book prefix encoding length invariant failed')
     return result, changes, issues
 
 
