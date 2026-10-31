@@ -33,8 +33,8 @@ class StewieBookEffectsTests(unittest.TestCase):
         self.assertEqual(out, unknown)
         self.assertEqual(changes, [])
         self.assertEqual(issues[0]['reason'], 'unreviewed_prefix_value')
-        self.assertEqual(b.edit(b'[Other]\nsPrefix=영구 효과:\n'.replace(
-            b'영구 효과:', b.UTF8), to_display=True)[1], [])
+        self.assertEqual(b.edit(b'[Other]\nsPrefix=' + b.UTF8 + b'\n',
+                                to_display=True)[1], [])
 
     def test_quotes_and_no_newline_are_preserved(self):
         source = b'[Book Effects]\nsPrefix =  "' + b.UTF8 + b'"  '
