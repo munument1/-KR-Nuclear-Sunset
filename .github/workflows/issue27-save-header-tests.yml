@@ -5,6 +5,7 @@ on:
     paths:
       - 'patcher/tools/audit_save_title_header.py'
       - 'patcher/tests/test_save_title_header.py'
+      - 'patcher/tools/verify_issue27_reporter_save.py'
       - '.github/workflows/issue27-save-header-tests.yml'
 
 permissions:
@@ -20,3 +21,10 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_save_title_header.py' -v
       - name: Verify Python source can be parsed and compiled
         run: python -m py_compile patcher/tools/audit_save_title_header.py
+      - name: Read-only verify exact attached save against pinned SHA
+        env:
+          SOURCE: https://github.com/user-attachments/files/34214889/Save.zip
+        run: |
+          curl --fail --location --silent --show-error --max-time 60 "$SOURCE" -o "$RUNNER_TEMP/issue27-reporter.zip"
+          cd patcher
+          python tools/verify_issue27_reporter_save.py "$RUNNER_TEMP/issue27-reporter.zip"
