@@ -26,6 +26,7 @@ import nskr_composed_display
 import nskr_dynamic_display
 import nskr_runtime_text
 import nskr_runtime_overrides
+import nskr_issue20_casings
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -800,6 +801,9 @@ def build_output(installation, catalog_dir, output, progress=None, *,
     # Keep the old exact-source migration so installed English fallbacks remain
     # recognized, then restore Korean as CP949 in the verified display pass.
     catalog, _ = preserve_english_concentrated_fire(catalog)
+    # #20: align only seven v1.0.8 SPARE.esp MISC/FULL casing labels.
+    # Carry previous_dests to support upgrades from already patched input.
+    catalog, _ = nskr_issue20_casings.align_spare_casings(catalog)
     english_exceptions = []
     if not development or 'plugins' in catalog.get('selected_scopes', []):
         defaults = (*nskr_nvse.builtin_perk_scripts(), *nskr_issue13.name_entries())
