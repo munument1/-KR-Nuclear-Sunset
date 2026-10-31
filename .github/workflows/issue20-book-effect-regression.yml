@@ -1,0 +1,58 @@
+name: Issue 20 skill book effect prefix regression
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/nskr_stewie_book_effects.py'
+      - 'patcher/nskr_output.py'
+      - 'patcher/tests/test_stewie_book_effects.py'
+      - '.github/workflows/issue20-book-effect-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Book effect encoding and reapply tests
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_stewie_book_effects.py' -v
+      - name: Existing notification display tests
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_notifications.py' -v
+      - name: Download published v1.0.8 translation mappings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v1.0.8 --repo "$GITHUB_REPOSITORY" \
+            --pattern 'NuclearSunset-TranslationData-v1.0.8.zip' \
+            --dir "$RUNNER_TEMP"
+      - name: Confirm real 1.0.8 Book Effects prefix and independent byte conversion
+        env:
+          ARCHIVE: ${{ runner.temp }}/NuclearSunset-TranslationData-v1.0.8.zip
+        run: |
+          python - <<'PY'
+          import json,os,sys,zipfile
+          from pathlib import Path
+          sys.path.insert(0,'patcher')
+          import nskr_stewie_book_effects as b
+          with zipfile.ZipFile(os.environ['ARCHIVE']) as z:
+              catalog=json.loads(z.read('TranslationData/catalog.json').decode('utf-8-sig'))
+          entries=[row for spec in catalog['files']
+              if spec.get('path','').casefold()==b.RELATIVE
+              for row in spec.get('mappings',[])
+              if row.get('section')=='[Book Effects]' and row.get('key')=='sPrefix']
+          assert len(entries)==1,entries
+          assert entries[0]['source']=='Permanent' and entries[0]['dest']==b.KOREAN,entries
+          source=b'[Book Effects]\r\nsPrefix = '+b.UTF8+b'\r\n'
+          output,edits,issues=b.edit(source,to_display=True)
+          assert not issues and len(edits)==1 and b.CP949 in output
+          assert b.normalize_reused_input(output)==source
+          print('Published v1.0.8 source-backed Stewie prefix confirmed; CP949 byte roundtrip PASS')
+          PY
