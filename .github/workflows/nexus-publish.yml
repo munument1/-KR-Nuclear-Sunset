@@ -175,8 +175,8 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
-            [b]v1.0.8 update (2026-10-26):[/b] Corrected reviewed scripts that restore English item, location and NPC names, fast-travel prompts and companion messages. Updated tNVSE with strict UTF-8/lossless conversion, door prompt normalization and an exact key-required engine message translation. Same-save in-game verification remains pending.
-            [b]v1.0.8 업데이트:[/b] 펑가 열매·장비·장소·NPC 등의 이름을 영어로 덮어쓰는 스크립트, 빠른 이동·동료 안내를 수정했습니다. tNVSE의 인코딩 처리와 문 안내 조합을 보강하고 열쇠 필요 안내를 번역했습니다. 전체 패쳐를 새 폴더에 풀고 새 Output을 적용한 뒤 게임을 재시작하세요. TranslationData만 교체하지 마세요. 동일 세이브의 실게임 확인은 필요합니다.
+            [b]v1.0.9 update (2026-10-31):[/b] Corrected seven exact SPARE.esp casing labels and the Stewie Tweaks Book Effects 'Permanent' prefix encoding when combined with Korean skill names. Existing tNVSE DLL remains unchanged. Save-menu Karma title garbling (#27), some notifications (#22) and remaining untranslated dynamic effects are still being investigated.
+            [b]v1.0.9 업데이트:[/b] 탄피 아이템 표기 7건을 통일하고 스킬북/의학 학술지 효과의 '영구 효과:' 접두어 깨짐을 보정했습니다. 새 패처 ZIP 전체를 별도 폴더에 풀어 Output을 다시 생성하세요. 세이브 목록 칭호 깨짐(#27), 일부 알림(#22)과 남은 미번역은 별도 조사 중입니다.
             [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main
