@@ -66,4 +66,17 @@ jobs:
           if($LASTEXITCODE -ne 0) { throw "configure failed" }
           cmake --build "$env:RUNNER_TEMP\tnvse-build" --config Release --parallel 3
           if($LASTEXITCODE -ne 0) { throw "native build failed" }
-          Get-ChildItem "$env:RUNNER_TEMP\tnvse-build" -Recurse -Filter tnvse.dll | Select-Object FullName,Length
+          $dlls=@(Get-ChildItem "$env:RUNNER_TEMP\tnvse-build" -Recurse -Filter tnvse.dll)
+          if($dlls.Count -ne 1) { throw "Expected exactly one DLL, got $($dlls.Count)" }
+          $dll=$dlls[0]
+          Get-FileHash -Algorithm SHA256 $dll.FullName | Format-List
+          $pe=& dumpbin /headers $dll.FullName
+          if($LASTEXITCODE -ne 0 -or -not (($pe -join " ") -match "machine \(x86\)")) { throw "Win32 PE header check failed" }
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\verified-native" -Force | Out-Null
+          Copy-Item $dll.FullName "$env:RUNNER_TEMP\verified-native\tnvse.dll"
+      - name: Upload isolated x86 DLL candidate only on native build success
+        uses: actions/upload-artifact@v4
+        with:
+          name: nskr-issue27-tnvse-candidate-x86-not-for-release
+          path: ${{ runner.temp }}/verified-native/tnvse.dll
+          retention-days: 7
