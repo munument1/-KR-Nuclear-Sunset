@@ -167,7 +167,7 @@ def build(base: Path, sums: Path, work: Path):
     }
     (output / 'build-report.json').write_text(
         json.dumps(report, ensure_ascii=False, indent=2)+'\n',encoding='utf-8')
-    print(json.dumps(report,ensure_ascii=False,indent=2))
+    print(json.dumps(report,ensure_ascii=True,indent=2))  # Windows CI console may be cp1252
 
 
 if __name__ == '__main__':
