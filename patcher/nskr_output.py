@@ -27,6 +27,7 @@ import nskr_dynamic_display
 import nskr_runtime_text
 import nskr_runtime_overrides
 import nskr_issue20_casings
+import nskr_stewie_book_effects
 from tools.audit_issue11_compiled_scripts import CASES as COMPILED_PERK_CASES
 from tools.loose_translation import TOKEN, decode, json_values, render_json
 
@@ -514,12 +515,22 @@ def merge_loose(source, entry):
     try:
         text, encoding = decode(source)
     except UnicodeDecodeError:
-        from nskr_notification_data import INI_TRANSLATIONS
-        original=source.read_bytes()
-        text=original.decode('cp949')
-        restored,_=nskr_notifications.ini_edit(text.encode('utf-8'),source.name,INI_TRANSLATIONS)
-        if restored!=original:raise ValueError('Unrecognized legacy translation INI bytes')
-        encoding='utf-8'
+        original = source.read_bytes()
+        if (entry.get('kind') == 'ini'
+                and entry.get('path', '').casefold() == nskr_stewie_book_effects.RELATIVE):
+            # Only the reviewed Stewie Book Effects prefix is CP949 in an
+            # otherwise UTF-8 file; normalize this known old Output for matching.
+            normalized = nskr_stewie_book_effects.normalize_reused_input(original)
+            text = normalized.decode('utf-8-sig')
+            encoding = 'utf-8-sig' if original.startswith(b'\xef\xbb\xbf') else 'utf-8'
+        else:
+            from nskr_notification_data import INI_TRANSLATIONS
+            text = original.decode('cp949')
+            restored, _ = nskr_notifications.ini_edit(
+                text.encode('utf-8'), source.name, INI_TRANSLATIONS)
+            if restored != original:
+                raise ValueError('Unrecognized legacy translation INI bytes')
+            encoding = 'utf-8'
     matches = defaultdict(set)
     previous = defaultdict(set)
     already_applied = defaultdict(set)
@@ -1162,6 +1173,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         nskr_dynamic_display.finalize(stage, report['files'])
         nskr_runtime_text.finalize(installation, stage, report['files'])
         nskr_runtime_overrides.finalize(installation, stage, report['files'])
+        nskr_stewie_book_effects.finalize(stage, report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
         report['unresolved_previous_translations'] = sum(
