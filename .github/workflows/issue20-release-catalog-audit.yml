@@ -1,0 +1,49 @@
+name: Issue 20 release TranslationData audit
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/tools/audit_issue20_release_casings.py'
+      - 'patcher/tools/download_issue_evidence.py'
+      - 'patcher/tools/audit_issue20_missing_strings.py'
+      - 'patcher/tools/audit_issue20_book_effect_prefix.py'
+      - '.github/workflows/issue20-release-catalog-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  catalog-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official 1.0.8 TranslationData
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/nskr-audit"
+          gh release download v1.0.8 --repo "$GITHUB_REPOSITORY" \
+            --pattern 'NuclearSunset-TranslationData-v1.0.8.zip' \
+            --dir "$RUNNER_TEMP/nskr-audit"
+      - name: Extract exact source-backed casing mappings
+        run: |
+          python patcher/tools/audit_issue20_release_casings.py \
+            "$RUNNER_TEMP/nskr-audit/NuclearSunset-TranslationData-v1.0.8.zip" \
+            "$RUNNER_TEMP/nskr-audit/issue20-casing-evidence.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue20-v1.0.8-casing-evidence
+          path: ${{ runner.temp }}/nskr-audit/issue20-casing-evidence.json
+      - name: Audit screenshot-visible English mappings
+        run: python patcher/tools/audit_issue20_missing_strings.py "$RUNNER_TEMP/nskr-audit/NuclearSunset-TranslationData-v1.0.8.zip"
+      - name: Inspect book effect prefix in published mappings
+        run: python patcher/tools/audit_issue20_book_effect_prefix.py "$RUNNER_TEMP/nskr-audit/NuclearSunset-TranslationData-v1.0.8.zip"
+      - name: Collect screenshots linked in issues 20 and 22
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python patcher/tools/download_issue_evidence.py "$RUNNER_TEMP/nskr-evidence"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue20-22-report-images
+          path: ${{ runner.temp }}/nskr-evidence/
