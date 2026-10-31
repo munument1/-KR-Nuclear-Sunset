@@ -38,6 +38,10 @@ jobs:
               print("Extracted exactly shipped tNVSE 71 source")
           '@ | python -
           python patcher/tools/apply_issue27_native_save_title.py --input "$env:RUNNER_TEMP\tnvse71\tnvse\Src\font\font_text_geometry.cpp" --output "$env:RUNNER_TEMP\patched_geometry.cpp"
+      - name: Restore DirectX SDK headers from pinned NuGet package
+        shell: pwsh
+        run: |
+          nuget install Microsoft.DXSDK.D3DX -Version 9.29.952.8 -OutputDirectory "$env:RUNNER_TEMP\\nuget" -NonInteractive
       - name: Test x86 compiler and syntax of actual modified translation unit
         shell: pwsh
         run: |
@@ -53,6 +57,9 @@ jobs:
             $dirs += $root
             if(Test-Path $root) { $dirs += (Get-ChildItem -Path $root -Directory -Recurse).FullName }
           }
+          $dxHeaders = Get-ChildItem -Path "$env:RUNNER_TEMP\\nuget" -Recurse -Filter d3dx9math.h
+          if (-not $dxHeaders) { throw "DirectX SDK header missing" }
+          $dirs += $dxHeaders | ForEach-Object { $_.DirectoryName }
           $includes=@($dirs | ForEach-Object { "/I$_" })
           & cl.exe /nologo /std:c++20 /EHsc /DWIN32_LEAN_AND_MEAN /DNOMINMAX /FIPrefix.h /FIITypes.h /FIMemory.h /FIIErrors.h /c @includes "$env:RUNNER_TEMP\patched_geometry.cpp" "/Fo$env:RUNNER_TEMP\issue27_geometry.obj"
           if($LASTEXITCODE -ne 0) { throw "Native source compilation failed: $LASTEXITCODE" }
