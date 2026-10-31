@@ -1,8 +1,8 @@
 """Build the v1.0.10 full onedir patcher from official v1.0.9 release bytes.
 
 Never mutates the original archive, MO2, installs or savegames.
-Python patcher is recompiled from this exact commit; tNVSE/XEdit binaries
-are retained byte-for-byte from the verified baseline.
+Python patcher and tNVSE DLL are rebuilt from pinned sources;
+XEditLib and all other runtime payloads remain byte-for-byte unchanged.
 """
 from __future__ import annotations
 import argparse
@@ -63,7 +63,7 @@ def build(base: Path, sums: Path, work: Path, dll: Path):
     catalog_path = package / 'TranslationData/catalog.json'
     prior_catalog = nskr.read_json(catalog_path)
     if (prior_catalog.get('version'), prior_catalog.get('target_modlist')) != (
-            '1.0.8', 'nuclear-sunset-ttw'):
+            '1.0.9', 'nuclear-sunset-ttw'):
         raise ValueError('Unrecognized v1.0.9 release catalog')
     catalog = prior_catalog
     if not dll.is_file() or dll.stat().st_size < 100000:
@@ -107,7 +107,7 @@ def build(base: Path, sums: Path, work: Path, dll: Path):
     nskr.write_json(catalog_path, catalog)
     asset_count = validate_payloads(package, catalog)
 
-    # Keep reviewed tNVSE DLL and XEditLib backend from v1.0.9 untouched.
+    # Preserve reviewed XEditLib and unrelated native binaries.
     for relative in ('NuclearSunsetKoreanPatcher.exe', 'NSKRXEditWorker.exe'):
         (package / relative).unlink()
     for relative in ('_internal', 'worker-runtime'):
