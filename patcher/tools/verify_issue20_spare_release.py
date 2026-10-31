@@ -29,7 +29,7 @@ def main(archive):
         for a, b in zip(first["mappings"], second["mappings"]):
             if a == b:
                 continue
-            assert {k: v for k, v in a.items() if k != "dest"} == {
+            assert {k: v for k, v in a.items() if k not in ("dest", "previous_dests")} == {
                 k: v for k, v in b.items() if k not in ("dest", "previous_dests")
             }, "Changed identity/source/context"
             assert a["dest"] in b["previous_dests"]
