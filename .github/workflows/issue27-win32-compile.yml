@@ -54,7 +54,7 @@ jobs:
             if(Test-Path $root) { $dirs += (Get-ChildItem -Path $root -Directory -Recurse).FullName }
           }
           $includes=@($dirs | ForEach-Object { "/I$_" })
-          & cl.exe /nologo /std:c++20 /EHsc /DWIN32_LEAN_AND_MEAN /DNOMINMAX /c @includes "$env:RUNNER_TEMP\patched_geometry.cpp" "/Fo$env:RUNNER_TEMP\issue27_geometry.obj"
+          & cl.exe /nologo /std:c++20 /EHsc /DWIN32_LEAN_AND_MEAN /DNOMINMAX /FIPrefix.h /FIITypes.h /FIMemory.h /FIIErrors.h /c @includes "$env:RUNNER_TEMP\patched_geometry.cpp" "/Fo$env:RUNNER_TEMP\issue27_geometry.obj"
           if($LASTEXITCODE -ne 0) { throw "Native source compilation failed: $LASTEXITCODE" }
           if(-not (Test-Path "$env:RUNNER_TEMP\issue27_geometry.obj")) { throw "Object not produced" }
           Write-Output "Win32 x86 source candidate compiled successfully (not linked, no in-game test)"
