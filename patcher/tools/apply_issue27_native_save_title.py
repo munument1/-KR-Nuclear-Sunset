@@ -74,6 +74,26 @@ HELPER = r"""
 		if (length < 6 || length > 1024
 			|| IsValidUTF8With3ByteMin(text->pString))
 			return; // Existing full-UTF-8 renderer handles this.
+
+		// Most UI strings are CP949. Skip costly save-list scans unless
+		// the mixed string contains the 3-byte UTF-8 form of a Hangul
+		// syllable (U+AC00..D7A3). This check never mutates text.
+		bool hasUtf8HangulCandidate = false;
+		for (size_t i = 0; i + 2 < length; ++i)
+		{
+			const UInt8 a = static_cast<UInt8>(text->pString[i]);
+			const UInt8 b = static_cast<UInt8>(text->pString[i + 1]);
+			const UInt8 c = static_cast<UInt8>(text->pString[i + 2]);
+			if (a >= 0xEA && a <= 0xED
+				&& (b & 0xC0) == 0x80 && (c & 0xC0) == 0x80)
+			{
+				hasUtf8HangulCandidate = true;
+				break;
+			}
+		}
+		if (!hasUtf8HangulCandidate)
+			return;
+
 		constexpr SIZE_T kSaveManagerSingleton = 0x11DE134;
 		if (!hook_identity::IsAccessibleRegion(kSaveManagerSingleton,
 				sizeof(void*), false))
