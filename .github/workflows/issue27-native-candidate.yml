@@ -1,0 +1,66 @@
+name: Issue 27 native save title source regression
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/tools/apply_issue27_native_save_title.py'
+      - '.github/workflows/issue27-native-candidate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  source-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch released native source and create candidate without modifying original
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/baseline"
+          gh release download v1.0.9 --repo "$GITHUB_REPOSITORY" --pattern 'NuclearSunset-Korean-Patcher-v1.0.9.zip' --dir "$RUNNER_TEMP/baseline"
+          python3 - <<'PY'
+          import zipfile,os,pathlib,hashlib
+          zip_path=next((pathlib.Path(os.environ["RUNNER_TEMP"])/"baseline").glob("*.zip"))
+          with zipfile.ZipFile(zip_path) as z:
+              paths=[n for n in z.namelist() if n.endswith("/tnvse/Src/font/font_text_geometry.cpp")]
+              if len(paths)!=1: raise SystemExit("Source not unique")
+              baseline=pathlib.Path(os.environ["RUNNER_TEMP"])/"original_geometry.cpp"
+              baseline.write_bytes(z.read(paths[0]))
+              print("original SHA:",hashlib.sha256(baseline.read_bytes()).hexdigest())
+          PY
+          python3 patcher/tools/apply_issue27_native_save_title.py --input "$RUNNER_TEMP/original_geometry.cpp" --output "$RUNNER_TEMP/patched_geometry.cpp"
+      - name: Verify scope and synthetic mixed-encoding fixture
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,hashlib
+          orig=(Path(os.environ['RUNNER_TEMP'])/'original_geometry.cpp').read_text()
+          new=(Path(os.environ['RUNNER_TEMP'])/'patched_geometry.cpp').read_text()
+          assert new.count("NormalizeMixedSaveTitleForUi(")==3
+          assert new.count("ReadBoundedSaveTitle(")==2
+          assert orig.count("NormalizeMixedSaveTitleForUi(")==0
+          assert "void __thiscall FontEx::CreateText(" in new
+          assert "NiAVObject* FontEx::MakeString(" in new
+          assert "kSaveManagerSingleton = 0x11DE134" in new
+          assert "g_usingWinEncoding != 949" in new
+          assert "IsValidUTF8With3ByteMin(text->pString)" in new
+          assert "TryUTF8ToMultiByteStr(" in new
+          title='볼트 거주자'
+          original='레벨 1 '.encode('cp949')+title.encode('utf8')
+          try: original.decode('utf8')
+          except UnicodeDecodeError: pass
+          else: raise AssertionError('fixture must be mixed encoding')
+          converted=original.replace(title.encode('utf8'),title.encode('cp949'))
+          assert converted.decode('cp949')=='레벨 1 볼트 거주자'
+          assert original!=converted
+          print("Native source scope and mixed UTF-8/CP949 fixture PASS")
+          PY
+      - name: Upload generated source patch for review (no user saves)
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue27-native-candidate-source-only
+          path: ${{ runner.temp }}/patched_geometry.cpp
+          retention-days: 3
