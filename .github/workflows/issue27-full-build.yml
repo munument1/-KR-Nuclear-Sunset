@@ -78,8 +78,11 @@ jobs:
           if($dlls.Count -ne 1) { throw "Expected exactly one DLL, got $($dlls.Count)" }
           $dll=$dlls[0]
           Get-FileHash -Algorithm SHA256 $dll.FullName | Format-List
-          $pe=& dumpbin /headers $dll.FullName
-          if($LASTEXITCODE -ne 0 -or -not (($pe -join " ") -match "machine \(x86\)")) { throw "Win32 PE header check failed" }
+          $pe=[System.IO.File]::ReadAllBytes($dll.FullName)
+          if($pe.Length -lt 4096 -or $pe[0] -ne 0x4d -or $pe[1] -ne 0x5a) { throw "Invalid native DLL MZ" }
+          $offset=[BitConverter]::ToInt32($pe,0x3c)
+          if($offset -lt 64 -or $offset -gt 4096 -or $pe[$offset] -ne 0x50 -or $pe[$offset+1] -ne 0x45) { throw "Invalid PE header" }
+          if([BitConverter]::ToUInt16($pe,$offset+4) -ne 0x14c) { throw "Native DLL is not Win32 x86" }
           New-Item -ItemType Directory "$env:RUNNER_TEMP\verified-native" -Force | Out-Null
           Copy-Item $dll.FullName "$env:RUNNER_TEMP\verified-native\tnvse.dll"
       - name: Upload isolated x86 DLL candidate only on native build success
