@@ -114,6 +114,12 @@ def script_edit(source,code,mappings,*,preserve_utf8_literals=()):
     if bytes(restored)!=initial_code:raise ValueError('Notification bytecode changed outside literals')
     return result,code,changes,issues
 
+# Item pickup notifications can compose FULL names with CP949 HUD labels.
+# Convert only these reviewed, player-visible item-name fields; never alter
+# script operands, editor identifiers, or unrelated record fields.
+PICKUP_NAME_SIGS = {b'MISC', b'AMMO', b'KEYM'}
+
+
 def patch_bytes(original,filename,plan):
     changes=[];issues=[]
     relevant={}
@@ -124,7 +130,7 @@ def patch_bytes(original,filename,plan):
             if Path(row['file']).name.casefold()==filename.casefold() and row['signature']=='MESG'}
     def visit(header,payload):
         sig=header[:4]
-        if sig not in {b'SCPT',b'MESG',b'MGEF',b'ALCH',b'SPEL',b'BOOK'}:return payload
+        if sig not in {b'SCPT',b'MESG',b'MGEF',b'ALCH',b'SPEL',b'BOOK'} | PICKUP_NAME_SIGS:return payload
         data=_decode_record(header,payload);slots=list(_slots(data))
         edid=next((v.rstrip(b'\0').decode('ascii','replace') for k,h,v in slots if k==b'EDID'),'')
         replacements={}
@@ -149,7 +155,7 @@ def patch_bytes(original,filename,plan):
         else:
             for i,(key,h,value) in enumerate(slots):
                 if ((sig==b'MESG' and key in {b'DESC',b'ITXT'})
-                        or (sig in {b'MGEF',b'ALCH',b'SPEL',b'BOOK'} and key==b'FULL')):
+                        or (sig in {b'MGEF',b'ALCH',b'SPEL',b'BOOK'} | PICKUP_NAME_SIGS and key==b'FULL')):
                     replacement=static.get((edid,key.decode()))
                     if replacement and value.rstrip(b'\0').decode('utf-8','replace')==replacement['old']:
                         converted=display_bytes(replacement['new'].encode('utf-8'))+b'\0'
