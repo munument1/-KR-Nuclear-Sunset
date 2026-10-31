@@ -1,0 +1,69 @@
+name: Issue 27 full native build feasibility
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/issue27-full-build.yml'
+      - 'patcher/tools/apply_issue27_native_save_title.py'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exactly shipped tNVSE 71 source and inspect layout
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory "$env:RUNNER_TEMP\rel" -Force | Out-Null
+          gh release download v1.0.9 --repo "$env:GITHUB_REPOSITORY" --pattern "NuclearSunset-Korean-Patcher-v1.0.9.zip" --dir "$env:RUNNER_TEMP\rel"
+          @'
+          import zipfile,os,pathlib
+          z=next((pathlib.Path(os.environ["RUNNER_TEMP"])/"rel").glob("*.zip"))
+          with zipfile.ZipFile(z) as a:
+              ls=[n for n in a.namelist() if "tNVSE-71-KR-UI-source/tNVSE" in n and not n.endswith('/')]
+              head=ls[0].split("tNVSE-71-KR-UI-source/tNVSE/")[0]+"tNVSE-71-KR-UI-source/tNVSE/"
+              print("Packaged source files count",len(ls))
+              for p in sorted(ls):
+                  item=p[len(head):]
+                  if item.count('/')<2 or item.lower().endswith((".sln",".vcxproj",".props",".cmake",".config",".json")):
+                      print("PATH",item)
+              root=pathlib.Path(os.environ["RUNNER_TEMP"])/"tnvse-source"
+              for m in a.infolist():
+                  if m.filename.startswith(head) and not m.is_dir():
+                      rel=m.filename[len(head):]
+                      target=root/rel
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(a.read(m))
+              print("SOURCE ROOT",root)
+          '@ | python -
+          cmake --version
+          nuget help | Select-Object -First 4
+      - name: Prepare exact pinned native source candidate
+        shell: pwsh
+        run: |
+          $src="$env:RUNNER_TEMP\tnvse-source\tnvse\Src\font\font_text_geometry.cpp"
+          python patcher/tools/apply_issue27_native_save_title.py --input $src --output "$env:RUNNER_TEMP\candidate_geometry.cpp"
+          Copy-Item -LiteralPath "$env:RUNNER_TEMP\candidate_geometry.cpp" -Destination $src
+      - name: Restore pinned NuGet prerequisites
+        shell: pwsh
+        run: |
+          nuget install Microsoft.DXSDK.D3DX -Version 9.29.952.8 -OutputDirectory "$env:RUNNER_TEMP\tnvse-source\tnvse\packages" -NonInteractive
+          nuget install VC-LTL -Version 5.3.1 -OutputDirectory "$env:RUNNER_TEMP\tnvse-source\tnvse\packages" -NonInteractive
+          Write-Output "CMake files:"
+          Get-ChildItem "$env:RUNNER_TEMP\tnvse-source" -Name | Select-Object -First 15
+      - name: Attempt Win32 native DLL configure/build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $src="$env:RUNNER_TEMP\tnvse-source"
+          if (-not (Test-Path "$src\CMakeLists.txt")) { throw "Full source snapshot missing CMakeLists.txt" }
+          cmake -S $src -B "$env:RUNNER_TEMP\tnvse-build" -A Win32 -G "Visual Studio 17 2022"
+          if($LASTEXITCODE -ne 0) { throw "configure failed" }
+          cmake --build "$env:RUNNER_TEMP\tnvse-build" --config Release --parallel 3
+          if($LASTEXITCODE -ne 0) { throw "native build failed" }
+          Get-ChildItem "$env:RUNNER_TEMP\tnvse-build" -Recurse -Filter tnvse.dll | Select-Object FullName,Length
