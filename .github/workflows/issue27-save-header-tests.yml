@@ -1,0 +1,22 @@
+name: Issue 27 save header encoding tests
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/tools/audit_save_title_header.py'
+      - 'patcher/tests/test_save_title_header.py'
+      - '.github/workflows/issue27-save-header-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify synthetic save header fixtures and format invariants
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_save_title_header.py' -v
+      - name: Verify Python source can be parsed and compiled
+        run: python -m py_compile patcher/tools/audit_save_title_header.py
