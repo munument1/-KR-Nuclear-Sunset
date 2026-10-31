@@ -1,0 +1,36 @@
+name: Read-only issue 27 save evidence acquisition
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/issue27-evidence.yml'
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download exact supplied issue attachment (no save content in logs)
+        env:
+          SOURCE: https://github.com/user-attachments/files/34214889/Save.zip
+        run: |
+          mkdir -p "$RUNNER_TEMP/issue27-evidence"
+          curl --fail --location --silent --show-error --max-time 60 "$SOURCE" -o "$RUNNER_TEMP/issue27-evidence/Save.zip"
+          python3 - <<'PY'
+          import zipfile,hashlib,os
+          from pathlib import Path
+          f=Path(os.environ["RUNNER_TEMP"])/"issue27-evidence"/"Save.zip"
+          with zipfile.ZipFile(f) as z:
+              names=z.namelist()
+              if not 1 <= len(names) <= 20: raise SystemExit("Unexpected save count")
+              for i in z.infolist():
+                  if not i.filename.lower().endswith((".fos",".nvse",".fose",".bak",".png",".jpg",".txt")):
+                      raise SystemExit("Unexpected ZIP member type")
+                  if i.file_size > 100*1024*1024: raise SystemExit("Oversize file")
+          print("Source attachment validated; SHA256:",hashlib.sha256(f.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue27-private-save-evidence
+          path: ${{ runner.temp }}/issue27-evidence/Save.zip
+          retention-days: 1
