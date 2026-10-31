@@ -175,8 +175,8 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
-            [b]v1.0.9 update (2026-10-31):[/b] Corrected seven exact SPARE.esp casing labels and the Stewie Tweaks Book Effects 'Permanent' prefix encoding when combined with Korean skill names. Existing tNVSE DLL remains unchanged. Save-menu Karma title garbling (#27), some notifications (#22) and remaining untranslated dynamic effects are still being investigated.
-            [b]v1.0.9 업데이트:[/b] 탄피 아이템 표기 7건을 통일하고 스킬북/의학 학술지 효과의 '영구 효과:' 접두어 깨짐을 보정했습니다. 새 패처 ZIP 전체를 별도 폴더에 풀어 Output을 다시 생성하세요. 세이브 목록 칭호 깨짐(#27), 일부 알림(#22)과 남은 미번역은 별도 조사 중입니다.
+            [b]v1.0.10 update (2026-10-31):[/b] Fixed the save/load menu's mixed UTF-8/CP949 Karma title display using an exact save-header title match. Original Fallout New Vegas save files are never changed. Rebuilt tNVSE Win32 DLL and Korean patcher from source. Same-game-save UI verification is not yet available; users can report any remaining display differences in issue #27.
+            [b]v1.0.10 업데이트:[/b] 세이브 목록에서 레벨 칭호가 깨지는 문제에 대응해 원본 UTF-8 칭호 부분만 CP949로 무손실 변환하도록 tNVSE를 수정했습니다. 원본 저장 파일은 변경하지 않습니다. 새 패처 ZIP 전체를 별도 폴더에 풀어 Output을 재생성하고 게임을 재시작하세요. 제보자의 동일 세이브 화면 검증은 아직 진행하지 않았으므로 문제가 남으면 이슈 #27에 알려 주세요. 알림 글자 깨짐(#22)과 일부 남은 미번역(#29)은 별도 조사 중입니다.
             [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main
