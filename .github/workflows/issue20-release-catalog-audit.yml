@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'patcher/tools/audit_issue20_release_casings.py'
+      - 'patcher/tools/download_issue_evidence.py'
       - '.github/workflows/issue20-release-catalog-audit.yml'
   workflow_dispatch:
 
@@ -32,3 +33,11 @@ jobs:
         with:
           name: issue20-v1.0.8-casing-evidence
           path: ${{ runner.temp }}/nskr-audit/issue20-casing-evidence.json
+      - name: Collect screenshots linked in issues 20 and 22
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python patcher/tools/download_issue_evidence.py "$RUNNER_TEMP/nskr-evidence"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue20-22-report-images
+          path: ${{ runner.temp }}/nskr-evidence/
