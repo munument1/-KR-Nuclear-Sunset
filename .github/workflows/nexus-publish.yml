@@ -165,7 +165,7 @@ jobs:
 
       - name: Upload new Nexus version
         id: upload
-        if: steps.nexus.outputs.upload == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)
+        if: steps.nexus.outputs.upload == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run) && !(github.event_name == 'release' && github.event.release.tag_name == 'v1.1.0')
         uses: Nexus-Mods/upload-action@c96019556046053aa26044b44396cd38929daf23 # v1.0.0-beta.10
         with:
           api_key: ${{ secrets.NEXUS_KEY }}
@@ -175,8 +175,8 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
-            [b]v1.0.10 update (2026-10-31):[/b] Fixed the save/load menu's mixed UTF-8/CP949 Karma title display using an exact save-header title match. Original Fallout New Vegas save files are never changed. Rebuilt tNVSE Win32 DLL and Korean patcher from source. Same-game-save UI verification is not yet available; users can report any remaining display differences in issue #27.
-            [b]v1.0.10 업데이트:[/b] 세이브 목록에서 레벨 칭호가 깨지는 문제에 대응해 원본 UTF-8 칭호 부분만 CP949로 무손실 변환하도록 tNVSE를 수정했습니다. 원본 저장 파일은 변경하지 않습니다. 새 패처 ZIP 전체를 별도 폴더에 풀어 Output을 재생성하고 게임을 재시작하세요. 제보자의 동일 세이브 화면 검증은 아직 진행하지 않았으므로 문제가 남으면 이슈 #27에 알려 주세요. 알림 글자 깨짐(#22)과 일부 남은 미번역(#29)은 별도 조사 중입니다.
+            [b]v1.1.0 update:[/b] Fixed the save/load level title display in the main menu with a targeted tNVSE renderer correction. The reported Korean title was confirmed in the game. Also includes a statically verified medical-bag text correction; the medical-bag fix has not yet been confirmed in game. Existing .fos save files remain untouched. Extract the full patcher into a new folder, regenerate Output and restart the game.
+            [b]v1.1.0 업데이트:[/b] 메인 메뉴 세이브 목록의 레벨 칭호가 깨지는 문제를 tNVSE 렌더러에서 수정하고 게임 화면의 정상 표시를 확인했습니다. 의료 가방 텍스트도 정적 대조를 거쳐 수정했으나 해당 항목의 실게임 검증은 아직 수행하지 않았습니다. 기존 .fos 세이브 파일은 변경하지 않습니다. 전체 패처 ZIP을 새 폴더에 풀어 Output을 다시 생성하고 게임을 재시작하세요.
             [url=https://munument1.github.io/-KR-Nuclear-Sunset/docs/main/korean-patch]Installation and recovery guide (Korean)[/url]
             [url=${{ steps.release.outputs.url }}]GitHub release[/url]
           category: main

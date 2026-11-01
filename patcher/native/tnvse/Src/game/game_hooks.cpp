@@ -9,6 +9,7 @@
 #include "load_config.h"
 #include "native_tile_overlay.h"
 #include "pipboy_search_icon_compat.h"
+#include "save_level_tile_fix.h"
 #include "SafeWrite.h"
 #include "text_hooks.h"
 #include "tnvse.h"
@@ -19,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cstring>
 
 namespace fonthook
@@ -968,6 +970,41 @@ namespace fonthook
 
 		NiNode* __fastcall TileTextMakeNodeHook(TileText* tile, void*)
 		{
+			// Save/Load previews can be built on the main menu, where no
+			// MainGameLoop message is guaranteed. Fix the exact level tile at
+			// this already-installed geometry boundary before rendering it.
+			if (tile && tile->strName.c_str()
+				&& g_bEnableUTF8 && g_bEnableMultibyteFontHook
+				&& g_usingWinEncoding == 949 && IsEastAsianUiMode()
+				&& _stricmp(tile->strName.c_str(), "saveload_playerlevel") == 0)
+			{
+				const char* raw = tile->GetValueString(Tile::kTileValue_string);
+				std::string corrected;
+				save_level_tile_fix::Probe probe;
+				const bool repaired = save_level_tile_fix::TryNormalize(
+					raw, corrected, probe);
+				bool applied = false;
+				if (repaired)
+				{
+					tile->SetValueString(Tile::kTileValue_string,
+						corrected.c_str(), false);
+					applied = std::strcmp(tile->GetValueString(
+						Tile::kTileValue_string), corrected.c_str()) == 0;
+				}
+				// No names, save paths or text bytes are ever logged. Bound the
+				// count even when menu geometry is rebuilt every frame.
+				static std::atomic<UInt32> diagnosticCount{0};
+				if (diagnosticCount.fetch_add(1, std::memory_order_relaxed) < 20)
+					gLog.FormattedMessage(
+						"tnvse_issue27_renderer: tile=saveload_playerlevel bytes=%u prefix=%u colon=%u fullUtf8=%u suffixUtf8=%u cp949=%u applied=%u",
+						static_cast<UInt32>(probe.length),
+						probe.levelPrefix ? 1u : 0u,
+						probe.hasColon ? 1u : 0u,
+						probe.fullUtf8 ? 1u : 0u,
+						probe.suffixUtf8 ? 1u : 0u,
+						probe.suffixConverted ? 1u : 0u,
+						applied ? 1u : 0u);
+			}
 			const bool freeTypeInstalled = s_fontHookInstallState.freeType;
 			const bool dictionaryTranslationInstalled =
 				s_fontHookInstallState.multibyte

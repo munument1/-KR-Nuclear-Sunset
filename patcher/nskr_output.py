@@ -24,6 +24,7 @@ import nskr_perk_display
 import nskr_notifications
 import nskr_composed_display
 import nskr_dynamic_display
+import nskr_medical_bag
 import nskr_runtime_text
 import nskr_runtime_overrides
 import nskr_issue20_casings
@@ -1171,6 +1172,7 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         nskr_notifications.finalize(stage,report['files'])
         nskr_composed_display.finalize(stage, report['files'])
         nskr_dynamic_display.finalize(stage, report['files'])
+        nskr_medical_bag.finalize(installation, stage, report['files'])
         nskr_runtime_text.finalize(installation, stage, report['files'])
         nskr_runtime_overrides.finalize(installation, stage, report['files'])
         nskr_stewie_book_effects.finalize(stage, report['files'])
