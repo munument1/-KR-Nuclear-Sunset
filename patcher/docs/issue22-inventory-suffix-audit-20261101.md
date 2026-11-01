@@ -58,9 +58,11 @@ fragments; do not convert unrelated GMSTs or all INI values wholesale.
   reached the main menu with the seven-field candidate. Automated mouse/key
   input did not trigger save loading, so the acquisition/attribute notifications
   were **not visually tested**. The test game was closed.
-- The source save remained byte-identical; the source UI plugin and the original
-  profile's mod/plugin lists were not changed. The QA override is enabled only
-  in its dedicated profile. No new release was published.
+- The source save and source UI plugin remained byte-identical. After testing,
+  the QA mod/profile were archived outside the live MO2 installation, the original
+  selected profile was restored, and MO2's temporary disabled-QA modlist entry was
+  removed. The restored modlist matches the pre-test copied baseline byte-for-byte.
+  No new release was published.
 
 The first screenshot's exact notification producer and the remaining #29 fungus
 screens still require runtime evidence. These changes remove verified mixed
