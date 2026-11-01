@@ -92,6 +92,26 @@ class CompositionTests(unittest.TestCase):
                 self.assertFalse(issues)
                 self.assertEqual(c.patch_bytes(out,'NSKR UI Strings.esp'),(out,[],[]))
 
+    def test_inventory_notification_suffixes_compose_with_cp949_names(self):
+        cases = [('sAddItemtoInventory', '추가됨'),
+                 ('sRemoveItemfromInventory', '제거됨'),
+                 ('sEquipItemOnPlayer', '장착되었습니다. : '),
+                 ('sUnequipItemOnPlayer', '장착해제 되었습니다. : ')]
+        for edid, text in cases:
+            with self.subTest(edid=edid):
+                untouched = record(b'GMST', sub(b'EDID', b'sAddedEffects\0') +
+                                   sub(b'DATA', '추가된 효과들'.encode() + b'\0'))
+                raw = plugin(record(b'GMST', sub(b'EDID', edid.encode() + b'\0') +
+                                    sub(b'DATA', text.encode() + b'\0')) + untouched)
+                out, changes, issues = c.patch_bytes(raw, 'NSKR UI Strings.esp')
+                self.assertEqual(len(changes), 1)
+                self.assertFalse(issues)
+                self.assertIn(untouched, out)
+                self.assertIn(text.encode('cp949') + b'\0', out)
+                composed = '발광 버섯 '.encode('cp949') + text.encode('cp949')
+                self.assertEqual(composed.decode('cp949'), '발광 버섯 ' + text)
+                self.assertEqual(c.patch_bytes(out, 'NSKR UI Strings.esp'), (out, [], []))
+
     def test_compressed_info_and_enclosing_group_lengths(self):
         info=record(b'INFO', sub(b'KNAM', struct.pack('<I', 0x4BB))+
                     sub(b'RNAM', '긴 한국어 선택지'.encode()+b'\0'), compressed=True)

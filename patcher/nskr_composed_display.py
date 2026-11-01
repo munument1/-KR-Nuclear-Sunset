@@ -13,7 +13,11 @@ from nskr_perk_display import display_bytes
 
 # Reviewed templates whose inserted AVIF / ALCH / SPEL names use CP949.
 CP949_GMSTS = {'schemswornoff', 'schemsaddicted', 'schemswithdrawal',
-               'shackineligible'}
+               'shackineligible',
+               # Inventory notifications join these suffixes to item FULL names.
+               # Those names are normalized by nskr_notifications already.
+               'sadditemtoinventory', 'sremoveitemfrominventory',
+               'sequipitemonplayer', 'sunequipitemonplayer'}
 
 
 def identity(form, owners):
