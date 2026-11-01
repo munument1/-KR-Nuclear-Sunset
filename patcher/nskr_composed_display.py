@@ -17,7 +17,9 @@ CP949_GMSTS = {'schemswornoff', 'schemsaddicted', 'schemswithdrawal',
                # Inventory notifications join these suffixes to item FULL names.
                # Those names are normalized by nskr_notifications already.
                'sadditemtoinventory', 'sremoveitemfrominventory',
-               'sequipitemonplayer', 'sunequipitemonplayer'}
+               'sequipitemonplayer', 'sunequipitemonplayer',
+               # Attribute notifications combine these with AVIF names too.
+               'syour', 'sattributedamaged', 'sattributedrained'}
 
 
 def identity(form, owners):

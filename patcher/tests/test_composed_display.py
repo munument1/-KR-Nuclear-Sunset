@@ -112,6 +112,23 @@ class CompositionTests(unittest.TestCase):
                 self.assertEqual(composed.decode('cp949'), '발광 버섯 ' + text)
                 self.assertEqual(c.patch_bytes(out, 'NSKR UI Strings.esp'), (out, [], []))
 
+    def test_attribute_notification_fragments_share_actor_value_encoding(self):
+        cases = [('sYour', '당신의'),
+                 ('sAttributeDamaged', '피해를 당했습니다 :'),
+                 ('sAttributeDrained', '효과가 감소하는 중입니다.')]
+        raw = plugin(b''.join(record(b'GMST', sub(b'EDID', edid.encode() + b'\0') +
+                                    sub(b'DATA', text.encode() + b'\0'), 0x800+i)
+                              for i, (edid, text) in enumerate(cases)))
+        out, changes, issues = c.patch_bytes(raw, 'NSKR UI Strings.esp')
+        self.assertEqual(len(changes), 3)
+        self.assertFalse(issues)
+        for _, text in cases:
+            self.assertIn(text.encode('cp949') + b'\0', out)
+        combined = b' '.join(text.encode('cp949') for text in
+                             ('당신의', '힘', '효과가 감소하는 중입니다.'))
+        self.assertEqual(combined.decode('cp949'), '당신의 힘 효과가 감소하는 중입니다.')
+        self.assertEqual(c.patch_bytes(out, 'NSKR UI Strings.esp'), (out, [], []))
+
     def test_compressed_info_and_enclosing_group_lengths(self):
         info=record(b'INFO', sub(b'KNAM', struct.pack('<I', 0x4BB))+
                     sub(b'RNAM', '긴 한국어 선택지'.encode()+b'\0'), compressed=True)

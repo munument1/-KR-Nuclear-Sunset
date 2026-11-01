@@ -39,3 +39,29 @@ attribute/skill notifications in the first screenshot still need their precise
 runtime producer identified. The old Output's nine notification review notes
 are in other scripts and do not by themselves identify that producer. Issue #22
 and the remaining paths in #29 must stay open pending game verification.
+
+## 2026-11-02: active-profile audit and attribute fragments
+
+`tools/audit_notification_composition.py` now resolves offline plugin winners
+for the selected profile. In the actual active configuration, all AVIF/FULL
+names are CP949, but the winning `NSKR UI Strings.esp` still supplies UTF-8
+`sYour`, `sAttributeDamaged`, and `sAttributeDrained`, in addition to the four
+inventory suffixes above. The existing `sChemsWornOff` and skill increase/decrease
+strings already use CP949. Normalize only these three additional composition
+fragments; do not convert unrelated GMSTs or all INI values wholesale.
+
+- Current installed UI plugin input SHA is the same `268bc28e...` above.
+- Seven-field candidate SHA-256:
+  `8bf809d8e61a5872ebf6191f8bd5f8c644c24811f342c7a2a84f9eb350aff85b`.
+- Full Python suite: **191 tests, 4 skipped, no failures**.
+- A separate MO2 QA profile with local saves and a separate overriding mod
+  reached the main menu with the seven-field candidate. Automated mouse/key
+  input did not trigger save loading, so the acquisition/attribute notifications
+  were **not visually tested**. The test game was closed.
+- The source save remained byte-identical; the source UI plugin and the original
+  profile's mod/plugin lists were not changed. The QA override is enabled only
+  in its dedicated profile. No new release was published.
+
+The first screenshot's exact notification producer and the remaining #29 fungus
+screens still require runtime evidence. These changes remove verified mixed
+composition inputs, but do not establish that every symptom is resolved.
