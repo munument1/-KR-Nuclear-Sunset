@@ -25,6 +25,7 @@ import nskr_notifications
 import nskr_composed_display
 import nskr_dynamic_display
 import nskr_medical_bag
+import nskr_b42_descriptions
 import nskr_runtime_text
 import nskr_runtime_overrides
 import nskr_issue20_casings
@@ -1175,6 +1176,8 @@ def build_output(installation, catalog_dir, output, progress=None, *,
         nskr_medical_bag.finalize(installation, stage, report['files'])
         nskr_runtime_text.finalize(installation, stage, report['files'])
         nskr_runtime_overrides.finalize(installation, stage, report['files'])
+        report['b42_descriptions'] = nskr_b42_descriptions.finalize(
+            installation, stage, report['files'])
         nskr_stewie_book_effects.finalize(stage, report['files'])
         if not report['files']:
             raise ValueError('No applicable translation files; no Output was published')
