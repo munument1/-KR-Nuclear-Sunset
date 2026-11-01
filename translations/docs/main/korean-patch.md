@@ -23,7 +23,7 @@ Nuclear Sunset 설치를 마치고 **영문 상태에서 게임이 정상 실행
 ## 설치 방법
 
 1. [tNVSE Font Plugin](https://www.nexusmods.com/newvegas/mods/95088?tab=files)에서 **tNVSE 본체**와 **tNVSE Default Config**를 내려받아 MO2에 각각 설치·활성화합니다. 이미 설치했다면 이 단계는 건너뛰세요.
-2. [최신 한국어 패쳐](https://github.com/munument1/-KR-Nuclear-Sunset/releases/latest)의 **Assets**에서 설치용 ZIP(현재 `NuclearSunset-Korean-Patcher-v1.0.8.zip`)을 내려받고 **새 폴더에 전체 압축을 풉니다**. EXE 두 개와 `_internal`, `worker-runtime`, `TranslationData`, `Backend`, `Licenses-and-Source` 폴더를 함께 유지하고 EXE만 따로 옮기지 마세요.
+2. [최신 한국어 패쳐](https://github.com/munument1/-KR-Nuclear-Sunset/releases/latest)의 **Assets**에서 설치용 ZIP(현재 `NuclearSunset-Korean-Patcher-v1.1.2.zip`)을 내려받고 **새 폴더에 전체 압축을 풉니다**. EXE 두 개와 `_internal`, `worker-runtime`, `TranslationData`, `Backend`, `Licenses-and-Source` 폴더를 함께 유지하고 EXE만 따로 옮기지 마세요.
 3. 게임과 MO2를 종료한 뒤 `NuclearSunsetKoreanPatcher.exe`를 실행합니다. `ModOrganizer.ini`가 있는 **Nuclear Sunset MO2 폴더**를 선택합니다. (`mods` 또는 게임 `Data` 폴더가 아닙니다.)
 4. **MCM·Translations**, **폰트·수정 tNVSE**, **전체 대상 플러그인 번역**을 모두 선택하고 **Output 생성**을 누릅니다. 완료 후 결과 보고서를 확인하고, 오류로 실패한 Output은 설치하지 마세요.
 5. 덮어쓸 기존 모드 파일을 백업한 다음, `Output/mods` **안에 있는 모드 폴더들**을 MO2의 실제 `mods` 폴더에 복사해 병합합니다. `Output` 폴더 전체를 하나의 모드로 설치하지 마세요.
