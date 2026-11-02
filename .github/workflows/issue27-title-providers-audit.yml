@@ -1,0 +1,28 @@
+name: Issue 27 title provider source audit
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/tools/audit_issue27_title_providers.py'
+      - '.github/workflows/issue27-title-providers-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download published v1.0.9 TranslationData (read-only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v1.0.9 --repo "$GITHUB_REPOSITORY" \
+            --pattern 'NuclearSunset-TranslationData-v1.0.9.zip' \
+            --dir "$RUNNER_TEMP"
+      - name: List karma title string sources
+        run: |
+          python patcher/tools/audit_issue27_title_providers.py \
+            "$RUNNER_TEMP/NuclearSunset-TranslationData-v1.0.9.zip"
