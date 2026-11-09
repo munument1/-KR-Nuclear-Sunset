@@ -1,0 +1,89 @@
+name: Issue 35 inventory notification native QA
+on:
+  pull_request:
+    paths:
+      - patcher/native/tnvse/Src/font/encoding.cpp
+      - patcher/native/tnvse/Src/font/encoding.h
+      - patcher/native/tnvse/run_regression.py
+      - .github/workflows/issue35-inventory-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exact official source and overlay two changed files
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/munument1/-KR-Nuclear-Sunset/releases/download/v1.1.2/NuclearSunset-Korean-Patcher-v1.1.2.zip -OutFile baseline.zip
+          @'
+          import zipfile,hashlib,json,pathlib,shutil
+          archive=pathlib.Path('baseline.zip')
+          assert hashlib.sha256(archive.read_bytes()).hexdigest()=='4c121b4ca2100d322e21005b44d9fbf0a538ee85a6753ceacf3521e05e3a7d16'
+          root=pathlib.Path('native-source').resolve()
+          prefix='Licenses-and-Source/tNVSE-71-KR-UI-source/tNVSE/'
+          with zipfile.ZipFile(archive) as z:
+              for name in z.namelist():
+                  if name.startswith(prefix) and not name.endswith('/'):
+                      target=root/name[len(prefix):]
+                      assert target.resolve().is_relative_to(root)
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(z.read(name))
+              pathlib.Path('dictionary.json').write_bytes(z.read('TranslationData/runtime_ui/NSKR_UI_Translations.json'))
+          changes=json.loads(pathlib.Path('patcher/native/tnvse/issue35-source-changes.json').read_text())
+          for rel,guard in changes.items():
+              target=root/'tnvse/Src'/rel
+              source=pathlib.Path('patcher/native/tnvse/Src')/rel
+              assert hashlib.sha256(target.read_bytes()).hexdigest()==guard['before_sha256']
+              assert hashlib.sha256(source.read_bytes()).hexdigest()==guard['after_sha256']
+              shutil.copy2(source,target)
+          '@ | python -
+      - name: Exercise actual conversion functions and patcher tests
+        shell: pwsh
+        run: |
+          python patcher/native/tnvse/run_regression.py dictionary.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native regression failed' }
+          Push-Location patcher
+          python -m unittest discover -s tests
+          if ($LASTEXITCODE -ne 0) { throw 'Patcher regression failed' }
+          Pop-Location
+      - name: Restore native build dependencies
+        shell: pwsh
+        run: |
+          nuget install Microsoft.DXSDK.D3DX -Version 9.29.952.8 -OutputDirectory native-source/tnvse/packages -NonInteractive
+          if ($LASTEXITCODE -ne 0) { throw 'DXSDK restore failed' }
+          nuget install VC-LTL -Version 5.3.1 -OutputDirectory native-source/tnvse/packages -NonInteractive
+          if ($LASTEXITCODE -ne 0) { throw 'VC-LTL restore failed' }
+      - name: Fresh Win32 DLL build
+        shell: pwsh
+        run: |
+          cmake -S native-source -B native-build -A Win32 -G 'Visual Studio 17 2022' '-DTNVSE_PLUGIN_PATH='
+          if ($LASTEXITCODE -ne 0) { throw 'CMake configure failed' }
+          cmake --build native-build --config Release --parallel 3
+          if ($LASTEXITCODE -ne 0) { throw 'DLL build failed' }
+      - name: Package candidate with corresponding GPL source
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,zipfile,hashlib,shutil,json,struct
+          dll=pathlib.Path('native-build/bin/Release/tnvse.dll')
+          raw=dll.read_bytes();pe=struct.unpack_from('<I',raw,0x3c)[0]
+          assert raw[:2]==b'MZ' and raw[pe:pe+4]==b'PE\0\0'
+          assert struct.unpack_from('<H',raw,pe+4)[0]==0x14c
+          out=pathlib.Path('candidate');out.mkdir()
+          shutil.copy2(dll,out/'tnvse.dll')
+          shutil.copy2('patcher/docs/issue35-inventory-encoding.md',out/'README.md')
+          shutil.copy2('patcher/native/tnvse/tests/results.json',out/'native-test-results.json')
+          (out/'SHA256SUMS.txt').write_text(hashlib.sha256(raw).hexdigest()+'  tnvse.dll\n')
+          with zipfile.ZipFile(out/'GPL-corresponding-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for p in pathlib.Path('native-source').rglob('*'):
+                  if p.is_file():z.write(p,p.relative_to('native-source'))
+          '@ | python -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue35-native-QA-not-released
+          path: candidate/
+          retention-days: 14

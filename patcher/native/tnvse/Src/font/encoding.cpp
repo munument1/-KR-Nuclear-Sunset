@@ -263,6 +263,44 @@ namespace fonthook
         return true;
     }
 
+    bool TryNormalizeInventoryNotification(const char* source, std::string& converted)
+    {
+        if (!source || g_usingWinEncoding != 949) return false;
+        const std::string_view text(source);
+        // v1.1.2 GMST fragments are CP949; AMMO/WEAP/etc. FULL stays UTF-8.
+        const std::string_view suffixes[] = {
+            " \xC3\xDF\xB0\xA1\xB5\xCA", // sAddItemtoInventory
+            " \xC1\xA6\xB0\xC5\xB5\xCA"  // sRemoveItemfromInventory
+        };
+        for (const auto suffix : suffixes)
+        {
+            if (text.size() <= suffix.size()
+                || text.substr(text.size() - suffix.size()) != suffix) continue;
+            const std::string item(text.substr(0, text.size() - suffix.size()));
+            std::string normalized;
+            if (!IsValidUTF8With3ByteMin(item.c_str())
+                || !TryUTF8ToMultiByteStr(item, 949, normalized)) return false;
+            normalized.append(suffix);
+            converted.swap(normalized);
+            return true;
+        }
+        const std::string_view prefixes[] = {
+            "\xC0\xE5\xC2\xF8\xB5\xC7\xBE\xFA\xBD\xC0\xB4\xCF\xB4\xD9. : ", // sEquipItemOnPlayer
+            "\xC0\xE5\xC2\xF8\xC7\xD8\xC1\xA6 \xB5\xC7\xBE\xFA\xBD\xC0\xB4\xCF\xB4\xD9. : " // sUnequipItemOnPlayer
+        };
+        for (const auto prefix : prefixes)
+        {
+            if (text.substr(0, prefix.size()) != prefix) continue;
+            const std::string item(text.substr(prefix.size()));
+            std::string normalized;
+            if (!IsValidUTF8With3ByteMin(item.c_str())
+                || !TryUTF8ToMultiByteStr(item, 949, normalized)) return false;
+            converted = std::string(prefix) + normalized;
+            return true;
+        }
+        return false;
+    }
+
     std::string UTF8ToMultiByteStr(const std::string& utf8, UInt32 codePage)
     {
         std::string converted;
