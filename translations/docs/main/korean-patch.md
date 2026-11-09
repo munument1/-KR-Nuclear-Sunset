@@ -10,7 +10,7 @@ Nuclear Sunset 설치를 마치고 **영문 상태에서 게임이 정상 실행
 
 ## 배포 구성과 번역 적용 방식
 
-현재 안내 기준은 [v1.0.8](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.0.8)입니다. 메인 패쳐와 작업 프로그램, 번역 자료를 함께 제공하는 폴더형 배포입니다.
+현재 안내 기준은 [v1.1.3](https://github.com/munument1/-KR-Nuclear-Sunset/releases/tag/v1.1.3)입니다. 메인 패쳐와 작업 프로그램, 번역 자료를 함께 제공하는 폴더형 배포입니다.
 
 - **일반 모드 번역:** 설치된 ESP/ESM을 읽고 레코드·필드·현재 원문에 맞는 번역 데이터를 적용해 Output을 생성합니다. 일반 모드의 완성된 번역 플러그인을 통째로 넣어 교체하는 방식은 아닙니다.
 - **한국어 UI 지원:** `NSKR UI Strings.esp`는 패쳐에 포함된 완성 플러그인을 Output으로 복사합니다. 문자열 GMST로 구성된 한국어 UI 지원 파일이며, 일반 모드에 번역 사전을 적용하는 경로와 별개입니다.

@@ -19,7 +19,8 @@ def literal(text,encoding='utf-8'):
 
 signatures={
  'font/encoding.cpp':['bool IsValidUTF8With3ByteMin(', 'void TraceEncodingConversionFailure(',
-    'bool TryUTF8ToMultiByteStr(', 'std::string UTF8ToMultiByteStr('],
+    'bool TryUTF8ToMultiByteStr(', 'bool TryNormalizeInventoryNotification(',
+    'std::string UTF8ToMultiByteStr('],
  'font/encoding.h':['inline bool ShouldConvertUTF8(', 'inline bool ConvertToMultiByte('],
  'font/text_hooks.cpp':['std::string GetDoorStructuralParticle(', 'const char* SafeCString(',
     'std::string NormalizeDoorUiPiece(', 'const char* TranslateDoorPiece(',
@@ -78,6 +79,39 @@ int main(int argc,char**){
   check(IsValidUTF8With3ByteMin(sentence.c_str()),"valid Korean UTF8");
   check(!IsValidUTF8With3ByteMin(sentence_cp.c_str()),"CP949 not misclassified fixture");
   check(!IsValidUTF8With3ByteMin("ASCII"),"ASCII legacy behavior");
+  const std::string ammo=__AMMO_UTF8__;
+  const std::string ammoCp=__AMMO_CP949__;
+  for (const auto suffix : {__ADDED_CP949__, __REMOVED_CP949__}) {
+    std::string input=ammo+suffix, storage="sentinel";
+    const char* value=input.c_str();
+    check(!IsValidUTF8With3ByteMin(value),"inventory reproduces v1.1.2 mixed bytes");
+    check(ConvertToMultiByte(value,storage,true)&&storage==ammoCp+suffix,
+        "inventory UTF8 ammo and CP949 GMST normalize together");
+    input=ammoCp+suffix;value=input.c_str();storage="sentinel";
+    check(!ConvertToMultiByte(value,storage,true)&&storage=="sentinel",
+        "already CP949 inventory unchanged");
+    input=emoji+suffix;value=input.c_str();storage="sentinel";
+    check(!ConvertToMultiByte(value,storage,true)&&storage=="sentinel",
+        "unsupported inventory item preserved without question marks");
+    input=ammo+suffix+" unrelated";value=input.c_str();
+    check(!ConvertToMultiByte(value,storage,true),"inventory suffix must be at end");
+    input=ammo+suffix;value=input.c_str();
+    check(!ConvertToMultiByte(value,storage,false),"inventory requires glyphs");
+    g_bEnableUTF8=false;
+    check(!ConvertToMultiByte(value,storage,true),"inventory respects UTF8 switch");
+    g_bEnableUTF8=true;g_usingWinEncoding=936;
+    check(!ConvertToMultiByte(value,storage,true),"inventory limited to Korean mode");
+    g_usingWinEncoding=949;
+  }
+  for (const auto prefix : {__EQUIPPED_CP949__, __UNEQUIPPED_CP949__}) {
+    std::string input=prefix+ammo, storage;
+    const char* value=input.c_str();
+    check(ConvertToMultiByte(value,storage,true)&&storage==prefix+ammoCp,
+        "equipment CP949 GMST prefix with UTF8 item");
+  }
+  std::string unknown=ammo+__UNKNOWN_CP949__, unchanged="sentinel";
+  check(!TryNormalizeInventoryNotification(unknown.c_str(),unchanged)&&unchanged=="sentinel",
+      "unreviewed mixed strings preserved");
   check(!IsValidUTF8With3ByteMin(nullptr),"null pointer");
   check(!IsValidUTF8With3ByteMin(greek.c_str()),"two-byte legacy heuristic");
   const std::vector<std::string> invalid={
@@ -181,6 +215,16 @@ int main(int argc,char**){
 main=main.replace('__CELL_UTF8__',literal(fixtures['cell'])).replace('__DOOR_UTF8__',literal(fixtures['door']))
 main=main.replace('__EMDASH_UTF8__',literal('한글—설명')).replace('__BAR_CP949__',literal('한글―설명','cp949'))
 main=main.replace('__LOCK_CP949__',literal('열쇠가 있어야 열 수 있습니다.','cp949'))
+for key, value, encoding in (
+    ('AMMO_UTF8', '11 .357 매그넘 탄약 [50]', 'utf-8'),
+    ('AMMO_CP949', '11 .357 매그넘 탄약 [50]', 'cp949'),
+    ('ADDED_CP949', ' 추가됨', 'cp949'),
+    ('REMOVED_CP949', ' 제거됨', 'cp949'),
+    ('EQUIPPED_CP949', '장착되었습니다. : ', 'cp949'),
+    ('UNEQUIPPED_CP949', '장착해제 되었습니다. : ', 'cp949'),
+    ('UNKNOWN_CP949', ' 알 수 없는 문구', 'cp949'),
+):
+    main=main.replace('__'+key+'__',literal(value,encoding))
 dictionary=Path(r'C:\Modlists\NuclearSunset\mods\Nuclear Sunset - Korean UI Runtime Translations\NVSE\plugins\NSKR_UI_Translations.json')
 import struct
 if len(sys.argv)>1:dictionary=Path(sys.argv[1])

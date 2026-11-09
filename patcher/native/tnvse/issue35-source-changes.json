@@ -1,0 +1,10 @@
+{
+  "font/encoding.cpp": {
+    "before_sha256": "b8749e09d5a08bf7c15c29316d1104d98e1c5c6a6b1145acbe46688c86d234d1",
+    "after_sha256": "7aad3e93a7e098b6dc0972e5ac6dc0198964301bc74f22491a2e8f9606f0cdd5"
+  },
+  "font/encoding.h": {
+    "before_sha256": "8664ae3ae3c0559881ff1babcbc89a6387177d51843e0b8fc411d3f105dc332f",
+    "after_sha256": "3d5b2dc9c6d217fad4aa61b570a86ad2bad1bdd94856ecb18da04b2871f0a3b6"
+  }
+}

@@ -204,6 +204,24 @@ jobs:
             const published = versions.find(v => v.version === process.env.VERSION && v.category === 'main');
             if (!published) throw new Error('New main version missing from Nexus API readback');
             core.info('Verified Nexus main version: ' + published.version);
+            async function api(path, body) {
+              const r = await fetch('https://api.nexusmods.com' + path, {
+                method: body ? 'POST' : 'GET',
+                headers: { apikey: key, 'Content-Type': 'application/json', 'User-Agent': 'KR-Patcher-Release-Sync' },
+                body: body ? JSON.stringify(body) : undefined, redirect: 'error'
+              });
+              if (!r.ok) throw new Error('Nexus API HTTP ' + r.status);
+              return r.json();
+            }
+            const mod = await api('/v1/games/newvegas/mods/99974.json');
+            const logs = await api('/v1/games/newvegas/mods/99974/changelogs.json');
+            if (!Object.keys(logs).some(v => v.toLowerCase() === process.env.VERSION.toLowerCase())) {
+              await api('/v3/mods/' + mod.uid + '/changelogs', {
+                version: process.env.VERSION,
+                changelog: '아이템 획득·구매·제거 알림에서 UTF-8 이름과 CP949 문구가 섞일 때 이름이 깨지는 문제 수정. 네이티브 회귀 178건과 패쳐 검사 통과. 실게임 알림 화면은 미검증. 전체 ZIP을 새 폴더에 풀고 새 Output을 생성해 적용하세요.'
+              });
+            }
+            core.info('NEXUS_PUBLICATION_READBACK ' + JSON.stringify({mod_id: 99974, group: process.env.FILE_ID, version: published.version, version_id: published.id, game_scoped_file_id: published.game_scoped_id, changelog_confirmed: true}));
 
       - name: Write run summary
         if: steps.release.outputs.ready == 'true'

@@ -1,5 +1,13 @@
 # tNVSE v1.0.8 변경 소스
 
+## 후속 수정 후보: 이슈 #35
+
+현재 `Src/font/encoding.cpp`와 `encoding.h`는 1.1.2의 혼합 인코딩
+아이템 알림을 처리하는 추가 수정 후보를 포함합니다.
+[원인·검증·제약](../../docs/issue35-inventory-encoding.md).
+아래 DLL 해시와 `source.patch`, `source-changes.json`, `binary-verification.json`은
+기존 v1.0.8 검증 기록입니다. 새 후보 정보는 `issue35-*` 파일에 따로 보존합니다.
+
 v1.0.7에 포함된 tNVSE 소스의 다섯 파일을 수정했습니다. 전체 대응 소스와 의존성은
 릴리스 패키지 Licenses-and-Source/tNVSE-71-KR-UI-source/tNVSE에 포함합니다.
 이 폴더의 source.patch는 해당 원본에 적용할 수 있는 변경 내역입니다.
