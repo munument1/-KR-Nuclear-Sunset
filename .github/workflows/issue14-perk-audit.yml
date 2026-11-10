@@ -1,0 +1,342 @@
+name: Issue 14 PERK audit tests
+on:
+  push:
+    branches:
+      - audit/issue14-perk-regression-20261022
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile audit sources
+        run: python -m compileall -q patcher/tools/audit_issue14_perk_regression.py patcher/tools/download_issue14_images.py patcher/tools/audit_issue14_mo2_winners.py patcher/tests/test_issue14_perk_regression.py patcher/tests/test_issue14_mo2_winners.py patcher/tools/build_issue14_sor_candidate.py patcher/tests/test_issue14_sor_candidate.py
+      - name: Run isolated audit tests
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_issue14*.py' -v
+      - name: Download released TranslationData archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release-input/v1.0.2 release-input/v1.0.5
+          gh release download v1.0.2 --repo "${GITHUB_REPOSITORY}" --pattern 'NuclearSunset-TranslationData-v1.0.2.zip' --dir release-input/v1.0.2
+          gh release download v1.0.5 --repo "${GITHUB_REPOSITORY}" --pattern 'NuclearSunset-TranslationData-v1.0.5.zip' --dir release-input/v1.0.5
+          python -m zipfile -e release-input/v1.0.2/NuclearSunset-TranslationData-v1.0.2.zip release-input/v1.0.2/extracted
+          python -m zipfile -e release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip release-input/v1.0.5/extracted
+      - name: Compare real v1.0.2 to v1.0.5 catalogs
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          test -n "$PREV" && test -n "$CURR"
+          mkdir -p audit-results
+          python patcher/tools/audit_issue14_perk_regression.py --previous "$PREV" --current "$CURR" --output audit-results/issue14-perk-comparison.csv
+          python -c 'import csv,collections,json; rows=list(csv.DictReader(open("audit-results/issue14-perk-comparison.csv",encoding="utf-8-sig"))); kinds=collections.Counter(x["change"] for x in rows); fields=collections.Counter(x["field"] for x in rows); print("PERK audit rows:", len(rows)); print("Changes:",json.dumps(kinds,sort_keys=True)); print("Fields:",json.dumps(fields,sort_keys=True)); print("Changed examples:",json.dumps([{"plugin":x["plugin"],"formid":x["formid"],"field":x["field"],"change":x["change"]} for x in rows if x["change"]!="unchanged"][:40],ensure_ascii=False))'
+      - name: Compare packaged font and runtime dictionary metadata
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys,hashlib
+          from pathlib import Path
+          old,new=[json.loads(Path(p).read_text(encoding="utf-8-sig")) for p in sys.argv[1:]]
+          for key in ("font_bundle","runtime_mods","asset_bundle","plugin_fields"):
+              x,y=old.get(key),new.get(key)
+              print("BUNDLE_COMPARE",key, "SAME" if x==y else "CHANGED",
+                    "v102_present="+str(x is not None), "v105_present="+str(y is not None))
+          for label,entry in (("v102",old),("v105",new)):
+              font=entry.get("font_bundle") or {}
+              for k in ("ini","xml"):
+                  print("FONT_CONFIG",label,k,str((font.get(k) or {}).get("payload_sha256","missing")))
+              for asset in font.get("assets",[]):
+                  if "tnvse.dll" in str(asset.get("path","")).casefold():
+                      print("BUNDLED_TNVSE",label,asset.get("path"),asset.get("payload_sha256"))
+          PY
+      - name: Name changed bundled runtime payloads
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys
+          from pathlib import Path
+          old,new=[json.loads(Path(p).read_text(encoding="utf-8-sig")) for p in sys.argv[1:]]
+          for key in ("font_bundle",):
+              lhs,rhs=old.get(key) or {},new.get(key) or {}
+              for subkey in sorted(set(lhs)|set(rhs)):
+                  if lhs.get(subkey)!=rhs.get(subkey):
+                      print("FONT_BUNDLE_CHANGED",subkey)
+              a={str(x.get("path","")):x.get("payload_sha256") for x in lhs.get("assets",[])}
+              b={str(x.get("path","")):x.get("payload_sha256") for x in rhs.get("assets",[])}
+              for path in sorted(set(a)|set(b)):
+                  if a.get(path)!=b.get(path):
+                      print("FONT_ASSET_CHANGED",path,str(a.get(path))[:12],str(b.get(path))[:12])
+          for label,catalog in (("v102",old),("v105",new)):
+              mods=catalog.get("runtime_mods") or []
+              print("RUNTIME_MOD_COUNT",label,len(mods))
+              for mod in mods:
+                  print("RUNTIME_MOD",label,mod.get("mod"),len(mod.get("files",[])))
+          om={str(x.get("mod","")):x for x in old.get("runtime_mods",[])}
+          nm={str(x.get("mod","")):x for x in new.get("runtime_mods",[])}
+          for mod in sorted(set(om)|set(nm)):
+              a,b=om.get(mod) or {},nm.get(mod) or {}
+              if a==b:continue
+              print("RUNTIME_CHANGED_MOD",mod)
+              af={str(x.get("path","")):x.get("payload_sha256") for x in a.get("files",[])}
+              bf={str(x.get("path","")):x.get("payload_sha256") for x in b.get("files",[])}
+              for path in sorted(set(af)|set(bf)):
+                  if af.get(path)!=bf.get(path):
+                      print("RUNTIME_CHANGED_FILE",mod,path,str(af.get(path))[:12],str(bf.get(path))[:12])
+          PY
+      - name: Audit released perk menu dictionary switches
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys,re,xml.etree.ElementTree as ET
+          from pathlib import Path
+          watched={"benabledictionarytranslation",
+                   "benabledictionaryperkdescriptiontranslation",
+                   "benabledictionarymixedsourcetranslation",
+                   "benabledictionarytranslationlog",
+                   "butf8", "uiencoding"}
+          for version,path in zip(("v102","v105"),sys.argv[1:]):
+              catalog_path=Path(path)
+              data=json.loads(catalog_path.read_text(encoding="utf-8-sig"))
+              font=data.get("font_bundle") or {}
+              ini=font.get("ini") or {}
+              payload=ini.get("payload")
+              print("PERK_MENU_CONFIG",version,"ini_payload",payload,"overrides",json.dumps(
+                    {name:{k:v for k,v in values.items() if k.casefold() in watched}
+                     for name,values in (font.get("ini_overrides") or {}).items()
+                     if isinstance(values,dict)},ensure_ascii=False))
+              if payload:
+                  target=(catalog_path.parent/payload).resolve()
+                  print("PERK_MENU_CONFIG",version,"ini_exists",target.is_file())
+                  if target.is_file():
+                      section=""
+                      for line in target.read_text(encoding="utf-8-sig").splitlines():
+                          if line.lstrip().startswith("["):
+                              section=line.strip()
+                          match=re.match(r"\s*([^;#=]+?)\s*=\s*([^;#]*)(?:[;#].*)?$",line)
+                          if match and match.group(1).strip().casefold() in watched:
+                              print("PERK_MENU_KEY",version,section,match.group(1).strip(),match.group(2).strip())
+              for name in ("dictionary","dictionary_xml"):
+                  entry=font.get(name)
+                  if isinstance(entry,dict):
+                      print("PERK_MENU_DICTIONARY",version,name,entry.get("payload"))
+          PY
+      - name: Inspect changed UI Strings ESP records from actual archives
+        env:
+          PYTHONPATH: patcher
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import collections, hashlib, json, sys
+          from pathlib import Path
+          from tools.tes4_text_scan import plugin_records, field_occurrences, clean_text
+          def find_runtime(catalog_file):
+              catalog=json.loads(Path(catalog_file).read_text(encoding="utf-8-sig"))
+              for mod in catalog.get("runtime_mods",[]):
+                  if mod.get("mod")!="Nuclear Sunset - Korean UI Strings":
+                      continue
+                  for item in mod.get("files",[]):
+                      if str(item.get("path","")).casefold().endswith("nskr ui strings.esp"):
+                          return (Path(catalog_file).parent / item["payload"]).resolve()
+              raise RuntimeError("NSKR UI Strings.esp not found")
+          def scan(path):
+              if not path.is_file():
+                  raise FileNotFoundError(path)
+              recs={}
+              duplicates=collections.Counter()
+              for fid,sig,fields in plugin_records(path):
+                  if sig=="TES4":continue
+                  edid=next((clean_text(raw,"cp1252") for key,raw in fields
+                             if key=="EDID"),None)
+                  recid=(sig,fid,edid or "")
+                  duplicates[recid]+=1
+                  identity=(*recid,duplicates[recid])
+                  recs[identity]={(key,order):raw for key,order,raw in field_occurrences(fields)}
+              return recs
+          old,new=(scan(find_runtime(x)) for x in sys.argv[1:])
+          changed=[]
+          for rid in sorted(set(old)|set(new)):
+              before,after=old.get(rid,{}),new.get(rid,{})
+              for key in sorted(set(before)|set(after)):
+                  b,a=before.get(key),after.get(key)
+                  if b==a:continue
+                  def readable(raw):
+                      if raw is None:return "[absent]"
+                      for enc in ("utf-8","cp1252"):
+                          t=clean_text(raw,enc)
+                          if t is not None:return t[:400]
+                      return "binary sha256:"+hashlib.sha256(raw).hexdigest()[:16]
+                  changed.append({"sig":rid[0],"formid":f"{rid[1]:08X}",
+                                  "edid":rid[2],"field":key[0],
+                                  "occurrence":key[1],"before":readable(b),
+                                  "after":readable(a)})
+          print("UI_STRINGS_RECORD_DIFF",json.dumps({
+                "old_records":len(old),"new_records":len(new),
+                "changed_subrecords":len(changed),
+                "changed":changed[:120]},ensure_ascii=False))
+          assert len(changed)<2000,"Refusing huge unexpectedly changed record set"
+          PY
+      - name: Verify source and destination encoding of changed UI GMST fields
+        env:
+          PYTHONPATH: patcher
+        run: |
+          PREV=$(find release-input/v1.0.2/extracted -type f -name catalog.json -print -quit)
+          CURR=$(find release-input/v1.0.5/extracted -type f -name catalog.json -print -quit)
+          python - "$PREV" "$CURR" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from tools.tes4_text_scan import plugin_records
+          def get_values(catalog_file):
+              catalogue=json.loads(Path(catalog_file).read_text(encoding="utf-8-sig"))
+              mod=next(x for x in catalogue["runtime_mods"] if x.get("mod")=="Nuclear Sunset - Korean UI Strings")
+              entry=next(x for x in mod["files"] if str(x["path"]).casefold().endswith("nskr ui strings.esp"))
+              p=(Path(catalog_file).parent / entry["payload"]).resolve()
+              out={}
+              for _,sig,fields in plugin_records(p):
+                  if sig!="GMST":continue
+                  data={k:v for k,v in fields}
+                  if data.get("EDID",b"").rstrip(b"\x00") in (b"sOr",b"sPCControlsTextPrefix"):
+                      name=data["EDID"].rstrip(b"\x00").decode("ascii")
+                      out[name]=data.get("DATA",b"").rstrip(b"\x00")
+              return out
+          old,new=map(get_values,sys.argv[1:])
+          for key in ("sOr","sPCControlsTextPrefix"):
+              for label,v in (("v102",old.get(key)),("v105",new.get(key))):
+                  assert v is not None, f"Missing {key} {label}"
+                  dec={}
+                  for enc in ("utf-8","cp949"):
+                      try:dec[enc]=v.decode(enc)
+                      except UnicodeDecodeError:dec[enc]="[invalid]"
+                  print("UI_GMST_ENCODING",json.dumps({"key":key,"version":label,
+                    "hex":v.hex(),"bytes":len(v),"decoded":dec},ensure_ascii=False))
+          assert old["sOr"].decode("utf-8")=="또는"
+          assert new["sOr"].decode("cp949")=="또는"
+          assert old["sOr"]!=new["sOr"]
+          sample_utf8="요구: ".encode("utf-8") + "또는".encode("utf-8") + " 설명: 저격수".encode("utf-8")
+          sample_mixed="요구: ".encode("utf-8") + new["sOr"] + " 설명: 저격수".encode("utf-8")
+          for label,b in (("utf8_only",sample_utf8),("mixed_source",sample_mixed)):
+              try:b.decode("utf-8"); valid=True
+              except UnicodeDecodeError:valid=False
+              print("UI_GMST_MIXED_BUFFER",label,"valid_utf8="+str(valid),"hex="+b.hex())
+          PY
+      - name: Build one-field sOr restoration candidate from published releases
+        env:
+          PYTHONPATH: patcher
+        run: |
+          python patcher/tools/build_issue14_sor_candidate.py \
+            --previous release-input/v1.0.2/NuclearSunset-TranslationData-v1.0.2.zip \
+            --current release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
+            --output-dir audit-results/sor-candidate
+      - name: Download original v1.0.5 installer archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v1.0.5 --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'NuclearSunset-Korean-Patcher-v1.0.5.zip' --dir release-input/v1.0.5
+      - name: Package full v1.0.6 official data hotfix compatible with v1.0.5
+        env:
+          PYTHONPATH: patcher
+        run: |
+          python patcher/tools/package_issue14_preview.py \
+            --installer release-input/v1.0.5/NuclearSunset-Korean-Patcher-v1.0.5.zip \
+            --translation-data release-input/v1.0.5/NuclearSunset-TranslationData-v1.0.5.zip \
+            --candidate audit-results/sor-candidate/NuclearSunset-TranslationData-v1.0.5-issue14-CANDIDATE.zip \
+            --output audit-results/release-preview
+      - name: Upload verified full installer and translation data
+        uses: actions/upload-artifact@v4
+        with:
+          name: NuclearSunset-v1.0.6-OFFICIAL-DATA-HOTFIX
+          path: audit-results/release-preview/*
+          if-no-files-found: error
+      - name: Upload unverified sOr candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-one-gmst-sOr-UTF8-candidate-NOT-RELEASED
+          path: audit-results/sor-candidate/*
+          if-no-files-found: error
+      - name: Upload catalog comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-perk-catalog-diff
+          path: audit-results/issue14-perk-comparison.csv
+          if-no-files-found: error
+      - name: Obtain 42 issue screenshots
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p issue14-attachments
+          gh api "repos/${GITHUB_REPOSITORY}/issues/14" --jq '.body' > issue14-attachments/issue-body.md
+          python patcher/tools/download_issue14_images.py --issue-body issue14-attachments/issue-body.md --output-dir issue14-attachments/captures
+      - name: Upload downloaded issue screenshots
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue14-capture-evidence
+          path: issue14-attachments/
+          if-no-files-found: ignore
+
+  publish_official:
+    needs: unit
+    if: github.ref == 'refs/heads/audit/issue14-perk-regression-20261022'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: NuclearSunset-v1.0.6-OFFICIAL-DATA-HOTFIX
+          path: dist
+      - name: Verify official release files and hashes
+        run: |
+          cd dist
+          test -f NuclearSunset-Korean-Patcher-v1.0.6.zip
+          test -f NuclearSunset-TranslationData-v1.0.6.zip
+          test -f SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          python - <<'PY'
+          from pathlib import Path
+          import json,zipfile
+          d=Path(".")
+          manifest=json.loads((d/"BUILD-MANIFEST.json").read_text(encoding="utf-8"))
+          assert manifest["release_tag"]=="v1.0.6", manifest
+          assert manifest["status"]=="OFFICIAL_RELEASE_GAMEPLAY_VERIFICATION_NEEDED"
+          assert manifest["changed_zip_members"] and len(manifest["changed_zip_members"])==2
+          for name in ("NuclearSunset-Korean-Patcher-v1.0.6.zip",
+                       "NuclearSunset-TranslationData-v1.0.6.zip"):
+              with zipfile.ZipFile(d/name) as z:
+                  assert z.testzip() is None
+          print("OFFICIAL_ASSET_VALIDATION_PASS", manifest["changed_zip_members"])
+          PY
+      - name: Create official v1.0.6 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.6 --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release v1.0.6 already exists; refusing to overwrite published assets."
+            exit 1
+          fi
+          gh release create v1.0.6 \
+            dist/NuclearSunset-Korean-Patcher-v1.0.6.zip \
+            dist/NuclearSunset-TranslationData-v1.0.6.zip \
+            dist/SHA256SUMS.txt \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Nuclear Sunset Korean Patcher v1.0.6" \
+            --notes-file patcher/docs/releases/v1.0.6.md \
+            --latest
+          gh release view v1.0.6 --repo "${GITHUB_REPOSITORY}" \
+            --json tagName,isPrerelease,isDraft,url,assets
