@@ -1,0 +1,24 @@
+name: Issue 22 pickup-name encoding regression
+
+on:
+  pull_request:
+    paths:
+      - 'patcher/nskr_notifications.py'
+      - 'patcher/tests/test_issue22_pickup_names.py'
+      - '.github/workflows/issue22-pickup-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify item FULL encoding and preserved bytes
+        working-directory: patcher
+        run: python -m unittest discover -s tests -p 'test_issue22_pickup_names.py' -v
