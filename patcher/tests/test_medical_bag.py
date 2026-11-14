@@ -61,7 +61,7 @@ class MedicalBagDynamicTests(unittest.TestCase):
             approved[edid] = medical.digest(source, code)
             if edid in already_translated:
                 source, code, _ = medical.replace_literals(source, code)
-            body = (sub(b'EDID', edid.encode('ascii') + b'\\0')
+            body = (sub(b'EDID', edid.encode('ascii') + b'\0')
                     + sub(b'SCHR', struct.pack('<5I', 1, 0, len(code), 1, 0))
                     + sub(b'SCDA', code) + sub(b'SCTX', source))
             records.append(rec(b'SCPT', 0x100 + index, body))
