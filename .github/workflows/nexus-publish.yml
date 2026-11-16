@@ -175,6 +175,7 @@ jobs:
           display_name: 'Nuclear Sunset Korean Patcher ${{ steps.release.outputs.version }}'
           description: |
             Korean translation patcher for an existing Nuclear Sunset installation. Original games and the modlist must be installed separately. Includes a Korean UI support ESP. Extract the entire folder package before running the patcher.
+            [b]v1.1.4 업데이트:[/b] 이전 한국어 Output을 설치한 뒤 다시 생성할 때 발생하는 Aid Addon 스크립트 해시 오류(#37)를 수정했습니다. 검수된 이전 한국어 스크립트만 안전하게 보존하며 알 수 없는 변경은 계속 거부합니다. 제보 해시와 같은 파일로 재현·재적용 검사를 통과했습니다. 전체 ZIP을 새 폴더에 풀고 새 Output을 생성하세요. 제보자 환경과 실게임 확인은 남아 있습니다.
             [b]v1.1.0 update:[/b] Fixed the save/load level title display in the main menu with a targeted tNVSE renderer correction. The reported Korean title was confirmed in the game. Also includes a statically verified medical-bag text correction; the medical-bag fix has not yet been confirmed in game. Existing .fos save files remain untouched. Extract the full patcher into a new folder, regenerate Output and restart the game.
             [b]v1.1.0 업데이트:[/b] 메인 메뉴 세이브 목록의 레벨 칭호가 깨지는 문제를 tNVSE 렌더러에서 수정하고 게임 화면의 정상 표시를 확인했습니다. 의료 가방 텍스트도 정적 대조를 거쳐 수정했으나 해당 항목의 실게임 검증은 아직 수행하지 않았습니다. 기존 .fos 세이브 파일은 변경하지 않습니다. 전체 패처 ZIP을 새 폴더에 풀어 Output을 다시 생성하고 게임을 재시작하세요.
             [b]v1.1.1 업데이트:[/b] B42 Descriptions Revised 및 호환 모드의 아이템 설명 INI 118개에 기존 검수된 한국어 번역 2,992건을 반영합니다. 원본 파일 SHA와 문자열 식별자를 확인한 뒤 새 Output에만 적용합니다. B42 아이템 설명의 실게임 출력은 아직 검증되지 않았으며, 좌측 상단 알림 깨짐(#22)과 다른 발광 버섯 출력 경로(#29)는 계속 조사합니다.
@@ -218,7 +219,9 @@ jobs:
             if (!Object.keys(logs).some(v => v.toLowerCase() === process.env.VERSION.toLowerCase())) {
               await api('/v3/mods/' + mod.uid + '/changelogs', {
                 version: process.env.VERSION,
-                changelog: '아이템 획득·구매·제거 알림에서 UTF-8 이름과 CP949 문구가 섞일 때 이름이 깨지는 문제 수정. 네이티브 회귀 178건과 패쳐 검사 통과. 실게임 알림 화면은 미검증. 전체 ZIP을 새 폴더에 풀고 새 Output을 생성해 적용하세요.'
+                changelog: process.env.VERSION === '1.1.4'
+                  ? '이전 한국어 Output 설치 후 재생성 시 발생하는 Aid Addon 스크립트 해시 오류(#37) 수정. 검수된 기존 한국어 스크립트만 보존하며 알 수 없는 변경은 계속 거부합니다. 제보 해시 재현·실행 파일 재적용 검사 통과. 전체 ZIP을 새 폴더에 풀고 새 Output을 생성하세요. 제보자 환경과 실게임은 미확인.'
+                  : '아이템 획득·구매·제거 알림에서 UTF-8 이름과 CP949 문구가 섞일 때 이름이 깨지는 문제 수정. 네이티브 회귀 178건과 패쳐 검사 통과. 실게임 알림 화면은 미검증. 전체 ZIP을 새 폴더에 풀고 새 Output을 생성해 적용하세요.'
               });
             }
             core.info('NEXUS_PUBLICATION_READBACK ' + JSON.stringify({mod_id: 99974, group: process.env.FILE_ID, version: published.version, version_id: published.id, game_scoped_file_id: published.game_scoped_id, changelog_confirmed: true}));

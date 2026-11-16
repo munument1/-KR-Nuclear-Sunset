@@ -1,4 +1,4 @@
-"""Hash-pinned, source-only fixer for Aid Addon's dynamically named healing item.
+"""Hash-pinned, repeat-safe fixer for Aid Addon's dynamically named healing item.
 
 The game scripts compute display text in LNSetName at runtime, overriding the
 already-translated ALCH/MGEF records. We edit only literal payloads in two
@@ -90,6 +90,47 @@ def replace_literals(source: bytes, code: bytes):
     return source, code, stats
 
 
+def _is_reviewed_previous_translation(source: bytes, code: bytes, edid: str) -> bool:
+    """Recognize ONLY the exact script bytes emitted by our approved fixer.
+
+    Reverse the three known SCTX/SCDA literal substitutions in memory, verify
+    the original whole-script digests, then regenerate and compare the result.
+    Unknown third-party or partially edited scripts still fail closed.
+    """
+    original_source, original_code = source, code
+    for old, dest in PAIRS:
+        old_bytes = old.encode('ascii')
+        translated_quoted = b'"' + dest.encode('utf-8') + b'"'
+        budget = len(old_bytes)
+        if original_source.count(translated_quoted) != COUNTS[old]:
+            return False
+        original_source = original_source.replace(
+            translated_quoted, b'"' + old_bytes + b'"')
+
+        compiled_translation = dest.encode('cp949').ljust(budget, b' ')
+        positions = []
+        start = 0
+        while True:
+            at = original_code.find(compiled_translation, start)
+            if at < 0:
+                break
+            start = at + 1
+            if (at >= 2 and struct.unpack_from('<H', original_code, at - 2)[0]
+                    == budget):
+                positions.append(at)
+        if len(positions) != COUNTS[old]:
+            return False
+        for at in positions:
+            original_code = (original_code[:at] + old_bytes
+                             + original_code[at + budget:])
+
+    if digest(original_source, original_code) != APPROVED[edid]:
+        return False
+    regenerated_source, regenerated_code, _ = replace_literals(
+        original_source, original_code)
+    return regenerated_source == source and regenerated_code == code
+
+
 def patch_bytes(data: bytes):
     changed = {}
     def visit(header: bytes, payload: bytes) -> bytes:
@@ -108,11 +149,14 @@ def patch_bytes(data: bytes):
         src = slots[positions[b'SCTX']][2]
         code = slots[positions[b'SCDA']][2]
         if digest(src, code) != APPROVED[edid]:
-            raise ValueError(f'Script hash changed, refusing unsafe edit: {edid}')
+            if not _is_reviewed_previous_translation(src, code, edid):
+                raise ValueError(f'Script hash changed, refusing unsafe edit: {edid}')
+            changed[edid] = {'status': 'already_translated', **COUNTS}
+            return payload
         translated_source, translated_code, stats = replace_literals(src, code)
         substitutions = {positions[b'SCTX']: translated_source,
                          positions[b'SCDA']: translated_code}
-        changed[edid] = stats
+        changed[edid] = {'status': 'translated', **stats}
         record = b''.join(_with_payload(field_header, substitutions.get(i, v))
                           for i, (_, field_header, v) in enumerate(slots))
         return _encode_record(header, record)
@@ -125,9 +169,9 @@ def patch_bytes(data: bytes):
 def finalize(installation, stage, files):
     """Apply only after native plugin record merging and dynamic script patches.
 
-    Both target scripts are absent from the 1.0.10 translated record mappings;
-    their reviewed SCTX/SCDA hashes must therefore remain unchanged. If not,
-    stop rather than overwrite an unknown compiled script variant.
+    Both target scripts are absent from the 1.0.10 translated record mappings.
+    Accept the reviewed original or an exact prior result from this fixer only;
+    refuse all unreviewed source/compiled-script variants.
     """
     import nskr
 
@@ -145,12 +189,15 @@ def finalize(installation, stage, files):
     before = target.read_bytes()
     after, changes = patch_bytes(before)
     if before == after:
-        raise ValueError('Aid Addon dynamic description did not change')
-    target.write_bytes(after)
-    if target.read_bytes() != after:
-        raise ValueError('Aid Addon dynamic description readback failed')
+        if not all(item['status'] == 'already_translated' for item in changes.values()):
+            raise ValueError('Aid Addon dynamic description did not change')
+        row['status'] += '; medical_bag_runtime_name_already_verified'
+    else:
+        target.write_bytes(after)
+        if target.read_bytes() != after:
+            raise ValueError('Aid Addon dynamic description readback failed')
+        row['status'] += '; medical_bag_runtime_name_verified'
     row['medical_bag_dynamic'] = changes
-    row['status'] += '; medical_bag_runtime_name_verified'
     row['output_sha256'] = nskr.sha256(target)
 
 

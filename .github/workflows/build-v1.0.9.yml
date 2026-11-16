@@ -1,21 +1,8 @@
 name: Build and publish Nuclear Sunset v1.0.9
 
 on:
-  pull_request:
-    paths:
-      - 'patcher/nskr.py'
-      - 'patcher/nskr_issue20_casings.py'
-      - 'patcher/nskr_stewie_book_effects.py'
-      - 'patcher/tools/build_v1_0_9_release.py'
-      - 'patcher/tools/audit_save_title_header.py'
-      - 'patcher/tests/test_save_title_header.py'
-      - 'patcher/docs/releases/v1.0.9.md'
-      - '.github/workflows/build-v1.0.9.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'patcher/tools/build_v1_0_9_release.py'
-      - '.github/workflows/build-v1.0.9.yml'
+  # Historical packager: run manually on its matching release ref.
+  workflow_dispatch:
 
 permissions:
   contents: write
