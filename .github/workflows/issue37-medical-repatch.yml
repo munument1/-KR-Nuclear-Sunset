@@ -26,7 +26,7 @@ jobs:
           python -m unittest discover -s tests -p test_medical_bag.py -v
           python -m unittest discover -s tests -p test_compiled_scpt.py -v
           python -m unittest discover -s tests -p test_dynamic_display.py -v
-  windows-candidate:
+  windows-package:
     needs: reviewed-script-repatch
     runs-on: windows-2022
     timeout-minutes: 15
@@ -42,10 +42,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download v1.1.3 --repo "${{ github.repository }}" --pattern "NuclearSunset-Korean-Patcher-v1.1.3.zip" --dir "${{ runner.temp }}/baseline"
-      - name: Build and verify unpublished candidate
-        run: python patcher/tools/build_v1_1_4_release.py --base "${{ runner.temp }}/baseline/NuclearSunset-Korean-Patcher-v1.1.3.zip" --work "${{ runner.temp }}/candidate"
+      - name: Build and verify release packages
+        run: python patcher/tools/build_v1_1_4_release.py --base "${{ runner.temp }}/baseline/NuclearSunset-Korean-Patcher-v1.1.3.zip" --work "${{ runner.temp }}/release-build"
       - uses: actions/upload-artifact@v4
         with:
-          name: nuclear-sunset-v1.1.4-candidate
-          path: ${{ runner.temp }}/candidate/output/*
+          name: nuclear-sunset-v1.1.4-release
+          path: ${{ runner.temp }}/release-build/output/*
           retention-days: 30

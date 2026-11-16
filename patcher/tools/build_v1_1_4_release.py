@@ -1,4 +1,4 @@
-"""Build an unpublished #37 candidate while preserving v1.1.3 game assets."""
+"""Build the #37 release packages while preserving v1.1.3 game assets."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -86,21 +86,32 @@ def build(base, work):
             raise ValueError('Unrelated baseline file changed: ' + name)
     output = work / 'output'
     output.mkdir()
-    full = output / 'NuclearSunset-Korean-Patcher-v1.1.4-candidate.zip'
+    full = output / 'NuclearSunset-Korean-Patcher-v1.1.4.zip'
+    data = output / 'NuclearSunset-TranslationData-v1.1.4.zip'
     package_zip(package, full, ('',))
+    package_zip(package, data, ('TranslationData', 'Licenses-and-Source'))
     with zipfile.ZipFile(full) as archive:
         if archive.testzip():
-            raise ValueError('Candidate ZIP CRC failure')
+            raise ValueError('Release ZIP CRC failure')
+        with zipfile.ZipFile(data) as standalone:
+            if standalone.testzip():
+                raise ValueError('TranslationData ZIP CRC failure')
+            for name in checked_zip(standalone):
+                if standalone.read(name) != archive.read(name):
+                    raise ValueError('Standalone data differs: ' + name)
         extracted = work / 'unpacked'
         extracted.mkdir()
         unpack(archive, extracted)
     extracted_check = check_binary(extracted)
     artifact = dict(file=full.name, sha256=sha(full), bytes=full.stat().st_size)
-    (output / 'SHA256SUMS.txt').write_text(artifact['sha256'] + '  ' + full.name + '\n', encoding='ascii')
-    report = dict(version='1.1.4', channel='unpublished_candidate', base_sha256=BASE_SHA,
+    data_artifact = dict(file=data.name, sha256=sha(data), bytes=data.stat().st_size)
+    (output / 'SHA256SUMS.txt').write_text(''.join(
+        row['sha256'] + '  ' + row['file'] + '\n' for row in (artifact, data_artifact)), encoding='ascii')
+    report = dict(version='1.1.4', channel='release', base_sha256=BASE_SHA,
                   changed_application_sources=sorted(changed), payloads_verified=payloads,
                   baseline_files_checked=len(baseline), binary_selfcheck=check,
-                  extracted_binary_selfcheck=extracted_check, gameplay_tested=False, artifact=artifact)
+                  extracted_binary_selfcheck=extracted_check, gameplay_tested=False,
+                  artifact=artifact, data_artifact=data_artifact)
     nskr.write_json(output / 'build-report.json', report)
     print(json.dumps(report, ensure_ascii=True, indent=2))
 
