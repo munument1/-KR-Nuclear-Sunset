@@ -1,12 +1,8 @@
 name: Build and publish Nuclear Sunset v1.0.9
 
 on:
+  # Historical packager: run manually on its matching release ref.
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'patcher/tools/build_v1_0_9_release.py'
-      - '.github/workflows/build-v1.0.9.yml'
 
 permissions:
   contents: write

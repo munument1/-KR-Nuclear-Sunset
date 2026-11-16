@@ -1,11 +1,7 @@
 name: Issue 27 full native build feasibility
 on:
+  # Historical packager: run manually on its matching release ref.
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/issue27-full-build.yml'
-      - 'patcher/tools/build_v1_0_10_release.py'
 
 permissions:
   contents: write
